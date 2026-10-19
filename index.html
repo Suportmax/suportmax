@@ -240,6 +240,62 @@
             font-size: 0.96rem;
         }
 
+        .gallery {
+            padding: 76px 0 84px;
+            background: var(--white);
+        }
+
+        .gallery-inner {
+            width: min(1180px, calc(100% - 64px));
+            margin: 0 auto;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 24px;
+        }
+
+        .gallery-card {
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--white);
+        }
+
+        .gallery-card img {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 10;
+            object-fit: cover;
+            background: var(--paper);
+        }
+
+        .gallery-copy {
+            padding: 20px;
+        }
+
+        .gallery-copy h3 {
+            margin-bottom: 7px;
+            color: var(--blue-dark);
+            font-size: 1.08rem;
+        }
+
+        .gallery-copy p {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .gallery-copy .image-credit {
+            margin-top: 14px;
+            font-size: 0.76rem;
+        }
+
+        .image-credit a {
+            color: var(--blue);
+            text-underline-offset: 3px;
+        }
+
         footer {
             background: var(--blue-dark);
             color: #e4edf3;
@@ -254,6 +310,12 @@
             justify-content: space-between;
             gap: 24px;
             font-size: 0.88rem;
+        }
+
+        @media (max-width: 800px) {
+            .gallery-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
         }
 
         @media (max-width: 800px) {
@@ -272,6 +334,7 @@
             .header-inner,
             .hero-inner,
             .services-inner,
+            .gallery-inner,
             .footer-inner {
                 width: min(100% - 40px, 1180px);
             }
@@ -345,6 +408,15 @@
                 grid-template-columns: 1fr;
             }
 
+            .gallery {
+                padding: 58px 0 64px;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+                gap: 18px;
+            }
+
             .service-card {
                 padding-top: 20px;
                 padding-bottom: 21px;
@@ -381,6 +453,7 @@
             </a>
             <nav class="primary-nav" aria-label="Navegação principal">
                 <a href="#servicos">Serviços</a>
+                <a href="#galeria">Galeria</a>
             </nav>
             <a href="https://wa.me/5571981589773" target="_blank" rel="noopener noreferrer" class="btn-cta header-cta">Fale com a gente</a>
         </div>
@@ -404,6 +477,44 @@
                         <li>Segurança eletrônica e digital</li>
                         <li>Backups e serviços em nuvem</li>
                     </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="gallery" id="galeria" aria-labelledby="gallery-title">
+            <div class="gallery-inner">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Tecnologia em imagens</p>
+                        <h2 id="gallery-title">Soluções para sua empresa</h2>
+                    </div>
+                    <p>Imagens ilustrativas de áreas atendidas pela SUPORT MAX. Elas não representam instalações específicas realizadas pela empresa.</p>
+                </div>
+                <div class="gallery-grid">
+                    <figure class="gallery-card">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/57/Computer_repair_in_progress.jpg/1280px-Computer_repair_in_progress.jpg" alt="Técnico trabalhando na manutenção de um computador" width="1000" height="662" loading="lazy">
+                        <figcaption class="gallery-copy">
+                            <h3>Computadores e suporte</h3>
+                            <p>Manutenção e suporte técnico para os equipamentos da sua empresa.</p>
+                            <p class="image-credit">Imagem: Vintechcomputerservices / <a href="https://commons.wikimedia.org/wiki/File:Computer_repair_in_progress.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>.</p>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-card">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/CCTV_cameras_in_Mumbai.jpg/1280px-CCTV_cameras_in_Mumbai.jpg" alt="Câmeras de CFTV instaladas para monitoramento" width="1000" height="500" loading="lazy">
+                        <figcaption class="gallery-copy">
+                            <h3>Câmeras e monitoramento</h3>
+                            <p>Soluções de CFTV para acompanhar e proteger os ambientes.</p>
+                            <p class="image-credit">Imagem: Punit Rajpal / <a href="https://commons.wikimedia.org/wiki/File:CCTV_cameras_in_Mumbai.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0</a>.</p>
+                        </figcaption>
+                    </figure>
+                    <figure class="gallery-card">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/b/bc/19-inch_rackmount_Ethernet_switches_and_patch_panels.jpg" alt="Equipamentos de rede e painéis de conexão montados em rack" width="1000" height="750" loading="lazy">
+                        <figcaption class="gallery-copy">
+                            <h3>Redes estruturadas</h3>
+                            <p>Infraestrutura organizada para conectar os equipamentos da empresa.</p>
+                            <p class="image-credit">Imagem: Dsimic / <a href="https://commons.wikimedia.org/wiki/File:19-inch_rackmount_Ethernet_switches_and_patch_panels.jpg" target="_blank" rel="noopener noreferrer">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>.</p>
+                        </figcaption>
+                    </figure>
                 </div>
             </div>
         </section>
