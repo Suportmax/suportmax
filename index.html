@@ -293,6 +293,49 @@
             font-size: 0.92rem;
         }
 
+        .portfolio {
+            padding: 76px 0 84px;
+            background: var(--white);
+        }
+
+        .portfolio-inner {
+            width: min(1180px, calc(100% - 64px));
+            margin: 0 auto;
+        }
+
+        .portfolio h2 {
+            margin-bottom: 12px;
+            color: var(--blue-dark);
+            font-size: 2.25rem;
+            line-height: 1.2;
+        }
+
+        .portfolio-intro {
+            max-width: 680px;
+            margin-bottom: 30px;
+            color: var(--muted);
+        }
+
+        .portfolio-empty {
+            padding: 34px;
+            border: 1px dashed #aab9c5;
+            border-radius: 8px;
+            background: var(--paper);
+            text-align: center;
+        }
+
+        .portfolio-empty h3 {
+            margin-bottom: 8px;
+            color: var(--blue-dark);
+            font-size: 1.15rem;
+        }
+
+        .portfolio-empty p {
+            max-width: 620px;
+            margin: 0 auto;
+            color: var(--muted);
+        }
+
         .clients {
             padding: 76px 0 84px;
             background: var(--paper);
@@ -439,6 +482,7 @@
             .hero-inner,
             .services-inner,
             .gallery-inner,
+            .portfolio-inner,
             .helpdesk-inner,
             .clients-inner,
             .footer-inner {
@@ -516,6 +560,18 @@
 
             .gallery {
                 padding: 58px 0 64px;
+            }
+
+            .portfolio {
+                padding: 58px 0 64px;
+            }
+
+            .portfolio h2 {
+                font-size: 1.9rem;
+            }
+
+            .portfolio-empty {
+                padding: 26px 20px;
             }
 
             .clients {
@@ -598,6 +654,7 @@
             <nav class="primary-nav" aria-label="Navegação principal">
                 <a href="#servicos">Serviços</a>
                 <a href="#galeria">Galeria</a>
+                <a href="#portfolio">Nossos serviços</a>
                 <a href="#clientes">Clientes</a>
                 <a href="#helpdesk">Helpdesk</a>
             </nav>
@@ -696,6 +753,18 @@
                         <h3>Segurança digital e nuvem</h3>
                         <p>Antivírus corporativo, gestão de backups e serviços em nuvem para apoiar a proteção e a continuidade dos seus dados.</p>
                     </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="portfolio" id="portfolio" aria-labelledby="portfolio-title">
+            <div class="portfolio-inner">
+                <p class="eyebrow">Trabalhos realizados</p>
+                <h2 id="portfolio-title">Nossos serviços</h2>
+                <p class="portfolio-intro">Acompanhe fotos de instalações, manutenções e outros serviços realizados pela SUPORT MAX.</p>
+                <div class="portfolio-empty">
+                    <h3>Portfólio em atualização</h3>
+                    <p>Em breve, esta galeria receberá registros dos serviços que estamos executando. Novas fotos poderão ser adicionadas aqui conforme os trabalhos forem realizados.</p>
                 </div>
             </div>
         </section>
