@@ -318,23 +318,68 @@
 
         .portfolio-grid {
             display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 24px;
+            grid-template-columns: minmax(0, 1fr);
+            max-width: 900px;
+            margin: 0 auto;
         }
 
         .portfolio-card {
             overflow: hidden;
-            border: 1px solid var(--line);
             border-radius: 8px;
-            background: var(--white);
+            background: var(--paper);
+        }
+
+        .portfolio-card[hidden] {
+            display: none;
         }
 
         .portfolio-card img {
             display: block;
             width: 100%;
-            height: 220px;
-            object-fit: cover;
+            height: clamp(260px, 48vw, 500px);
+            object-fit: contain;
             background: var(--paper);
+        }
+
+        .portfolio-carousel-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 18px;
+        }
+
+        .portfolio-carousel-button {
+            display: inline-flex;
+            width: 46px;
+            height: 46px;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--blue);
+            border-radius: 50%;
+            background: var(--blue);
+            color: var(--white);
+            font: inherit;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .portfolio-carousel-button:hover {
+            border-color: var(--blue-dark);
+            background: var(--blue-dark);
+        }
+
+        .portfolio-carousel-button:focus-visible {
+            outline: 3px solid #f0b429;
+            outline-offset: 3px;
+        }
+
+        .portfolio-carousel-count {
+            min-width: 72px;
+            color: var(--muted);
+            font-size: 0.9rem;
+            text-align: center;
         }
 
         .portfolio-image-button {
@@ -610,10 +655,6 @@
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
-            .portfolio-grid {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-
             .client-logos {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
@@ -728,9 +769,12 @@
                 font-size: 1.9rem;
             }
 
-            .portfolio-grid {
-                grid-template-columns: 1fr;
-                gap: 18px;
+            .portfolio-card img {
+                height: 260px;
+            }
+
+            .portfolio-copy {
+                padding: 16px 4px;
             }
 
             .clients {
@@ -921,7 +965,7 @@
                 <p class="eyebrow">Trabalhos realizados</p>
                 <h2 id="portfolio-title">Nossos serviços</h2>
                 <p class="portfolio-intro">Veja alguns registros de instalações, manutenções e suporte técnico realizados pela SUPORT MAX.</p>
-                <div class="portfolio-grid">
+                <div class="portfolio-grid" role="region" aria-label="Fotos dos serviços" aria-roledescription="carrossel">
                     <article class="portfolio-card">
                         <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Estação de alinhamento automotivo">
                             <img src="serviços/alinhamento.jpg" alt="Computador e monitor de um equipamento de alinhamento automotivo" loading="lazy" decoding="async">
@@ -1112,6 +1156,11 @@
                         </div>
                     </article>
                 </div>
+                <div class="portfolio-carousel-controls" aria-label="Navegação das fotos dos serviços">
+                    <button class="portfolio-carousel-button portfolio-previous" type="button" aria-label="Ver serviço anterior">&larr;</button>
+                    <p class="portfolio-carousel-count" aria-live="polite"></p>
+                    <button class="portfolio-carousel-button portfolio-next" type="button" aria-label="Ver próximo serviço">&rarr;</button>
+                </div>
             </div>
         </section>
 
@@ -1270,10 +1319,19 @@
         const imageDescription = imageViewer.querySelector(".image-viewer-description");
         const imageCount = imageViewer.querySelector(".image-viewer-count");
         const portfolioImageButtons = [...portfolioGrid.querySelectorAll(".portfolio-image-button")];
+        const portfolioCarouselCount = document.querySelector(".portfolio-carousel-count");
         let activePhotoIndex = 0;
+
+        const updatePortfolioCarousel = () => {
+            portfolioImageButtons.forEach((imageButton, index) => {
+                imageButton.closest(".portfolio-card").hidden = index !== activePhotoIndex;
+            });
+            portfolioCarouselCount.textContent = `${activePhotoIndex + 1} de ${portfolioImageButtons.length}`;
+        };
 
         const showPhoto = (index) => {
             activePhotoIndex = (index + portfolioImageButtons.length) % portfolioImageButtons.length;
+            updatePortfolioCarousel();
             const card = portfolioImageButtons[activePhotoIndex].closest(".portfolio-card");
             const thumbnail = card.querySelector("img");
 
@@ -1283,6 +1341,16 @@
             imageDescription.textContent = card.querySelector(".portfolio-copy p").textContent;
             imageCount.textContent = `${activePhotoIndex + 1} de ${portfolioImageButtons.length} fotos`;
         };
+
+        document.querySelector(".portfolio-previous").addEventListener("click", () => {
+            showPhoto(activePhotoIndex - 1);
+        });
+
+        document.querySelector(".portfolio-next").addEventListener("click", () => {
+            showPhoto(activePhotoIndex + 1);
+        });
+
+        updatePortfolioCarousel();
 
         portfolioGrid.addEventListener("click", (event) => {
             const imageButton = event.target.closest(".portfolio-image-button");
