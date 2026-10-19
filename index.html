@@ -79,20 +79,27 @@
         .primary-nav {
             display: flex;
             align-items: center;
-            gap: 32px;
+            gap: 10px;
             margin-left: auto;
         }
 
         .primary-nav a {
-            min-height: 44px;
-            color: var(--muted);
-            font-size: 0.95rem;
+            min-height: 40px;
+            padding: 7px 11px;
+            border: 1px solid #dce8f0;
+            border-radius: 6px;
+            background: #f3f7fa;
+            color: var(--blue-dark);
+            font-size: 0.88rem;
             font-weight: 600;
             text-decoration: none;
-            transition: color 160ms ease;
+            white-space: nowrap;
+            transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
         }
 
         .primary-nav a:hover {
+            border-color: #b8d1e3;
+            background: #e7f0f7;
             color: var(--blue);
         }
 
@@ -699,16 +706,16 @@
                 order: 3;
                 width: 100%;
                 max-width: 100%;
-                gap: 18px;
+                gap: 10px;
                 overflow-x: auto;
+                padding: 8px 0;
                 border-top: 1px solid var(--line);
             }
 
             .primary-nav a {
                 flex: 0 0 auto;
-                min-height: 42px;
-                font-size: 0.88rem;
-                white-space: nowrap;
+                min-height: 40px;
+                font-size: 0.84rem;
             }
 
             .header-cta {
