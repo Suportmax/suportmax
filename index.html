@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUPORT MAX | Tecnologia da Informação para empresas</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --ink: #172b3a;
+            --muted: #536574;
+            --blue: #07589a;
+            --blue-dark: #063b68;
+            --green: #188451;
+            --line: #d8e1e7;
+            --paper: #eaf2f8;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--white);
+            color: var(--ink);
+            font-family: "Segoe UI", Arial, sans-serif;
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        a:focus-visible {
+            outline: 3px solid #f0b429;
+            outline-offset: 4px;
+        }
+
+        header {
+            background: var(--white);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-inner {
+            width: min(1180px, calc(100% - 64px));
+            min-height: 82px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 32px;
+        }
+
+        .brand-link,
+        .primary-nav a {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .brand-link {
+            flex: 0 0 auto;
+        }
+
+        .logo-img {
+            max-height: 60px;
+            width: auto;
+        }
+
+        .primary-nav {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            margin-left: auto;
+        }
+
+        .primary-nav a {
+            min-height: 44px;
+            color: var(--muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 160ms ease;
+        }
+
+        .primary-nav a:hover {
+            color: var(--blue);
+        }
+
+        .hero {
+            background: var(--blue-dark);
+            color: var(--white);
+        }
+
+        .hero-inner {
+            width: min(1180px, calc(100% - 64px));
+            min-height: 470px;
+            margin: 0 auto;
+            padding: 76px 0;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            align-items: center;
+            gap: 72px;
+        }
+
+        .eyebrow {
+            margin-bottom: 18px;
+            color: var(--blue);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .hero .eyebrow {
+            color: #9dcced;
+        }
+
+        .hero h1 {
+            max-width: 660px;
+            margin-bottom: 22px;
+            color: var(--white);
+            font-size: 3.25rem;
+            font-weight: 700;
+            line-height: 1.08;
+        }
+
+        .hero p {
+            max-width: 620px;
+            margin-bottom: 30px;
+            color: #d7e7f3;
+            font-size: 1.1rem;
+        }
+
+        .btn-cta {
+            min-height: 50px;
+            padding: 13px 22px;
+            border: 1px solid var(--green);
+            border-radius: 4px;
+            background: var(--green);
+            color: var(--white);
+            text-decoration: none;
+            font-weight: bold;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 160ms ease, border-color 160ms ease;
+        }
+
+        .btn-cta:hover {
+            background: #116b41;
+            border-color: #116b41;
+        }
+
+        .hero-detail {
+            padding: 8px 0 8px 34px;
+            border-left: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .hero-detail h2 {
+            margin-bottom: 22px;
+            color: var(--white);
+            font-size: 1.35rem;
+            line-height: 1.3;
+        }
+
+        .hero-detail ul {
+            list-style: none;
+        }
+
+        .hero-detail li {
+            padding: 13px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #d7e7f3;
+            font-size: 0.98rem;
+            font-weight: 600;
+        }
+
+        .services {
+            background: var(--paper);
+            padding: 76px 0 84px;
+        }
+
+        .services-inner {
+            width: min(1180px, calc(100% - 64px));
+            margin: 0 auto;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 40px;
+            margin-bottom: 34px;
+        }
+
+        .services h2 {
+            color: var(--blue-dark);
+            font-size: 2.25rem;
+            line-height: 1.2;
+        }
+
+        .section-heading p {
+            max-width: 440px;
+            color: var(--muted);
+            font-size: 0.98rem;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: 56px;
+            border-top: 1px solid var(--line);
+        }
+
+        .service-card {
+            padding: 25px 0 27px 18px;
+            border-bottom: 1px solid var(--line);
+            border-left: 2px solid var(--blue);
+        }
+
+        .service-card h3 {
+            margin-bottom: 8px;
+            color: var(--blue-dark);
+            font-size: 1.12rem;
+        }
+
+        .service-card p {
+            max-width: 490px;
+            color: var(--muted);
+            font-size: 0.96rem;
+        }
+
+        footer {
+            background: var(--blue-dark);
+            color: #e4edf3;
+        }
+
+        .footer-inner {
+            width: min(1180px, calc(100% - 64px));
+            min-height: 90px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            font-size: 0.88rem;
+        }
+
+        @media (max-width: 800px) {
+            .hero-inner {
+                grid-template-columns: 1fr;
+                gap: 42px;
+                padding: 64px 0;
+            }
+
+            .hero-detail {
+                max-width: 620px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header-inner,
+            .hero-inner,
+            .services-inner,
+            .footer-inner {
+                width: min(100% - 40px, 1180px);
+            }
+
+            .header-inner {
+                min-height: 72px;
+                flex-wrap: wrap;
+                gap: 0 18px;
+                padding: 10px 0;
+            }
+
+            .logo-img {
+                max-height: 48px;
+            }
+
+            .primary-nav {
+                order: 3;
+                width: 100%;
+                gap: 24px;
+                border-top: 1px solid var(--line);
+            }
+
+            .primary-nav a {
+                min-height: 42px;
+                font-size: 0.88rem;
+            }
+
+            .header-cta {
+                min-height: 42px;
+                padding: 9px 13px;
+                font-size: 0.88rem;
+            }
+
+            .hero-inner {
+                min-height: auto;
+                padding: 54px 0 58px;
+                gap: 38px;
+            }
+
+            .eyebrow {
+                font-size: 0.7rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+            }
+
+            .hero-detail {
+                padding-left: 20px;
+            }
+
+            .services {
+                padding: 58px 0 64px;
+            }
+
+            .section-heading {
+                display: block;
+                margin-bottom: 26px;
+            }
+
+            .services h2 {
+                margin-bottom: 12px;
+                font-size: 1.9rem;
+            }
+
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .service-card {
+                padding-top: 20px;
+                padding-bottom: 21px;
+            }
+
+            .footer-inner {
+                min-height: 82px;
+                flex-wrap: wrap;
+                align-content: center;
+                gap: 4px;
+                padding: 17px 0;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            *,
+            *::before,
+            *::after {
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-inner">
+            <a href="#inicio" class="brand-link" aria-label="SUPORT MAX, início">
+                <img src="marca.png" alt="SUPORT MAX Tecnologia da Informação" class="logo-img">
+            </a>
+            <nav class="primary-nav" aria-label="Navegação principal">
+                <a href="#servicos">Serviços</a>
+            </nav>
+            <a href="https://wa.me/5571981589773" target="_blank" rel="noopener noreferrer" class="btn-cta header-cta">Fale com a gente</a>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero" id="inicio">
+            <div class="hero-inner">
+                <div class="hero-copy">
+                    <p class="eyebrow">Tecnologia que apoia o seu negócio</p>
+                    <h1>Uma TI confiável para sua empresa seguir em frente</h1>
+                    <p>Conte com suporte técnico, redes, segurança e soluções em nuvem para manter a tecnologia da sua empresa funcionando no dia a dia.</p>
+                    <a href="https://wa.me/5571981589773" target="_blank" rel="noopener noreferrer" class="btn-cta">Converse com nossa equipe</a>
+                </div>
+                <div class="hero-detail" aria-label="Áreas de atuação">
+                    <p class="eyebrow">Tecnologia em cada etapa</p>
+                    <h2>O suporte que sua empresa precisa para trabalhar com tranquilidade.</h2>
+                    <ul>
+                        <li>Suporte técnico para empresas</li>
+                        <li>Redes e conexão estável</li>
+                        <li>Segurança eletrônica e digital</li>
+                        <li>Backups e serviços em nuvem</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="services" id="servicos" aria-labelledby="services-title">
+            <div class="services-inner">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Soluções para sua rotina</p>
+                        <h2 id="services-title">Como podemos ajudar</h2>
+                    </div>
+                    <p>Serviços de tecnologia pensados para apoiar a operação e as necessidades da sua empresa.</p>
+                </div>
+                <div class="service-grid">
+                    <article class="service-card">
+                        <h3>Suporte corporativo</h3>
+                        <p>Manutenção preventiva e corretiva de computadores e servidores, além de suporte remoto e atendimento técnico.</p>
+                    </article>
+                    <article class="service-card">
+                        <h3>Infraestrutura de redes</h3>
+                        <p>Instalação de cabeamento estruturado, configuração de roteadores e implantação de redes Wi-Fi seguras.</p>
+                    </article>
+                    <article class="service-card">
+                        <h3>Segurança eletrônica</h3>
+                        <p>Instalação e configuração de câmeras, sistemas de CFTV e gravadores NVR para monitoramento.</p>
+                    </article>
+                    <article class="service-card">
+                        <h3>Segurança digital e nuvem</h3>
+                        <p>Antivírus corporativo, gestão de backups e serviços em nuvem para apoiar a proteção e a continuidade dos seus dados.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-inner">
+            <p>SUPORT MAX | Tecnologia da Informação</p>
+            <p>&copy; 2026 SUPORT MAX. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
