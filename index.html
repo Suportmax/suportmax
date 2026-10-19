@@ -333,6 +333,62 @@
             object-fit: contain;
         }
 
+        .helpdesk {
+            padding: 76px 0 84px;
+            background: var(--white);
+        }
+
+        .helpdesk-inner {
+            width: min(1180px, calc(100% - 64px));
+            margin: 0 auto;
+        }
+
+        .helpdesk h2 {
+            margin-bottom: 12px;
+            color: var(--blue-dark);
+            font-size: 2.25rem;
+            line-height: 1.2;
+        }
+
+        .helpdesk-intro {
+            max-width: 680px;
+            margin-bottom: 30px;
+            color: var(--muted);
+        }
+
+        .helpdesk-links {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .helpdesk-link {
+            display: block;
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--paper);
+            color: var(--blue-dark);
+            text-decoration: none;
+            transition: border-color 160ms ease, background 160ms ease;
+        }
+
+        .helpdesk-link:hover {
+            border-color: var(--blue);
+            background: #dceaf5;
+        }
+
+        .helpdesk-link strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 1.08rem;
+        }
+
+        .helpdesk-link span {
+            color: var(--muted);
+            font-size: 0.94rem;
+        }
+
         footer {
             background: var(--blue-dark);
             color: #e4edf3;
@@ -376,6 +432,7 @@
             .hero-inner,
             .services-inner,
             .gallery-inner,
+            .helpdesk-inner,
             .clients-inner,
             .footer-inner {
                 width: min(100% - 40px, 1180px);
@@ -462,6 +519,23 @@
                 font-size: 1.9rem;
             }
 
+            .helpdesk {
+                padding: 58px 0 64px;
+            }
+
+            .helpdesk h2 {
+                font-size: 1.9rem;
+            }
+
+            .helpdesk-links {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            .helpdesk-link {
+                padding: 20px;
+            }
+
             .gallery-grid {
                 grid-template-columns: 1fr;
                 gap: 18px;
@@ -518,6 +592,7 @@
                 <a href="#servicos">Serviços</a>
                 <a href="#galeria">Galeria</a>
                 <a href="#clientes">Clientes</a>
+                <a href="#helpdesk">Helpdesk</a>
             </nav>
             <a href="https://wa.me/5571981589773" target="_blank" rel="noopener noreferrer" class="btn-cta header-cta">Fale com a gente</a>
         </div>
@@ -638,6 +713,25 @@
                     <figure class="client-logo"><img src="clientes/geladom.jpg" alt="Geladom" loading="lazy"></figure>
                     <figure class="client-logo"><img src="clientes/mactra.jpg" alt="MACTRA" loading="lazy"></figure>
                 </div>
+            </div>
+        </section>
+
+        <section class="helpdesk" id="helpdesk" aria-labelledby="helpdesk-title">
+            <div class="helpdesk-inner">
+                <p class="eyebrow">Suporte remoto</p>
+                <h2 id="helpdesk-title">Helpdesk</h2>
+                <p class="helpdesk-intro">Baixe o programa de acesso remoto indicado pela equipe SUPORT MAX para receber atendimento técnico.</p>
+                <div class="helpdesk-links">
+                    <a class="helpdesk-link" href="https://download.teamviewer.com/download/version_13x/TeamViewerQS.exe?_gl=1*1thcsrp*_gcl_au*NzgwODgzNzY1LjE3OTIzODM4OTg" target="_blank" rel="noopener noreferrer">
+                        <strong>TeamViewer QuickSupport</strong>
+                        <span>Baixar para suporte remoto</span>
+                    </a>
+                    <a class="helpdesk-link" href="https://anydesk.com/pt/downloads/thank-you?dv=win_exe" target="_blank" rel="noopener noreferrer">
+                        <strong>AnyDesk</strong>
+                        <span>Baixar para Windows</span>
+                    </a>
+                </div>
+                <p class="helpdesk-intro">Compartilhe o código de acesso somente com um técnico autorizado da SUPORT MAX.</p>
             </div>
         </section>
     </main>
