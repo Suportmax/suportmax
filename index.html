@@ -337,6 +337,89 @@
             background: var(--paper);
         }
 
+        .portfolio-image-button {
+            display: block;
+            width: 100%;
+            border: 0;
+            padding: 0;
+            background: transparent;
+            cursor: zoom-in;
+        }
+
+        .portfolio-image-button:focus-visible {
+            outline: 3px solid #f0b429;
+            outline-offset: -3px;
+        }
+
+        .image-viewer {
+            position: fixed;
+            max-width: min(96vw, 1200px);
+            max-height: 94vh;
+            margin: auto;
+            padding: 12px;
+            overflow: visible;
+            border: 0;
+            border-radius: 8px;
+            background: var(--white);
+            color: var(--ink);
+        }
+
+        .image-viewer::backdrop {
+            background: rgba(9, 22, 32, 0.88);
+        }
+
+        .image-viewer figure {
+            margin: 0;
+        }
+
+        .image-viewer img {
+            display: block;
+            max-width: calc(96vw - 24px);
+            max-height: 82vh;
+            margin: 0 auto;
+            object-fit: contain;
+        }
+
+        .image-viewer figcaption {
+            padding: 12px 48px 0 4px;
+            color: var(--blue-dark);
+            font-weight: 600;
+        }
+
+        .image-viewer-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 40px;
+            height: 40px;
+            border: 0;
+            border-radius: 50%;
+            background: var(--blue-dark);
+            color: var(--white);
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .image-viewer-close:focus-visible {
+            outline: 3px solid #f0b429;
+            outline-offset: 3px;
+        }
+
+        @media (max-width: 600px) {
+            .image-viewer {
+                max-width: 100vw;
+                max-height: 100vh;
+                padding: 8px;
+                border-radius: 0;
+            }
+
+            .image-viewer img {
+                max-width: calc(100vw - 16px);
+                max-height: 82vh;
+            }
+        }
+
         .portfolio-copy {
             padding: 20px;
         }
@@ -789,147 +872,189 @@
                 <p class="portfolio-intro">Veja alguns registros de instalações, manutenções e suporte técnico realizados pela SUPORT MAX.</p>
                 <div class="portfolio-grid">
                     <article class="portfolio-card">
-                        <img src="serviços/alinhamento.jpg" alt="Computador e monitor de um equipamento de alinhamento automotivo" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Estação de alinhamento automotivo">
+                            <img src="serviços/alinhamento.jpg" alt="Computador e monitor de um equipamento de alinhamento automotivo" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Estação de alinhamento automotivo</h3>
                             <p>Computador e monitor em operação com o sistema usado na rotina de alinhamento da oficina.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/cftv.jpg" alt="Câmera de segurança instalada em poste" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Instalação de câmera de segurança">
+                            <img src="serviços/cftv.jpg" alt="Câmera de segurança instalada em poste" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Instalação de câmera de segurança</h3>
                             <p>Câmera instalada em área externa, com cabeamento protegido para acompanhar o perímetro.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/instalaçao cabeamentos.jpg" alt="Plataforma elevatória em galpão durante trabalho na estrutura do teto" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Infraestrutura em galpão">
+                            <img src="serviços/instalaçao cabeamentos.jpg" alt="Plataforma elevatória em galpão durante trabalho na estrutura do teto" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Infraestrutura em galpão</h3>
                             <p>Preparação da infraestrutura em área elevada para a passagem de cabeamento em ambiente comercial.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/instalação automatizadores.jpg" alt="Placa eletrônica de central para automatizador de portão" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Central de automatizador">
+                            <img src="serviços/instalação automatizadores.jpg" alt="Placa eletrônica de central para automatizador de portão" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Central de automatizador</h3>
                             <p>Instalação e configuração dos comandos eletrônicos de abertura e fechamento automático.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/instalação cftv em galpao.jpg" alt="Trabalho de instalação de CFTV na fachada de um galpão" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Instalação de CFTV em galpão">
+                            <img src="serviços/instalação cftv em galpao.jpg" alt="Trabalho de instalação de CFTV na fachada de um galpão" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Instalação de CFTV em galpão</h3>
                             <p>Montagem de ponto de câmera e passagem de cabeamento em fachada de imóvel comercial.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/instalação e configuração mikrotic.jpg" alt="Equipamentos de rede conectados para configuração" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Configuração de rede">
+                            <img src="serviços/instalação e configuração mikrotic.jpg" alt="Equipamentos de rede conectados para configuração" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Configuração de rede</h3>
                             <p>Configuração de equipamentos de conectividade para distribuir a rede no ambiente da empresa.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/instalação obra.jpg" alt="Ambiente comercial em obra com estrutura metálica e plataforma elevatória" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Instalação em ambiente em obra">
+                            <img src="serviços/instalação obra.jpg" alt="Ambiente comercial em obra com estrutura metálica e plataforma elevatória" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Instalação em ambiente em obra</h3>
                             <p>Etapa de trabalho em um espaço em reforma, com atenção à passagem e à organização da infraestrutura.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/limpeza de computadores.jpg" alt="Interior de computador aberto para limpeza e revisão" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Limpeza interna de computador">
+                            <img src="serviços/limpeza de computadores.jpg" alt="Interior de computador aberto para limpeza e revisão" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Limpeza interna de computador</h3>
                             <p>Remoção de poeira dos componentes e revisão do sistema de ventilação do equipamento.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/loja entregue.jpg" alt="Espaço amplo de oficina automotiva já organizado" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Ambiente comercial pronto para operar">
+                            <img src="serviços/loja entregue.jpg" alt="Espaço amplo de oficina automotiva já organizado" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Ambiente comercial pronto para operar</h3>
                             <p>Registro de uma oficina organizada e preparada para atender sua equipe e seus clientes.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/placa.jpg" alt="Placa-mãe de computador nova, pronta para instalação" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Instalação de placa-mãe">
+                            <img src="serviços/placa.jpg" alt="Placa-mãe de computador nova, pronta para instalação" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Instalação de placa-mãe</h3>
                             <p>Substituição da placa principal e conferência das conexões internas do computador.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/rack cliente.jpg" alt="Rack com equipamentos de informática e rede" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Rack de equipamentos">
+                            <img src="serviços/rack cliente.jpg" alt="Rack com equipamentos de informática e rede" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Rack de equipamentos</h3>
                             <p>Organização dos equipamentos de comunicação e informática para facilitar o acesso e a manutenção.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/rack.jpg" alt="Interior de rack com cabeamento e equipamentos instalados" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Manutenção de rack de TI">
+                            <img src="serviços/rack.jpg" alt="Interior de rack com cabeamento e equipamentos instalados" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Manutenção de rack de TI</h3>
                             <p>Conferência e organização dos dispositivos instalados no rack para manter a infraestrutura acessível.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/rack2.jpg" alt="Rack com gravador de CFTV, roteador e equipamentos de rede" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Rack de CFTV e rede">
+                            <img src="serviços/rack2.jpg" alt="Rack com gravador de CFTV, roteador e equipamentos de rede" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Rack de CFTV e rede</h3>
                             <p>Equipamentos de gravação e conectividade reunidos em um único ponto da infraestrutura.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/rede pront.jpg" alt="Equipamentos de rede conectados ao computador para configuração" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Rede dedicada para câmeras">
+                            <img src="serviços/rede pront.jpg" alt="Equipamentos de rede conectados ao computador para configuração" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Rede dedicada para câmeras</h3>
                             <p>Configuração do CFTV em uma rede separada da rede de dados da empresa.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/reparo alinhamento.jpg" alt="Console e monitor de equipamento de alinhamento automotivo" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Manutenção de equipamento de alinhamento">
+                            <img src="serviços/reparo alinhamento.jpg" alt="Console e monitor de equipamento de alinhamento automotivo" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Manutenção de equipamento de alinhamento</h3>
                             <p>Suporte técnico à estação eletrônica usada no diagnóstico de alinhamento automotivo.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/reparo centrais.jpg" alt="Placas eletrônicas de centrais em manutenção" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Reparo de centrais eletrônicas">
+                            <img src="serviços/reparo centrais.jpg" alt="Placas eletrônicas de centrais em manutenção" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Reparo de centrais eletrônicas</h3>
                             <p>Diagnóstico e manutenção de placas e módulos eletrônicos de equipamentos automotivos.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/reparo impressora.jpg" alt="Impressora aberta durante manutenção" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Manutenção de impressora">
+                            <img src="serviços/reparo impressora.jpg" alt="Impressora aberta durante manutenção" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Manutenção de impressora</h3>
                             <p>Inspeção interna e manutenção de componentes para identificar falhas de impressão e alimentação de papel.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/reparo notebooks.jpg" alt="Notebook aberto para diagnóstico ao lado de impressoras" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Diagnóstico de notebook">
+                            <img src="serviços/reparo notebooks.jpg" alt="Notebook aberto para diagnóstico ao lado de impressoras" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Diagnóstico de notebook</h3>
                             <p>Verificação da inicialização e dos componentes para identificar falhas e orientar o reparo adequado.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/reparos e limpeza alinhamentos.jpg" alt="Sistema Corghi de alinhamento 3D em estação automotiva" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Revisão de sistema de alinhamento">
+                            <img src="serviços/reparos e limpeza alinhamentos.jpg" alt="Sistema Corghi de alinhamento 3D em estação automotiva" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Revisão de sistema de alinhamento</h3>
                             <p>Manutenção da estação e dos periféricos usados no processo de alinhamento 3D.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/troca placa mae.jpg" alt="Interior de computador com placa-mãe instalada" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Troca de placa-mãe">
+                            <img src="serviços/troca placa mae.jpg" alt="Interior de computador com placa-mãe instalada" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Troca de placa-mãe</h3>
                             <p>Instalação da placa principal e conexão dos componentes internos do computador.</p>
                         </div>
                     </article>
                     <article class="portfolio-card">
-                        <img src="serviços/troca ventilacao rack.jpg" alt="Cooler instalado sobre placa-mãe de computador" loading="lazy" decoding="async">
+                        <button class="portfolio-image-button" type="button" aria-label="Ampliar foto: Manutenção do sistema de ventilação">
+                            <img src="serviços/troca ventilacao rack.jpg" alt="Cooler instalado sobre placa-mãe de computador" loading="lazy" decoding="async">
+                        </button>
                         <div class="portfolio-copy">
                             <h3>Manutenção do sistema de ventilação</h3>
                             <p>Inspeção e substituição do cooler para ajudar na circulação de ar e na dissipação de calor.</p>
@@ -992,12 +1117,57 @@
         </section>
     </main>
 
+    <dialog class="image-viewer" aria-label="Imagem ampliada">
+        <button class="image-viewer-close" type="button" aria-label="Fechar imagem ampliada">&times;</button>
+        <figure>
+            <img src="" alt="">
+            <figcaption></figcaption>
+        </figure>
+    </dialog>
+
     <footer>
         <div class="footer-inner">
             <p>SUPORT MAX | Tecnologia da Informação</p>
             <p>&copy; 2026 SUPORT MAX. Todos os direitos reservados.</p>
         </div>
     </footer>
+
+    <script>
+        const imageViewer = document.querySelector(".image-viewer");
+        const enlargedImage = imageViewer.querySelector("img");
+        const imageCaption = imageViewer.querySelector("figcaption");
+
+        document.querySelector(".portfolio-grid").addEventListener("click", (event) => {
+            const imageButton = event.target.closest(".portfolio-image-button");
+
+            if (!imageButton) {
+                return;
+            }
+
+            const thumbnail = imageButton.querySelector("img");
+            const title = imageButton.closest(".portfolio-card").querySelector("h3");
+            enlargedImage.src = thumbnail.currentSrc || thumbnail.src;
+            enlargedImage.alt = thumbnail.alt;
+            imageCaption.textContent = title.textContent;
+            imageViewer.showModal();
+        });
+
+        imageViewer.querySelector(".image-viewer-close").addEventListener("click", () => {
+            imageViewer.close();
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && imageViewer.open) {
+                imageViewer.close();
+            }
+        });
+
+        imageViewer.addEventListener("click", (event) => {
+            if (event.target === imageViewer) {
+                imageViewer.close();
+            }
+        });
+    </script>
 
 </body>
 </html>
