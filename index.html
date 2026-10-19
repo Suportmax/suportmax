@@ -286,6 +286,53 @@
             font-size: 0.92rem;
         }
 
+        .clients {
+            padding: 76px 0 84px;
+            background: var(--paper);
+        }
+
+        .clients-inner {
+            width: min(1180px, calc(100% - 64px));
+            margin: 0 auto;
+        }
+
+        .clients h2 {
+            margin-bottom: 12px;
+            color: var(--blue-dark);
+            font-size: 2.25rem;
+            line-height: 1.2;
+        }
+
+        .clients-intro {
+            max-width: 620px;
+            margin-bottom: 30px;
+            color: var(--muted);
+        }
+
+        .client-logos {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 20px;
+        }
+
+        .client-logo {
+            display: grid;
+            min-height: 130px;
+            place-items: center;
+            margin: 0;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--white);
+        }
+
+        .client-logo img {
+            display: block;
+            width: 100%;
+            height: 108px;
+            object-fit: contain;
+        }
+
         footer {
             background: var(--blue-dark);
             color: #e4edf3;
@@ -304,6 +351,10 @@
 
         @media (max-width: 800px) {
             .gallery-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .client-logos {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
@@ -325,6 +376,7 @@
             .hero-inner,
             .services-inner,
             .gallery-inner,
+            .clients-inner,
             .footer-inner {
                 width: min(100% - 40px, 1180px);
             }
@@ -402,9 +454,30 @@
                 padding: 58px 0 64px;
             }
 
+            .clients {
+                padding: 58px 0 64px;
+            }
+
+            .clients h2 {
+                font-size: 1.9rem;
+            }
+
             .gallery-grid {
                 grid-template-columns: 1fr;
                 gap: 18px;
+            }
+
+            .client-logos {
+                gap: 12px;
+            }
+
+            .client-logo {
+                min-height: 100px;
+                padding: 10px;
+            }
+
+            .client-logo img {
+                height: 88px;
             }
 
             .service-card {
@@ -444,6 +517,7 @@
             <nav class="primary-nav" aria-label="Navegação principal">
                 <a href="#servicos">Serviços</a>
                 <a href="#galeria">Galeria</a>
+                <a href="#clientes">Clientes</a>
             </nav>
             <a href="https://wa.me/5571981589773" target="_blank" rel="noopener noreferrer" class="btn-cta header-cta">Fale com a gente</a>
         </div>
@@ -535,6 +609,29 @@
                         <h3>Segurança digital e nuvem</h3>
                         <p>Antivírus corporativo, gestão de backups e serviços em nuvem para apoiar a proteção e a continuidade dos seus dados.</p>
                     </article>
+                </div>
+            </div>
+        </section>
+
+        <section class="clients" id="clientes" aria-labelledby="clients-title">
+            <div class="clients-inner">
+                <p class="eyebrow">Parcerias de confiança</p>
+                <h2 id="clients-title">Nossos clientes</h2>
+                <p class="clients-intro">Conheça algumas das empresas que confiam na SUPORT MAX para cuidar da tecnologia.</p>
+                <div class="client-logos" aria-label="Empresas atendidas pela SUPORT MAX">
+                    <figure class="client-logo"><img src="clientes/monobloco.jpg" alt="Monobloco Alinhamento Técnico" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/mundo-do-sabor.jpg" alt="Mundo do Sabor Distribuidora" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/pneudrive.png" alt="PneuDrive" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/ryk-motors.webp" alt="RYK Motors" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/magic-clean.png" alt="Magic Clean" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/artcar.jpg" alt="Art Car Centro Automotivo" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/cascao-imperial.jpg" alt="Cascão Imperial" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/choc-chocolates.jpg" alt="Choc Chocolates Finos" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/distak.png" alt="Distak Ar Condicionado e Acessórios" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/fama-pneus.png" alt="Fama Pneus" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/hub-acai.jpg" alt="Hub Açaí" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/impacto-prime.jpg" alt="Impacto Prime" loading="lazy"></figure>
+                    <figure class="client-logo"><img src="clientes/jr-pirelli.jpg" alt="JR Auto Center e Pirelli" loading="lazy"></figure>
                 </div>
             </div>
         </section>
