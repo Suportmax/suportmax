@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="CRM Básico Suport Max: gestão de clientes, orçamentos, ordens de serviço, financeiro e catálogo de produtos para tecnologia da informação.">
+<meta name="theme-color" content="#0f172a">
 <title>CRM Básico — Gestão de Clientes</title>
 <style>
 :root{
@@ -36,6 +38,10 @@ a{color:var(--prim)}
 
 .main{flex:1;margin-left:230px;display:flex;flex-direction:column;min-width:0}
 .topbar{background:var(--painel);border-bottom:1px solid var(--borda);padding:14px 26px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:15}
+/* Menu hambúrguer (só aparece no celular) */
+.menu-mobile{display:none;font-size:20px;padding:7px 12px;line-height:1}
+.menu-backdrop{display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:19;opacity:0;transition:.2s}
+.menu-backdrop.aberto{display:block;opacity:1}
 .topbar h1{font-size:19px;font-weight:700}
 .topbar .sub{font-size:12.5px;color:var(--suave);font-weight:400}
 .topbar-actions{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
@@ -148,6 +154,19 @@ td .mt{font-size:12.3px;color:var(--suave)}
 /* ===== Link público do orçamento ===== */
 .link-box{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .link-box input{flex:1;min-width:200px;padding:9px 11px;border:1px solid var(--borda);border-radius:9px;font-size:12.5px;color:var(--suave);background:#f8fafc}
+/* QR Code do orçamento */
+.qr-box{display:flex;gap:16px;align-items:center;margin-top:14px;background:#f8fafc;border:1px solid var(--borda);border-radius:12px;padding:14px;flex-wrap:wrap}
+.qr-img{width:150px;height:150px;background:#fff;border-radius:8px;padding:6px;border:1px solid var(--borda)}
+.qr-txt{font-size:13px;color:var(--texto);line-height:1.5;flex:1;min-width:180px}
+/* Foto do produto no catálogo */
+.foto-prod{display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap}
+.foto-prod-prev{width:104px;height:104px;border:1px solid var(--borda);border-radius:12px;background:#f8fafc;display:flex;align-items:center;justify-content:center;overflow:hidden;flex:0 0 auto}
+.foto-prod-prev img{width:100%;height:100%;object-fit:cover;display:block}
+.foto-vazio{font-size:30px;opacity:.5}
+.foto-prod-acoes{flex:1;min-width:160px}
+.cat-foto{width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid var(--borda);background:#fff;flex:0 0 auto}
+.cat-item{display:flex;gap:10px;align-items:flex-start}
+body.tema-escuro .foto-prod-prev{background:#0d1728}
 .pub-wrap{max-width:900px;margin:0 auto;padding:20px}
 .pub-acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 
@@ -339,6 +358,16 @@ body.tema-escuro .fup-pill.venc{background:#2a1215;color:#fca5a5}
 .modal-h .x:hover{background:#f1f5f9}
 .modal-b{padding:20px 22px}
 .modal-f{padding:16px 22px;border-top:1px solid var(--borda);display:flex;gap:10px;justify-content:flex-end;background:#f8fafc;border-radius:0 0 16px 16px}
+/* Lista de atalhos de teclado */
+.atalhos-lista{display:flex;flex-direction:column;gap:2px}
+.atalho-linha{display:flex;align-items:center;gap:12px;padding:7px 8px;border-radius:8px}
+.atalho-linha:nth-child(odd){background:#f8fafc}
+.atalho-linha span{font-size:13.2px;color:#334155}
+.atalho-linha kbd{min-width:42px;text-align:center;font-family:inherit;font-size:12px;font-weight:700;color:#0f172a;
+  background:#fff;border:1px solid var(--borda);border-bottom-width:2px;border-radius:6px;padding:4px 8px;box-shadow:0 1px 0 rgba(15,23,42,.05)}
+body.tema-escuro .atalho-linha:nth-child(odd){background:#0b1526}
+body.tema-escuro .atalho-linha span{color:#cbd5e1}
+body.tema-escuro .atalho-linha kbd{background:#0f172a;color:#e2e8f0}
 
 /* ---------- Formulários ---------- */
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -374,6 +403,8 @@ body.tema-escuro .fup-pill.venc{background:#2a1215;color:#fca5a5}
 .rel-chart{display:flex;align-items:flex-end;gap:8px;height:170px;padding:10px 4px 0;overflow-x:auto}
 .rel-bar-wrap{flex:1;min-width:34px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
 .rel-bar{width:100%;max-width:46px;background:linear-gradient(180deg,#3b82f6,#2563eb);border-radius:6px 6px 0 0;transition:height .3s ease}
+.rel-bar.lucro-pos{background:linear-gradient(180deg,#34d399,#15803d)}
+.rel-bar.lucro-neg{background:linear-gradient(180deg,#f87171,#b91c1c)}
 .rel-bar-lbl{font-size:10.5px;color:var(--suave);margin-top:6px;white-space:nowrap}
 .rel-chart-base{margin-top:8px;font-size:12.5px;color:var(--suave)}
 .rel-duas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -452,6 +483,15 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
 .orc-doc .rodape-contato a{color:#334155;text-decoration:none;border-bottom:1px dotted #94a3b8}
 .orc-doc .assinaturas{display:flex;gap:44px;margin-top:52px}
 .orc-doc .assinaturas div{flex:1;border-top:1px solid #0f172a;padding-top:6px;font-size:12.3px;text-align:center;color:#334155}
+.orc-doc .assin-img{width:100%;max-width:210px;height:auto;display:block;margin:0 auto 2px}
+/* Captura de assinatura */
+.assin-area{position:relative;border:2px dashed var(--borda);border-radius:12px;background:#fff;overflow:hidden;touch-action:none}
+.assin-area canvas{display:block;width:100%;height:auto;cursor:crosshair;touch-action:none}
+.assin-dica{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:15px;letter-spacing:.5px;pointer-events:none}
+.assin-preview{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:10px;margin-top:10px;text-align:center}
+.assin-preview img{max-width:280px;width:100%;height:auto}
+.aviso-assinado{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:10px;padding:10px 12px;font-size:13.5px;margin-bottom:8px}
+body.tema-escuro .assin-area,body.tema-escuro .assin-preview{background:#0d1728;border-color:#334155}
 @media print{
   body{background:#fff}
   body.imprimindo .app,body.imprimindo .overlay,body.imprimindo #toast{display:none !important}
@@ -461,16 +501,27 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
 
 /* ---------- Responsivo ---------- */
 @media (max-width:900px){
-  .sidebar{width:64px}
-  .logo b,.logo small,.nav-item span:not(.ico),.nav-item .pill,.sidebar-foot{display:none}
-  .logo{justify-content:center;padding:12px 8px}
-  .logo-img{max-width:44px;padding:4px}
-  .nav-item{justify-content:center;padding:11px 0}
-  .main{margin-left:64px}
+  /* Menu deslizante: a sidebar sai da tela e entra ao tocar no ☰ */
+  .menu-mobile{display:inline-flex}
+  .sidebar{width:264px;transform:translateX(-100%);transition:transform .22s ease;box-shadow:0 0 40px rgba(2,6,23,.4)}
+  body.menu-aberto .sidebar{transform:translateX(0)}
+  .main{margin-left:0}
   .cols{grid-template-columns:1fr}
   .form-grid{grid-template-columns:1fr}
   .view{padding:16px 14px 50px}
-  .topbar{padding:12px 14px;flex-wrap:wrap}
+  .topbar{padding:12px 14px;flex-wrap:wrap;gap:10px}
+  .topbar-actions{gap:8px}
+  /* Alvos de toque maiores no menu */
+  .nav-item{padding:13px 14px;font-size:15px}
+  .nav-item .ico{font-size:18px}
+  .logo-img{max-width:200px}
+}
+@media (max-width:560px){
+  .topbar-actions{gap:6px}
+  .topbar-actions .btn{padding:8px 11px;font-size:12.5px}
+  .topbar-actions .btn.only-desktop{display:none}
+  .view{padding:14px 11px 50px}
+  .topbar h1{font-size:17px}
 }
 
 /* ===== Tela de login ===== */
@@ -538,7 +589,8 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
 </div>
 
 <div class="app" id="appCrm" hidden>
-  <aside class="sidebar">
+  <div class="menu-backdrop" id="menuBackdrop"></div>
+  <aside class="sidebar" id="sidebar">
     <div class="logo">
       <img class="logo-img" alt="SUPORT MAX" id="logoTopo">
     </div>
@@ -566,6 +618,7 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
 
   <main class="main">
     <header class="topbar">
+      <button class="btn ghost menu-mobile" id="btnMenu" type="button" aria-label="Abrir menu" title="Menu">☰</button>
       <div>
         <h1 id="viewTitle">Painel</h1>
         <div class="sub" id="viewSub">Visão geral do seu negócio</div>
@@ -578,8 +631,8 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
         </div>
         <button class="btn ghost" id="btnTema" title="Alternar tema claro/escuro">🌙</button>
         <button class="btn ghost" id="btnInstalar" hidden title="Instalar o CRM no seu aparelho">📲 Instalar app</button>
-        <button class="btn ghost" id="btnBackupTopo" title="Baixar uma cópia de segurança dos seus dados">💾 Backup</button>
-        <button class="btn ghost" id="btnExportRapido" title="Exportar backup JSON">⬇ Exportar</button>
+        <button class="btn ghost only-desktop" id="btnBackupTopo" title="Baixar uma cópia de segurança dos seus dados">💾 Backup</button>
+        <button class="btn ghost only-desktop" id="btnExportRapido" title="Exportar backup JSON">⬇ Exportar</button>
         <button class="btn primary" id="btnNovo">＋ Novo cliente</button>
       </div>
     </header>
@@ -1634,8 +1687,18 @@ document.querySelector('.nav').addEventListener('click', e=>{
   /* Ao abrir a agenda pelo sino, já mostra os follow-ups de hoje */
   if(alvo==='agenda' && view!=='agenda') filtroAgenda.periodo = 'hoje';
   view = alvo;
+  fecharMenu();   /* no celular, fecha o menu deslizante ao escolher */
   render();
 });
+/* ---------- Menu deslizante (celular) ---------- */
+function abrirMenu(){ document.body.classList.add('menu-aberto'); const b=document.getElementById('menuBackdrop'); if(b) b.classList.add('aberto'); }
+function fecharMenu(){ document.body.classList.remove('menu-aberto'); const b=document.getElementById('menuBackdrop'); if(b) b.classList.remove('aberto'); }
+(function ligarMenu(){
+  const btn = document.getElementById('btnMenu');
+  const bd = document.getElementById('menuBackdrop');
+  if(btn) btn.addEventListener('click', ()=>{ document.body.classList.contains('menu-aberto') ? fecharMenu() : abrirMenu(); });
+  if(bd) bd.addEventListener('click', fecharMenu);
+})();
 document.getElementById('btnExportRapido').addEventListener('click', exportarJSON);
 document.getElementById('btnInstalar').addEventListener('click', instalarApp);
 document.getElementById('btnBackupTopo').addEventListener('click', baixarBackupAgora);
@@ -1777,7 +1840,7 @@ function htmlPainel(){
     if(!venc.length && !nfp.length && !osab.length) return '';
     if(!cartaoLigado('atencao')) return '';
     return `<div class="card" style="margin-bottom:18px;border-color:#fde68a">
-      <div class="card-h"><h3>⚠️ Precisa da sua atenção</h3></div>
+      <div class="card-h"><h2>⚠️ Precisa da sua atenção</h2></div>
       <div class="card-b" style="display:grid;gap:10px">
         ${venc.length?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <span class="selo vence">⏳ ${venc.length} orçamento(s) vencendo/vencido(s)</span>
@@ -1798,7 +1861,7 @@ function htmlPainel(){
 
   <div class="cols">
     ${cartaoLigado('followups')?`<div class="card">
-      <div class="card-h"><h3>⏰ Follow-ups próximos</h3><button class="link" data-go="agenda">Ver agenda →</button></div>
+      <div class="card-h"><h2>⏰ Follow-ups próximos</h2><button class="link" data-go="agenda">Ver agenda →</button></div>
       <div class="card-b">
         ${(()=>{
           const hojeN = agendaPendentes().filter(c=>diasAte(c.followup.data)===0).length;
@@ -1823,7 +1886,7 @@ function htmlPainel(){
     </div>`:''}
 
     ${cartaoLigado('recentes')?`<div class="card">
-      <div class="card-h"><h3>🕓 Últimos clientes cadastrados</h3><button class="link" data-go="clientes">Ver todos →</button></div>
+      <div class="card-h"><h2>🕓 Últimos clientes cadastrados</h2><button class="link" data-go="clientes">Ver todos →</button></div>
       <div class="card-b">
         ${recentes.map(c=>`<div class="linha-lista" data-abrir="${c.id}">
           <div class="avatar">${iniciais(c.nome)}</div>
@@ -1835,7 +1898,7 @@ function htmlPainel(){
   </div>
 
   ${cartaoLigado('orcamentos')?`<div class="card" style="margin-top:18px">
-    <div class="card-h"><h3>🧾 Últimos orçamentos</h3><button class="link" data-go="orcamentos">Ver todos →</button></div>
+    <div class="card-h"><h2>🧾 Últimos orçamentos</h2><button class="link" data-go="orcamentos">Ver todos →</button></div>
     <div class="card-b">
       ${ultOrc.length ? ultOrc.map(o=>`<div class="linha-lista">
         <div class="hist-ico">🧾</div>
@@ -1850,7 +1913,7 @@ function htmlPainel(){
   </div>`:''}
 
   ${cartaoLigado('atividade')?`<div class="card" style="margin-top:18px">
-    <div class="card-h"><h3>🗒️ Atividade recente</h3></div>
+    <div class="card-h"><h2>🗒️ Atividade recente</h2></div>
     <div class="card-b">
       ${atividade.length ? atividade.map(t=>`<div class="linha-lista" data-abrir="${t.cliente.id}">
         <div class="hist-ico">${ICONES_TIPO[t.tipo]||'📝'}</div>
@@ -1879,7 +1942,7 @@ function resumoMensalCard(){
   const osMes = listaOrdens().filter(o=>String(o.criadoEm||o.data||'').slice(0,7)===mes).length;
   const mrrV = mrr();
   return `<div class="card" style="margin-bottom:18px">
-    <div class="card-h"><h3>📆 Resumo de ${new Date().toLocaleDateString('pt-BR',{month:'long', year:'numeric'})}</h3>
+    <div class="card-h"><h2>📆 Resumo de ${new Date().toLocaleDateString('pt-BR',{month:'long', year:'numeric'})}</h2>
       <button class="link" data-go="relatorios">Relatórios →</button></div>
     <div class="card-b">
       <div class="grid-4">
@@ -1903,7 +1966,7 @@ function caixaCard(){
   const cr = contasReceber();
   const venc = cr.filter(c=>c.vencido);
   return `<div class="card" style="margin-bottom:18px">
-    <div class="card-h"><h3>💰 Fluxo de caixa</h3><button class="link" data-go="financeiro">Financeiro →</button></div>
+    <div class="card-h"><h2>💰 Fluxo de caixa</h2><button class="link" data-go="financeiro">Financeiro →</button></div>
     <div class="card-b">
       <div class="grid-4">
         <div class="mini-stat"><div class="ml">Recebido no mês</div><div class="mv ok">${brl(r.recebMes)}</div></div>
@@ -2063,6 +2126,10 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='exemplo') carregarExemplo();
   else if(btn.dataset.act==='backup-agora') baixarBackupAgora();
   else if(btn.dataset.act==='instalar-app') instalarApp();
+  else if(btn.dataset.act==='notif-ativar') ativarNotificacoes().then(()=>render());
+  else if(btn.dataset.act==='notif-desativar'){ desativarNotificacoes(); render(); }
+  else if(btn.dataset.act==='notif-testar') testarNotificacao();
+  else if(btn.dataset.act==='mostrar-atalhos') mostrarAtalhos();
   else if(btn.dataset.act==='nuvem-agora'){ /* tratado em ligarDados */ }
   else if(btn.dataset.act==='limpar') limparDados();
   /* Financeiro */
@@ -2468,11 +2535,11 @@ function calDetalheDia(key){
   const el = document.getElementById('calDetalhe');
   if(!el) return;
   if(!lista.length){
-    el.innerHTML = `<div class="card-h"><h3>📅 ${fmtData(key)}</h3><button class="link" data-cal-novo="${key}">＋ Agendar neste dia</button></div>
+    el.innerHTML = `<div class="card-h"><h2>📅 ${fmtData(key)}</h2><button class="link" data-cal-novo="${key}">＋ Agendar neste dia</button></div>
       <div class="card-b"><div class="vazio"><span class="big">📭</span>Nenhum follow-up neste dia.</div></div>`;
     return;
   }
-  el.innerHTML = `<div class="card-h"><h3>📅 ${fmtData(key)} <span class="cnt">${lista.length}</span></h3><button class="link" data-cal-novo="${key}">＋ Agendar neste dia</button></div>
+  el.innerHTML = `<div class="card-h"><h2>📅 ${fmtData(key)} <span class="cnt">${lista.length}</span></h2><button class="link" data-cal-novo="${key}">＋ Agendar neste dia</button></div>
     <div class="card-b">
       ${lista.map(c=>{
         const d = diasAte(c.followup.data);
@@ -2953,7 +3020,7 @@ function tabelaOrcHTML(){
     <td>
       <div class="nm">${esc(o.numero||'—')}</div>
       <div class="mt">${fmtData(o.data)}${o.validade?` · válido até ${fmtData(o.validade)}`:''} · ${(o.itens||[]).length} item(ns)</div>
-      <div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">${seloValidade(o)}${precisaNF(o)?badgeNF(o):''}${osDeOrcamento(o.id)?`<span class="selo info">🛠️ ${esc(osDeOrcamento(o.id).numero)}</span>`:''}</div>
+      <div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">${seloValidade(o)}${precisaNF(o)?badgeNF(o):''}${o.assinatura?`<span class="selo info" title="Assinado por ${esc(o.assinatura.nome||'cliente')} em ${fmtData(o.assinatura.data)}">✍️ assinado</span>`:''}${osDeOrcamento(o.id)?`<span class="selo info">🛠️ ${esc(osDeOrcamento(o.id).numero)}</span>`:''}</div>
     </td>
     <td>
       <div class="nm">${esc(nomeClienteOrc(o))}</div>
@@ -3012,7 +3079,7 @@ function opcoesProduto(sel){
 function itemOrcHTML(it){
   const dv = itemDescV(it);
   return `<tr data-item="${it.id}">
-    <td><select data-campo="produto">${opcoesProduto(it.produtoId)}</select></td>
+    <td><div style="display:flex;gap:6px;align-items:center">${it.produtoId&&buscarProd(it.produtoId)&&buscarProd(it.produtoId).foto?`<img class="cat-foto" data-foto-item src="${buscarProd(it.produtoId).foto}" alt="">`:'<span data-foto-item></span>'}<select data-campo="produto" style="flex:1;min-width:0">${opcoesProduto(it.produtoId)}</select></div></td>
     <td><input data-campo="desc" maxlength="160" value="${esc(it.desc)}" placeholder="Descrição do item"></td>
     <td class="col-qtd"><input data-campo="qtd" type="number" min="0" step="0.01" value="${Number(it.qtd)||0}"></td>
     <td class="col-unit"><input data-campo="unit" type="number" min="0" step="0.01" value="${Number(it.unit)||0}"></td>
@@ -3205,6 +3272,18 @@ function formOrcamento(id){
     }
     it.produtoId = sel.value;
     const p = buscarProd(sel.value);
+    /* atualiza a miniatura da foto ao lado do seletor */
+    const slotFoto = tr.querySelector('[data-foto-item]');
+    if(slotFoto){
+      const wrapF = slotFoto.parentElement;
+      const antiga = wrapF.querySelector('img.cat-foto');
+      if(antiga) antiga.remove();
+      if(p && p.foto){
+        const im = document.createElement('img');
+        im.className='cat-foto'; im.dataset.fotoItem=''; im.src=p.foto; im.alt='';
+        wrapF.insertBefore(im, sel);
+      }
+    }
     if(p){
       if(tr.dataset.previa!=='0'){
         it.desc = p.desc || p.nome;
@@ -3390,7 +3469,7 @@ function orcDocHTML(o){
       <thead><tr><th>Descrição</th><th class="num-c">Qtd</th><th class="num-c">Valor unit.</th><th class="num-c">Total</th></tr></thead>
       <tbody>
         ${(o.itens||[]).map(i=>`<tr>
-          <td>${esc(i.desc||'—')}${itemDescV(i)>0?`<div style="color:#ef4444;font-size:11.5px">desconto: − ${brl(itemDescV(i))}${i.descTipo==='%'?` (${Number(i.descItem)||0}%)`:''}</div>`:''}</td>
+          <td>${(()=>{ const pf = i.produtoId?buscarProd(i.produtoId):null; return pf&&pf.foto?`<img src="${pf.foto}" alt="" style="width:34px;height:34px;object-fit:cover;border-radius:6px;float:left;margin:0 8px 4px 0">`:''; })()}${esc(i.desc||'—')}${itemDescV(i)>0?`<div style="color:#ef4444;font-size:11.5px">desconto: − ${brl(itemDescV(i))}${i.descTipo==='%'?` (${Number(i.descItem)||0}%)`:''}</div>`:''}</td>
           <td class="num-c">${Number(i.qtd)||0}</td>
           <td class="num-c">${brl(i.unit)}</td>
           <td class="num-c">${brl(itemTotal(i))}</td>
@@ -3409,7 +3488,11 @@ function orcDocHTML(o){
     ${o.obs?`<div class="obs"><b>Observações e condições:</b><br>${esc(o.obs)}</div>`:''}
     ${nfEmitida(o)?`<div class="obs" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><b>Nota fiscal:</b> emitida${nfDe(o).numero?` nº ${esc(nfDe(o).numero)}`:''}${nfDe(o).emitidaEm?` em ${fmtData(nfDe(o).emitidaEm)}`:''}.</div>`:''}
     <div class="assinaturas">
-      <div>Assinatura do cliente</div>
+      <div>${o.assinatura
+        ? `<img class="assin-img" src="${o.assinatura.img}" alt="Assinatura de ${esc(o.assinatura.nome||'cliente')}">
+           <div style="margin-top:2px"><b>${esc(o.assinatura.nome||'')}</b></div>
+           <div style="font-size:10.5px;color:#64748b">Assinado digitalmente em ${fmtData(o.assinatura.data)}</div>`
+        : 'Assinatura do cliente'}</div>
       <div>Responsável pela emissão</div>
     </div>
     <div class="rodape-doc">
@@ -3433,6 +3516,7 @@ function verOrc(id){
     <div class="modal-f" style="flex-wrap:wrap">
       <button type="button" class="btn ghost" data-fechar>Fechar</button>
       <button type="button" class="btn ghost" id="btnEditFromView">✏️ Editar</button>
+      <button type="button" class="btn ghost" id="btnAssinarOrc">✍️ ${o.assinatura?'Ver assinatura':'Assinar'}</button>
       <button type="button" class="btn ghost" data-act="orc-copiar" data-id="${o.id}">📋 Copiar texto</button>
       ${(o.status==='aprovado'||o.status==='entregue')?`<button type="button" class="btn ghost" id="btnRecibo">🧾 Recibo</button>`:''}
       <button type="button" class="btn ok" data-act="orc-mail" data-id="${o.id}">✉️ E-mail</button>
@@ -3441,6 +3525,7 @@ function verOrc(id){
     </div>`, true);
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
   document.getElementById('btnEditFromView').onclick = ()=>{ fecharModal(); formOrcamento(o.id); };
+  document.getElementById('btnAssinarOrc').onclick = ()=>formAssinaturaOrc(o.id);
   document.getElementById('btnImprimir').onclick = ()=>imprimirOrc(o);
   const br = document.getElementById('btnRecibo'); if(br) br.onclick = ()=>imprimirRecibo(o.id);
   modal.querySelector('[data-act="orc-copiar"]').onclick = ()=>copiarOrc(o.id);
@@ -3449,8 +3534,88 @@ function verOrc(id){
 }
 
 /* =========================================================
-   RECIBO DE PAGAMENTO (comprovante simples)
+   ASSINATURA DIGITAL DO ORÇAMENTO
    ========================================================= */
+function formAssinaturaOrc(id){
+  const o = buscarOrc(id); if(!o) return;
+  const jaTem = !!o.assinatura;
+  abrirModal(`
+    <div class="modal-h"><h2>✍️ Assinatura do orçamento ${esc(o.numero||'')}</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      ${jaTem?`<div class="aviso-assinado">✅ Orçamento assinado por <b>${esc(o.assinatura.nome||'cliente')}</b> em ${fmtData(o.assinatura.data)}.</div>
+        <div class="assin-preview"><img src="${o.assinatura.img}" alt="Assinatura"></div>
+        <p style="font-size:13px;color:var(--suave);margin-top:10px">Você pode apagar a assinatura atual e assinar novamente (ex.: para corrigir).</p>`:''}
+      <p style="font-size:13.5px;color:var(--suave);margin:0 0 10px">Peça para o cliente <b>assinar com o dedo</b> (celular) ou com o mouse (computador) no espaço abaixo. A assinatura fica salva no orçamento e aparece na impressão.</p>
+      <div class="campo" style="margin-bottom:10px">
+        <label for="assNome">Nome de quem assina</label>
+        <input id="assNome" maxlength="120" placeholder="Ex.: João da Silva" value="${esc(o.assinatura?o.assinatura.nome:nomeClienteOrc(o))}">
+      </div>
+      <div class="assin-area">
+        <canvas id="assCanvas" width="700" height="220"></canvas>
+        <div class="assin-dica" id="assinDica">Assine aqui</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button type="button" class="btn ghost sm" id="assLimpar">🧽 Limpar</button>
+        <span style="font-size:12.5px;color:var(--suave);align-self:center">A assinatura é opcional — sirva-se do espaço em branco abaixo se preferir assinar à mão no papel.</span>
+      </div>
+    </div>
+    <div class="modal-f" style="flex-wrap:wrap">
+      <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+      ${jaTem?`<button type="button" class="btn danger" id="assRemover">🗑️ Remover assinatura</button>`:''}
+      <button type="button" class="btn primary" id="assSalvar">💾 Salvar assinatura</button>
+    </div>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+
+  const cv = document.getElementById('assCanvas');
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle = '#0f172a'; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  let desenhou = false, desenhando = false, ultimo = null;
+
+  const pos = (ev)=>{
+    const r = cv.getBoundingClientRect();
+    const p = ev.touches ? (ev.touches[0]||ev.changedTouches[0]) : ev;
+    return { x:(p.clientX-r.left)*(cv.width/r.width), y:(p.clientY-r.top)*(cv.height/r.height) };
+  };
+  const iniciar = (ev)=>{ ev.preventDefault(); desenhando = true; ultimo = pos(ev); if(!desenhou){ const d=document.getElementById('assinDica'); if(d) d.style.display='none'; } };
+  const mover = (ev)=>{
+    if(!desenhando) return;
+    ev.preventDefault();
+    const p = pos(ev);
+    ctx.beginPath(); ctx.moveTo(ultimo.x, ultimo.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    ultimo = p; desenhou = true;
+  };
+  const parar = ()=>{ desenhando = false; };
+  cv.addEventListener('mousedown', iniciar);
+  cv.addEventListener('mousemove', mover);
+  cv.addEventListener('mouseup', parar);
+  cv.addEventListener('mouseleave', parar);
+  cv.addEventListener('touchstart', iniciar, {passive:false});
+  cv.addEventListener('touchmove', mover, {passive:false});
+  cv.addEventListener('touchend', parar);
+
+  document.getElementById('assLimpar').onclick = ()=>{
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,cv.width,cv.height);
+    desenhou = false;
+    const d=document.getElementById('assinDica'); if(d) d.style.display='';
+  };
+  const remover = document.getElementById('assRemover');
+  if(remover) remover.onclick = ()=>{
+    if(!confirm('Remover a assinatura deste orçamento?')) return;
+    delete o.assinatura; salvar(); fecharModal(); render(); toast('Assinatura removida.');
+  };
+  document.getElementById('assSalvar').onclick = ()=>{
+    if(!desenhou){ toast('Assine no espaço antes de salvar.','erro'); return; }
+    const nome = (document.getElementById('assNome').value||'').trim() || nomeClienteOrc(o);
+    let img;
+    try{ img = cv.toDataURL('image/png'); }catch(e){ toast('Não foi possível capturar a assinatura.','erro'); return; }
+    o.assinatura = { nome, data: hojeISO(), img };
+    salvar(); fecharModal(); render(); verOrc(o.id);
+    toast('Assinatura salva no orçamento.');
+  };
+}
+
+
 function reciboHTML(o){
   const em = db.emissor || {};
   const nome = nomeClienteOrc(o);
@@ -4050,6 +4215,35 @@ function seloMargem(p){
   const cls = m.pct>=40?'margem-boa':(m.pct>=20?'margem-media':'margem-baixa');
   return `<span class="selo ${cls}" title="Margem sobre o preço">margem ${m.pct.toFixed(0)}%</span>`;
 }
+/* ---------- Custo e lucro de um item/orçamento ----------
+   O custo vem do item (custoUnit) ou, se não houver, do produto no catálogo. */
+function custoUnitItem(i){
+  if(!i) return 0;
+  if(i.custoUnit!=null && i.custoUnit!=='') return Number(i.custoUnit)||0;
+  if(i.custo!=null && i.custo!=='') return Number(i.custo)||0;
+  const p = i.produtoId ? buscarProd(i.produtoId) : null;
+  return p ? (Number(p.custo)||0) : 0;
+}
+function custoItemOrc(i){ return (Number(i&&i.qtd)||0) * custoUnitItem(i); }
+/* Custo total do orçamento: itens + frete (frete é custo, não lucro), menos o desconto geral proporcional */
+function custoOrc(o){
+  const itens = (o&&o.itens)||[];
+  const bruto = itens.reduce((s,i)=>s+custoItemOrc(i),0);
+  const fret = freteOrc(o);
+  const sub = subtotalOrc(o);
+  const dg = descGeralV(o);
+  /* o desconto geral reduz o que se paga; aplica proporcionalmente ao custo */
+  const proporcao = sub>0 ? Math.max(0, (sub-dg)/sub) : 1;
+  return bruto*proporcao + fret;
+}
+/* Lucro = total pago pelo cliente - custo */
+function lucroOrc(o){
+  return totalOrc(o) - custoOrc(o);
+}
+function lucroPctOrc(o){
+  const t = totalOrc(o);
+  return t>0 ? (lucroOrc(o)/t*100) : 0;
+}
 
 /* =========================================================
    CATÁLOGO (view): produtos, serviços, fornecedores e margem
@@ -4118,7 +4312,7 @@ function renderTabelaCat(){
   tb.innerHTML = l.length ? l.map(p=>{
     const m = margemProduto(p);
     return `<tr>
-      <td><div class="nm">${esc(p.nome)}</div>${p.desc?`<div class="mt">${esc(p.desc)}</div>`:''}</td>
+      <td><div class="cat-item">${p.foto?`<img class="cat-foto" src="${p.foto}" alt="">`:''}<div style="min-width:0"><div class="nm">${esc(p.nome)}</div>${p.desc?`<div class="mt">${esc(p.desc)}</div>`:''}</div></div></td>
       <td><span class="mini">${esc(p.un||'un')}</span></td>
       <td>${Number(p.custo)>0?brl(p.custo):'<span class="mini">—</span>'}</td>
       <td class="vl-total">${brl(p.preco)}</td>
@@ -4169,6 +4363,18 @@ function formProduto(id){
           <div class="campo"><label>Custo (R$)</label><input name="custo" type="number" min="0" step="0.01" value="${Number(v.custo)||0}"></div>
           <div class="campo"><label>Preço de venda (R$)</label><input name="preco" type="number" min="0" step="0.01" value="${Number(v.preco)||0}"></div>
           <div class="campo full"><label>Descrição padrão (texto do orçamento)</label><input name="desc" maxlength="160" value="${esc(v.desc||'')}"></div>
+          <div class="campo full">
+            <label>Foto do item (opcional)</label>
+            <div class="foto-prod">
+              <div class="foto-prod-prev" id="fotoPrev">${v.foto?`<img src="${v.foto}" alt="Foto do item">`:'<span class="foto-vazio">📷</span>'}</div>
+              <div class="foto-prod-acoes">
+                <input type="file" id="fotoArquivo" accept="image/*" hidden>
+                <button type="button" class="btn ghost sm" id="fotoEscolher">📷 Escolher foto</button>
+                <button type="button" class="btn ghost sm" id="fotoRemover" ${v.foto?'':'hidden'}>🗑️ Remover</button>
+                <div class="mini" style="margin-top:6px">A imagem é reduzida e salva no próprio CRM (sem servidor externo).</div>
+              </div>
+            </div>
+          </div>
           <div class="campo full"><div class="info-resumo" id="resMargem"></div></div>
         </div>
       </div>
@@ -4190,6 +4396,46 @@ function formProduto(id){
   modal.querySelector('[name="custo"]').addEventListener('input', calcMargem);
   modal.querySelector('[name="preco"]').addEventListener('input', calcMargem);
   calcMargem();
+
+  /* ---- foto do item ---- */
+  let fotoAtual = v.foto || '';
+  const inpFoto = document.getElementById('fotoArquivo');
+  const prev = document.getElementById('fotoPrev');
+  const btnRemFoto = document.getElementById('fotoRemover');
+  const mostrarFoto = ()=>{
+    prev.innerHTML = fotoAtual ? `<img src="${fotoAtual}" alt="Foto do item">` : '<span class="foto-vazio">📷</span>';
+    if(btnRemFoto) btnRemFoto.hidden = !fotoAtual;
+  };
+  document.getElementById('fotoEscolher').onclick = ()=>inpFoto.click();
+  if(btnRemFoto) btnRemFoto.onclick = ()=>{ fotoAtual=''; inpFoto.value=''; mostrarFoto(); };
+  inpFoto.onchange = ()=>{
+    const arq = inpFoto.files && inpFoto.files[0];
+    if(!arq) return;
+    if(!/^image\//.test(arq.type)){ toast('Escolha um arquivo de imagem.','erro'); return; }
+    const leitor = new FileReader();
+    leitor.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const MAX = 640;
+        let {width:w, height:h} = img;
+        if(w>h && w>MAX){ h = Math.round(h*MAX/w); w = MAX; }
+        else if(h>=w && h>MAX){ w = Math.round(w*MAX/h); h = MAX; }
+        const cv = document.createElement('canvas'); cv.width=w; cv.height=h;
+        const cx = cv.getContext('2d');
+        cx.fillStyle='#fff'; cx.fillRect(0,0,w,h);
+        cx.drawImage(img,0,0,w,h);
+        try{ fotoAtual = cv.toDataURL('image/jpeg', 0.82); }catch(err){ toast('Não foi possível processar a imagem.','erro'); return; }
+        mostrarFoto();
+        toast('Foto carregada. Salve o item para gravar.');
+      };
+      img.onerror = ()=>toast('Imagem inválida.','erro');
+      img.src = leitor.result;
+    };
+    leitor.onerror = ()=>toast('Não foi possível ler o arquivo.','erro');
+    leitor.readAsDataURL(arq);
+  };
+  mostrarFoto();
+
   document.getElementById('fProd2').onsubmit = e=>{
     e.preventDefault();
     const f = new FormData(e.target);
@@ -4201,7 +4447,8 @@ function formProduto(id){
       custo:Math.max(0, Number(f.get('custo'))||0),
       preco:Math.max(0, Number(f.get('preco'))||0),
       desc:String(f.get('desc')||'').trim(),
-      fornecedorId:String(f.get('fornecedorId')||'')
+      fornecedorId:String(f.get('fornecedorId')||''),
+      foto:fotoAtual
     };
     if(p){ Object.assign(p, dados); toast('Item atualizado.'); }
     else{ listaProdutos().push({id:uid(), ...dados}); toast('Item adicionado ao catálogo.'); }
@@ -4267,10 +4514,321 @@ function gerarLinkOrc(id){
   const o = buscarOrc(id); if(!o) return '';
   return orcParaLink(o);
 }
+
+/* =========================================================
+   QR CODE (gerador leve, modo byte, sem dependências)
+   ========================================================= */
+const QR = (()=>{
+  /* Tabelas de correção de erro (nível M) por versão (1..10): total, dados, ecc, blocos */
+  /* Nivel M (correcao ~15%), versoes 1-40. Tabela oficial ISO/IEC 18004.
+     Cada entrada traz a estrutura EXATA dos blocos RS, no formato:
+       blocos:[ {n, data}, {n, data} ]  (n = quantidade de blocos iguais)
+     O total de correcao por bloco e sempre o mesmo dentro da versao
+     (eccPorBloco = (total - somaDosDados) / numeroDeBlocos). */
+  const ECC_M = [
+    null,
+    {total:26,  data:16,  ecc:10,  blocos:[[1,16]]},
+    {total:44,  data:28,  ecc:16,  blocos:[[1,28]]},
+    {total:70,  data:44,  ecc:26,  blocos:[[1,44]]},
+    {total:100, data:64,  ecc:36,  blocos:[[2,32]]},
+    {total:134, data:86,  ecc:48,  blocos:[[2,43]]},
+    {total:172, data:108, ecc:64,  blocos:[[4,27]]},
+    {total:196, data:124, ecc:72,  blocos:[[4,31]]},
+    {total:242, data:154, ecc:88,  blocos:[[2,38],[2,39]]},
+    {total:292, data:182, ecc:110, blocos:[[3,36],[2,37]]},
+    {total:346, data:216, ecc:130, blocos:[[4,43],[1,44]]},
+    {total:404, data:254, ecc:150, blocos:[[1,50],[4,51]]},
+    {total:466, data:290, ecc:176, blocos:[[6,36],[2,37]]},
+    {total:532, data:334, ecc:198, blocos:[[8,37],[1,38]]},
+    {total:581, data:365, ecc:216, blocos:[[4,40],[5,41]]},
+    {total:655, data:415, ecc:240, blocos:[[5,41],[5,42]]},
+    {total:733, data:453, ecc:280, blocos:[[7,45],[3,46]]},
+    {total:815, data:507, ecc:308, blocos:[[10,46],[1,47]]},
+    {total:901, data:563, ecc:338, blocos:[[9,43],[4,44]]},
+    {total:991, data:627, ecc:364, blocos:[[3,44],[11,45]]},
+    {total:1085,data:669, ecc:416, blocos:[[3,41],[13,42]]},
+    {total:1156,data:714, ecc:442, blocos:[[17,42]]},
+    {total:1258,data:782, ecc:476, blocos:[[17,46]]},
+    {total:1364,data:860, ecc:504, blocos:[[4,47],[14,48]]},
+    {total:1474,data:914, ecc:560, blocos:[[6,45],[14,46]]},
+    {total:1588,data:1000,ecc:588, blocos:[[8,47],[13,48]]},
+    {total:1706,data:1062,ecc:644, blocos:[[19,46],[4,47]]},
+    {total:1828,data:1128,ecc:700, blocos:[[22,45],[3,46]]},
+    {total:1921,data:1193,ecc:728, blocos:[[3,45],[23,46]]},
+    {total:2051,data:1267,ecc:784, blocos:[[21,45],[7,46]]},
+    {total:2185,data:1373,ecc:812, blocos:[[19,47],[10,48]]},
+    {total:2323,data:1455,ecc:868, blocos:[[2,46],[29,47]]},
+    {total:2465,data:1541,ecc:924, blocos:[[10,46],[23,47]]},
+    {total:2611,data:1631,ecc:980, blocos:[[14,46],[21,47]]},
+    {total:2761,data:1725,ecc:1036,blocos:[[14,46],[23,47]]},
+    {total:2876,data:1812,ecc:1064,blocos:[[12,47],[26,48]]},
+    {total:3034,data:1914,ecc:1120,blocos:[[6,47],[34,48]]},
+    {total:3196,data:1992,ecc:1204,blocos:[[29,46],[14,47]]},
+    {total:3362,data:2102,ecc:1260,blocos:[[13,46],[32,47]]},
+    {total:3532,data:2216,ecc:1316,blocos:[[40,47],[7,48]]},
+    {total:3706,data:2334,ecc:1372,blocos:[[18,47],[31,48]]}
+  ];
+  /* Coeficientes dos padroes de alinhamento (centros), versoes 1-40 */
+  const ALIGN = [
+    null,[], [6,18], [6,22], [6,26], [6,30], [6,34], [6,22,38], [6,24,42], [6,26,46], [6,28,50],
+    [6,30,54], [6,32,58], [6,34,62], [6,26,46,66], [6,26,48,70], [6,26,50,74], [6,30,54,78],
+    [6,30,56,82], [6,30,58,86], [6,34,62,90], [6,28,50,72,94], [6,26,50,74,98], [6,30,54,78,102],
+    [6,28,54,80,106], [6,32,58,84,110], [6,30,58,86,114], [6,34,62,90,118], [6,26,50,74,98,122],
+    [6,30,54,78,102,126], [6,26,52,78,104,130], [6,30,56,82,108,134], [6,34,60,86,112,138],
+    [6,30,58,86,114,142], [6,34,62,90,118,146], [6,30,54,78,102,126,150], [6,24,50,76,102,128,154],
+    [6,28,54,80,106,132,158], [6,32,58,84,110,136,162], [6,26,54,82,110,138,166], [6,30,58,86,114,142,170]
+  ];
+
+  /* Galois field GF(256) para Reed-Solomon */
+  const EXP = new Array(512), LOG = new Array(256);
+  (function(){ let x=1; for(let i=0;i<255;i++){ EXP[i]=x; LOG[x]=i; x<<=1; if(x&0x100) x^=0x11d; } for(let i=255;i<512;i++) EXP[i]=EXP[i-255]; })();
+  function gfMul(a,b){ if(a===0||b===0) return 0; return EXP[LOG[a]+LOG[b]]; }
+
+  function rsGenerator(deg){
+    let g = [1];
+    for(let i=0;i<deg;i++){
+      const ng = new Array(g.length+1).fill(0);
+      for(let j=0;j<g.length;j++){
+        ng[j]   ^= gfMul(g[j], 1);
+        ng[j+1] ^= gfMul(g[j], EXP[i]);
+      }
+      g = ng;
+    }
+    return g;
+  }
+  function rsEncode(data, deg){
+    const gen = rsGenerator(deg);
+    const res = data.concat(new Array(deg).fill(0));
+    for(let i=0;i<data.length;i++){
+      const coef = res[i];
+      if(coef!==0){ for(let j=0;j<gen.length;j++){ res[i+j] ^= gfMul(gen[j], coef); } }
+    }
+    return res.slice(data.length);
+  }
+
+  function utf8Bytes(str){
+    const out = [];
+    for(let i=0;i<str.length;i++){
+      let c = str.charCodeAt(i);
+      if(c<0x80) out.push(c);
+      else if(c<0x800){ out.push(0xc0|(c>>6), 0x80|(c&63)); }
+      else if(c>=0xd800 && c<=0xdbff){ const c2=str.charCodeAt(++i); const cp=0x10000+((c&0x3ff)<<10)+(c2&0x3ff); out.push(0xf0|(cp>>18),0x80|((cp>>12)&63),0x80|((cp>>6)&63),0x80|(cp&63)); }
+      else out.push(0xe0|(c>>12), 0x80|((c>>6)&63), 0x80|(c&63));
+    }
+    return out;
+  }
+
+  function pickVersion(len){
+    for(let v=1;v<=40;v++){
+      const cap = ECC_M[v].data;
+      const cci = v<10 ? 8 : 16;
+      /* modo byte(4) + contador + dados + terminador, em bits */
+      const need = 4 + cci + len*8;
+      if(need <= cap*8) return v;
+    }
+    return null;
+  }
+
+  function encode(text){
+    const bytes = utf8Bytes(text);
+    const v = pickVersion(bytes.length);
+    if(!v) return null;
+    const info = ECC_M[v];
+    const cci = v<10 ? 8 : 16;
+    const bits = [];
+    const push = (val, n)=>{ for(let i=n-1;i>=0;i--) bits.push((val>>i)&1); };
+    push(4, 4);            /* modo byte */
+    push(bytes.length, cci);
+    bytes.forEach(b=>push(b,8));
+    /* terminador + padding */
+    const totalData = info.data*8;
+    for(let i=0;i<4 && bits.length<totalData;i++) bits.push(0);
+    while(bits.length % 8) bits.push(0);
+    const padBytes = [0xec,0x11]; let pi=0;
+    while(bits.length < totalData){ push(padBytes[pi++%2],8); }
+    /* bytes de dados */
+    const dataBytes = [];
+    for(let i=0;i<bits.length;i+=8){ let b=0; for(let j=0;j<8;j++) b=(b<<1)|bits[i+j]; dataBytes.push(b); }
+    /* divide em blocos e calcula ECC, conforme a estrutura exata da versao */
+    const dBlocks = [], eBlocks = [];
+    const eccPorBloco = (info.total - info.data) / info.blocos.reduce((s,b)=>s+b[0],0);
+    let off = 0;
+    for(const [qn, dlen] of info.blocos){
+      for(let k=0;k<qn;k++){
+        const db = dataBytes.slice(off, off+dlen); off += dlen;
+        dBlocks.push(db);
+        eBlocks.push(rsEncode(db, eccPorBloco));
+      }
+    }
+    /* intercala dados e ECC (coluna a coluna, bloco a bloco) */
+    const finalBytes = [];
+    const maxD = Math.max(...dBlocks.map(b=>b.length));
+    for(let i=0;i<maxD;i++){ dBlocks.forEach(b=>{ if(i<b.length) finalBytes.push(b[i]); }); }
+    const maxE = Math.max(...eBlocks.map(b=>b.length));
+    for(let i=0;i<maxE;i++){ eBlocks.forEach(b=>{ if(i<b.length) finalBytes.push(b[i]); }); }
+
+    /* monta a matriz */
+    const size = 17 + v*4;
+    const mat = new Array(size).fill(0).map(()=>new Array(size).fill(null));
+    const reserved = new Array(size).fill(0).map(()=>new Array(size).fill(false));
+
+    function setF(r,c,val){ if(r>=0&&r<size&&c>=0&&c<size){ mat[r][c]=val; reserved[r][c]=true; } }
+
+    /* padrões localizadores */
+    function finder(r,c){
+      for(let i=-1;i<=7;i++) for(let j=-1;j<=7;j++){
+        const rr=r+i, cc=c+j;
+        if(rr<0||rr>=size||cc<0||cc>=size) continue;
+        let val = 0;
+        if(i>=0&&i<=6&&(j===0||j===6)) val=1;
+        else if(j>=0&&j<=6&&(i===0||i===6)) val=1;
+        else if(i>=2&&i<=4&&j>=2&&j<=4) val=1;
+        mat[rr][cc]=val; reserved[rr][cc]=true;
+      }
+    }
+    finder(0,0); finder(0,size-7); finder(size-7,0);
+
+    /* alinhamento — desenhado em todas as combinacoes, exceto as que caem sobre os localizadores.
+       Vem antes do timing para que os padroes de alinhamento na linha/coluna do timing prevaleçam. */
+    const ap = ALIGN[v];
+    for(const r of ap) for(const c of ap){
+      const noLocalizador = (r<=8 && c<=8) || (r<=8 && c>=size-9) || (r>=size-9 && c<=8);
+      if(noLocalizador) continue;
+      for(let i=-2;i<=2;i++) for(let j=-2;j<=2;j++){
+        const val = (Math.max(Math.abs(i),Math.abs(j))!==1)?1:0;
+        mat[r+i][c+j]=val; reserved[r+i][c+j]=true;
+      }
+    }
+
+    /* timing */
+    for(let i=8;i<size-8;i++){ if(mat[6][i]===null){ mat[6][i]=(i%2===0)?1:0; reserved[6][i]=true; } if(mat[i][6]===null){ mat[i][6]=(i%2===0)?1:0; reserved[i][6]=true; } }
+
+    /* reserva formato (posicoes exatas dos 15 bits x2 + modulo escuro), conforme o padrao */
+    function reserveFormat(){
+      /* copia 1 — coluna 8: bits 0-5 nas linhas 0-5, bit6 linha 7, bit7 linha 8, bits 8-14 nas linhas size-7..size-1 */
+      for(let i=0;i<6;i++) reserved[i][8]=true;
+      reserved[7][8]=true;
+      reserved[8][8]=true;
+      for(let i=8;i<15;i++) reserved[size-15+i][8]=true;
+      /* copia 2 — linha 8: bits 0-7 nas colunas size-1..size-8, bit8 coluna 7, bits 9-14 nas colunas 5..0 */
+      for(let i=0;i<8;i++) reserved[8][size-1-i]=true;
+      reserved[8][7]=true;
+      for(let i=9;i<15;i++) reserved[8][15-i-1]=true;
+      /* modulo escuro */
+      reserved[size-8][8]=true;
+    }
+    reserveFormat();
+
+    /* versão (v>=7) — 18 bits no canto superior direito e inferior esquerdo */
+    if(v>=7){
+      /* BCH (18,6): generator 0x1F25 */
+      let rem = v;
+      for(let i=0;i<12;i++) rem = (rem<<1) ^ ((rem>>>11)*0x1f25);
+      const vbits = ((v<<12) | rem) >>> 0;
+      for(let i=0;i<18;i++){
+        const bit = (vbits >> i) & 1;
+        const a = size - 11 + (i % 3);
+        const b = Math.floor(i / 3);
+        setF(a, b, bit);
+        setF(b, a, bit);
+      }
+    }
+
+    /* posiciona os dados (zigzag) */
+    let bitIdx = 0;
+    const totalBits = finalBytes.length*8;
+    const getBit = (i)=> (finalBytes[i>>3] >> (7-(i&7))) & 1;
+    for(let col=size-1; col>0; col-=2){
+      if(col===6) col=5;
+      const upward = ((col+1) & 2) === 0;
+      for(let vert=0; vert<size; vert++){
+        const row = upward ? (size-1-vert) : vert;
+        for(let k=0;k<2;k++){
+          const c = col-k;
+          if(reserved[row][c]) continue;
+          let val = 0;
+          if(bitIdx < totalBits){ val = getBit(bitIdx); bitIdx++; }
+          mat[row][c] = val;
+        }
+      }
+    }
+
+    /* máscara: escolhe a melhor (penalidade simplificada) */
+    function applyMask(m){
+      const g = mat.map(r=>r.slice());
+      const mask = [
+        (r,c)=>(r+c)%2===0,
+        (r,c)=>r%2===0,
+        (r,c)=>c%3===0,
+        (r,c)=>(r+c)%3===0,
+        (r,c)=>(Math.floor(r/2)+Math.floor(c/3))%2===0,
+        (r,c)=>((r*c)%2)+((r*c)%3)===0,
+        (r,c)=>((((r*c)%2)+((r*c)%3))%2)===0,
+        (r,c)=>((((r+c)%2)+((r*c)%3))%2)===0
+      ][m];
+      for(let r=0;r<size;r++) for(let c=0;c<size;c++){
+        if(!reserved[r][c] && mask(r,c)) g[r][c]^=1;
+      }
+      return g;
+    }
+    function penalty(g){
+      let p=0;
+      /* regra 1: 5+ iguais em linha/coluna */
+      for(let r=0;r<size;r++){ let run=1; for(let c=1;c<size;c++){ if(g[r][c]===g[r][c-1]) run++; else { if(run>=5) p+=3+(run-5); run=1; } } if(run>=5) p+=3+(run-5); }
+      for(let c=0;c<size;c++){ let run=1; for(let r=1;r<size;r++){ if(g[r][c]===g[r-1][c]) run++; else { if(run>=5) p+=3+(run-5); run=1; } } if(run>=5) p+=3+(run-5); }
+      return p;
+    }
+    let best=null, bestP=Infinity, bestM=0;
+    for(let m=0;m<8;m++){ const g=applyMask(m); const p=penalty(g); if(p<bestP){ bestP=p; best=g; bestM=m; } }
+
+    /* grava bits de formato (nível M = 00) */
+    function setupFormat(g, m){
+      const eccLevel = 0; /* M */
+      const data = (eccLevel<<3) | m;
+      let rem = data<<10;
+      const G2 = 0x537;
+      for(let i=4;i>=0;i--){ if(rem & (1<<(i+10))) rem ^= G2<<i; }
+      const fmt = ((data<<10)|rem) ^ 0x5412;
+      /* copia 1 — coluna 8 */
+      for(let i=0;i<6;i++) g[i][8] = (fmt>>i)&1;
+      g[7][8]=(fmt>>6)&1; g[8][8]=(fmt>>7)&1;
+      for(let i=8;i<15;i++) g[size-15+i][8] = (fmt>>i)&1;
+      /* copia 2 — linha 8 */
+      for(let i=0;i<8;i++) g[8][size-1-i] = (fmt>>i)&1;
+      g[8][7]=(fmt>>8)&1;
+      for(let i=9;i<15;i++) g[8][15-i-1] = (fmt>>i)&1;
+      /* modulo escuro */
+      g[size-8][8]=1;
+      return g;
+    }
+    return setupFormat(best, bestM);
+  }
+  return { encode };
+})();
+
+function qrDataURL(texto, scale){
+  scale = scale || 4;
+  const m = QR.encode(String(texto||''));
+  if(!m) return null;
+  const n = m.length;
+  const margem = 4;
+  const dim = (n + margem*2) * scale;
+  const cv = document.createElement('canvas');
+  cv.width = dim; cv.height = dim;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,dim,dim);
+  ctx.fillStyle = '#0f172a';
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+    if(m[r][c]) ctx.fillRect((c+margem)*scale, (r+margem)*scale, scale, scale);
+  }
+  try{ return cv.toDataURL('image/png'); }catch(e){ return null; }
+}
+
 function mostrarLinkOrc(id){
   const o = buscarOrc(id); if(!o) return;
   const link = orcParaLink(o);
   copiarTexto(link);
+  const qr = qrDataURL(link, 4);
   abrirModal(`
     <div class="modal-h"><h2>🔗 Link público do orçamento</h2><button type="button" class="x" data-fechar>×</button></div>
     <div class="modal-b">
@@ -4279,6 +4837,11 @@ function mostrarLinkOrc(id){
         <input id="linkOrcPub" readonly value="${esc(link)}">
         <button class="btn ghost sm" id="btnCopiarLink">📋 Copiar</button>
       </div>
+      ${qr?`<div class="qr-box">
+        <img class="qr-img" src="${qr}" alt="QR Code do link do orçamento" width="196" height="196">
+        <div class="qr-txt"><b>📱 QR Code</b><br>Aponte a câmera do celular para abrir o orçamento.<br>
+        <button class="btn ghost sm" id="btnBaixarQR" style="margin-top:8px">⬇ Baixar QR Code</button></div>
+      </div>`:''}
       <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn ghost sm" id="btnAbrirLink">👁️ Abrir prévia</button>
         <button class="btn ghost sm" id="btnLinkZap">💬 Enviar por WhatsApp</button>
@@ -4287,6 +4850,13 @@ function mostrarLinkOrc(id){
     <div class="modal-f"><button class="btn primary" data-fechar>Fechar</button></div>`);
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
   document.getElementById('btnCopiarLink').onclick = ()=>copiarTexto(link);
+  const btnQR = document.getElementById('btnBaixarQR');
+  if(btnQR && qr) btnQR.onclick = ()=>{
+    const a = document.createElement('a');
+    a.href = qr; a.download = `qrcode-${(o.numero||'orcamento').replace(/[^\w-]/g,'')}.png`;
+    document.body.appendChild(a); a.click(); a.remove();
+    toast('QR Code baixado.');
+  };
   document.getElementById('btnAbrirLink').onclick = ()=>window.open(link,'_blank','noopener');
   document.getElementById('btnLinkZap').onclick = ()=>{
     const c = buscarCli(o.clienteId);
@@ -4388,7 +4958,7 @@ function htmlFinanceiro(){
     ${stat('Vencido', brl(r.vencido), '🚨', r.vencido>0)}
   </div>
   <div class="card">
-    <div class="card-h"><h3>📊 Recebido neste mês por forma de pagamento</h3></div>
+    <div class="card-h"><h2>📊 Recebido neste mês por forma de pagamento</h2></div>
     <div class="card-b">
       ${Object.keys(porForma).length ? Object.entries(porForma).sort((a,b)=>b[1]-a[1]).map(([f,v])=>`
         <div class="linha-lista"><div class="nm">${esc(f)}</div><div class="end vl-total">${brl(v)}</div></div>`).join('')
@@ -4528,7 +5098,7 @@ function htmlContratos(){
     ${stat('Vencendo em 15 dias', venc.length, '⏳', venc.length>0)}
   </div>
   ${venc.length ? `<div class="card" style="margin-bottom:16px">
-    <div class="card-h"><h3>⚠️ Contratos a renovar</h3></div>
+    <div class="card-h"><h2>⚠️ Contratos a renovar</h2></div>
     <div class="card-b">${venc.map(c=>`
       <div class="linha-lista">
         <div><div class="nm">${esc(c.clienteNome||nomeClienteOrc(c)||'—')}</div><div class="mt">${esc(c.descricao||'')} · vence ${fmtData(c.proximoVenc)}</div></div>
@@ -4658,7 +5228,7 @@ const TAGS_MSG = [['orcamento','🧾 Orçamento'],['cobranca','💰 Cobrança'],
 function htmlMensagens(){
   return `
   <div class="card">
-    <div class="card-h"><h3>💬 Modelos de mensagem</h3><span class="mini" style="margin-left:auto">Use as variáveis: {cliente} {numero} {total} {validade} {empresa} {assunto}</span></div>
+    <div class="card-h"><h2>💬 Modelos de mensagem</h2><span class="mini" style="margin-left:auto">Use as variáveis: {cliente} {numero} {total} {validade} {empresa} {assunto}</span></div>
     <div class="card-b">
       <p class="mini" style="margin-bottom:12px">Salve textos prontos e insira no WhatsApp com um clique, direto do cliente ou do orçamento.</p>
       <div class="toolbar">
@@ -4691,7 +5261,7 @@ function atualizarListaMsg(){
   el.innerHTML = l.map(m=>{
     const tag = TAGS_MSG.find(t=>t[0]===m.tag);
     return `<div class="card" style="margin-bottom:12px">
-      <div class="card-h"><h3>${esc(m.nome)}</h3><span class="mini" style="margin-left:8px">${tag?tag[1]:''}</span>
+      <div class="card-h"><h2>${esc(m.nome)}</h2><span class="mini" style="margin-left:8px">${tag?tag[1]:''}</span>
         <div style="margin-left:auto" class="acoes">
           <button class="icon-btn" title="Copiar" data-act="msg-copiar" data-id="${m.id}">📋</button>
           <button class="icon-btn" title="Editar" data-act="msg-editar" data-id="${m.id}">✏️</button>
@@ -4797,6 +5367,27 @@ function htmlRelatorios(){
   const mesesArr = Object.keys(meses).map(k=>({...meses[k], chave:k}));
   const maiorMes = Math.max(1, ...mesesArr.map(m=>m.valor));
 
+  /* Lucro real por mês (aprovados): faturamento - custo (itens + frete) */
+  const lucroMeses = {};
+  Object.keys(meses).forEach(k=>{ lucroMeses[k] = {receita:0, custo:0, lucro:0, qtd:0, label:meses[k].label}; });
+  os.filter(o=>o.status==='aprovado').forEach(o=>{
+    const chave = String(o.data||'').slice(0,7);
+    if(!lucroMeses[chave]) return;
+    const rec = totalOrc(o);
+    const cus = custoOrc(o);
+    lucroMeses[chave].receita += rec;
+    lucroMeses[chave].custo += cus;
+    lucroMeses[chave].lucro += (rec - cus);
+    lucroMeses[chave].qtd++;
+  });
+  const lucroArr = Object.keys(lucroMeses).map(k=>({...lucroMeses[k], chave:k}));
+  const maiorLucro = Math.max(1, ...lucroArr.map(m=>Math.abs(m.lucro)));
+  const totalReceitaPeriodo = lucroArr.reduce((s,m)=>s+m.receita,0);
+  const totalCustoPeriodo = lucroArr.reduce((s,m)=>s+m.custo,0);
+  const totalLucroPeriodo = totalReceitaPeriodo - totalCustoPeriodo;
+  const margemPeriodo = totalReceitaPeriodo>0 ? (totalLucroPeriodo/totalReceitaPeriodo*100) : 0;
+  const temCusto = listaProdutos().some(p=>Number(p.custo)>0);
+
   /* Ranking de itens/serviços */
   const rank = {};
   os.forEach(o=>(o.itens||[]).forEach(i=>{
@@ -4861,6 +5452,28 @@ function htmlRelatorios(){
       </div>`).join('')}</div>
       <div class="rel-chart-base">Total no período: <b>${brl(mesesArr.reduce((s,m)=>s+m.valor,0))}</b></div>`
     : `<div class="vazio"><span class="big">📈</span>Nenhum orçamento aprovado no período.<br>Aprove orçamentos para ver o faturamento.</div>`}
+  </div>
+
+  <div class="op-card" style="margin-bottom:16px">
+    <h4>💵 Lucro real por mês (faturamento − custo)</h4>
+    ${!temCusto
+      ? `<div class="vazio"><span class="big">💰</span>Cadastre o <b>custo</b> dos itens no <b>Catálogo</b> para ver o lucro real.<br>Enquanto isso, o gráfico abaixo fica zerado.</div>`
+      : (maiorLucro>1
+        ? `<div class="rel-chart">${lucroArr.map(m=>{
+            const h = Math.max(2, Math.round(Math.abs(m.lucro)/maiorLucro*100));
+            const cls = m.lucro>=0 ? 'rel-bar lucro-pos' : 'rel-bar lucro-neg';
+            return `<div class="rel-bar-wrap" title="${m.label}: lucro ${brl(m.lucro)} (receita ${brl(m.receita)} · custo ${brl(m.custo)})">
+              <div class="${cls}" style="height:${h}%"></div>
+              <span class="rel-bar-lbl">${m.label}</span>
+            </div>`;
+          }).join('')}</div>
+          <div class="rel-lista" style="margin-top:12px">
+            <div class="rel-linha"><span class="rel-nome">Receita no período</span><b class="rel-valor">${brl(totalReceitaPeriodo)}</b></div>
+            <div class="rel-linha"><span class="rel-nome">Custo no período</span><b class="rel-valor">${brl(totalCustoPeriodo)}</b></div>
+            <div class="rel-linha"><span class="rel-nome"><b>Lucro no período</b></span><b class="rel-valor" style="color:${totalLucroPeriodo>=0?'#15803d':'#b91c1c'}">${brl(totalLucroPeriodo)}</b></div>
+            <div class="rel-linha"><span class="rel-nome">Margem média</span><b class="rel-valor">${margemPeriodo.toFixed(1)}%</b></div>
+          </div>`
+        : `<div class="vazio"><span class="big">💵</span>Sem orçamentos aprovados no período.</div>`)}
   </div>
 
   <div class="rel-duas">
@@ -5251,8 +5864,23 @@ function htmlDados(){
     </div>
     <div class="op-card">
       <h4>📲 Instalar como aplicativo</h4>
-      <p>Instale o CRM na tela inicial do celular ou no computador para abrir como um app, sem barra do navegador.</p>
+      <p>Instale o CRM na tela inicial do celular ou no computador para abrir como um app, sem barra do navegador. Depois de instalado, ele <b>abre mesmo sem internet</b>.</p>
       <button class="btn ghost" data-act="instalar-app">📲 Instalar app</button>
+    </div>
+    <div class="op-card">
+      <h4>🔔 Avisos no navegador</h4>
+      <p>Receba uma notificação quando um follow-up vencer, uma cobrança estiver vencida, um contrato estiver perto de renovar ou uma nota fiscal estiver pendente.</p>
+      <p style="font-size:12.5px;color:var(--suave);margin-top:6px">Situação: <b>${!notificacoesSuportadas()?'não suportado neste navegador':(prefsNotif().ativa && Notification.permission==='granted'?'ativado':'desativado')}</b></p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn primary" data-act="notif-ativar">🔔 Ativar avisos</button>
+        <button class="btn ghost" data-act="notif-testar">🧪 Testar</button>
+        <button class="btn ghost" data-act="notif-desativar">🔕 Desativar</button>
+      </div>
+    </div>
+    <div class="op-card">
+      <h4>⌨️ Atalhos de teclado</h4>
+      <p>No computador, use atalhos para trabalhar mais rápido: <kbd>Ctrl</kbd>+<kbd>K</kbd> abre a busca, <kbd>N</kbd> cria orçamento, <kbd>C</kbd> cria cliente.</p>
+      <button class="btn ghost" data-act="mostrar-atalhos">⌨️ Ver todos os atalhos</button>
     </div>
     <div class="op-card">
       <h4>⬇ Exportar planilha (CSV)</h4>
@@ -5897,6 +6525,150 @@ function iniciarBuscaGlobal(){
 }
 
 /* =========================================================
+   ATALHOS DE TECLADO
+   ========================================================= */
+const ATALHOS = [
+  {tecla:'Ctrl+K', desc:'Abrir a busca global', fn:()=>{ const i=document.getElementById('buscaGlobal'); if(i){ i.focus(); i.select(); } }},
+  {tecla:'N',      desc:'Novo orçamento', fn:()=>{ view='orcamentos'; render(); formOrcamento(null); }},
+  {tecla:'C',      desc:'Novo cliente', fn:()=>{ view='clientes'; render(); formCliente(null); }},
+  {tecla:'O',      desc:'Nova ordem de serviço', fn:()=>{ view='ordens'; render(); formOrdem(null); }},
+  {tecla:'P',      desc:'Novo item no catálogo', fn:()=>{ view='catalogo'; render(); formProduto(null); }},
+  {tecla:'G',      desc:'Ir para o painel', fn:()=>{ view='painel'; render(); }},
+  {tecla:'A',      desc:'Ir para a agenda', fn:()=>{ view='agenda'; filtroAgenda.periodo='hoje'; render(); }},
+  {tecla:'F',      desc:'Ir para o financeiro', fn:()=>{ view='financeiro'; render(); }},
+  {tecla:'R',      desc:'Ir para os relatórios', fn:()=>{ view='relatorios'; render(); }},
+  {tecla:'T',      desc:'Alternar tema claro/escuro', fn:()=>alternarTema()},
+  {tecla:'?',      desc:'Mostrar esta lista', fn:()=>mostrarAtalhos()},
+];
+function digitandoEmCampo(el){
+  if(!el) return false;
+  const t = el.tagName;
+  return t==='INPUT' || t==='TEXTAREA' || t==='SELECT' || el.isContentEditable;
+}
+function iniciarAtalhos(){
+  document.addEventListener('keydown', e=>{
+    /* Ctrl+K em qualquer lugar */
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){
+      e.preventDefault();
+      const i = document.getElementById('buscaGlobal');
+      if(i){ i.focus(); i.select(); }
+      return;
+    }
+    /* Esc fecha modal (já existe, mas garantimos) e some com a busca */
+    if(e.key==='Escape') return;
+    /* nada de atalho quando está digitando */
+    if(digitandoEmCampo(document.activeElement)) return;
+    if(e.ctrlKey||e.metaKey||e.altKey) return;
+    /* overlay aberto? não dispara */
+    if(overlay && overlay.classList.contains('open')) return;
+    const alvo = ATALHOS.find(a=>a.tecla.toLowerCase()===e.key.toLowerCase());
+    if(alvo){ e.preventDefault(); alvo.fn(); }
+  });
+}
+function mostrarAtalhos(){
+  abrirModal(`
+    <div class="modal-h"><h2>⌨️ Atalhos de teclado</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      <p class="mini" style="margin-bottom:10px">Funcionam quando você não está digitando em um campo.</p>
+      <div class="atalhos-lista">
+        ${ATALHOS.map(a=>`<div class="atalho-linha"><kbd>${esc(a.tecla)}</kbd><span>${esc(a.desc)}</span></div>`).join('')}
+      </div>
+    </div>
+    <div class="modal-f"><button type="button" class="btn ghost" data-fechar>Fechar</button></div>`);
+}
+
+/* =========================================================
+   NOTIFICAÇÕES (follow-ups e títulos a vencer)
+   ========================================================= */
+const CHAVE_NOTIF = 'crm_notif_v1';
+function prefsNotif(){
+  try{ return JSON.parse(localStorage.getItem(CHAVE_NOTIF)) || {ativa:false, avisados:{}}; }
+  catch(e){ return {ativa:false, avisados:{}}; }
+}
+function salvarPrefsNotif(p){ try{ localStorage.setItem(CHAVE_NOTIF, JSON.stringify(p)); }catch(e){} }
+function notificacoesSuportadas(){ return ('Notification' in window); }
+function iniciarNotificacoes(){
+  if(!notificacoesSuportadas()) return;
+  const p = prefsNotif();
+  if(p.ativa && Notification.permission==='granted'){
+    /* verifica a cada 30 min e quando a aba volta a ficar visível */
+    setTimeout(checarNotificacoes, 8000);
+    setInterval(checarNotificacoes, 30*60*1000);
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) checarNotificacoes(); });
+  }
+}
+async function ativarNotificacoes(){
+  if(!notificacoesSuportadas()){ toast('Este navegador não suporta notificações.','erro'); return false; }
+  let perm = Notification.permission;
+  if(perm==='default'){ try{ perm = await Notification.requestPermission(); }catch(e){} }
+  if(perm!=='granted'){ toast('Permissão de notificação não concedida.','erro'); return false; }
+  const p = prefsNotif(); p.ativa = true; salvarPrefsNotif(p);
+  iniciarNotificacoes();
+  toast('🔔 Notificações ativadas.','ok');
+  checarNotificacoes(true);
+  return true;
+}
+function desativarNotificacoes(){
+  const p = prefsNotif(); p.ativa = false; salvarPrefsNotif(p);
+  toast('🔕 Notificações desativadas.');
+}
+function notificar(titulo, corpo, chave){
+  const p = prefsNotif();
+  const hoje = hojeISO();
+  if(p.avisados[chave]===hoje) return; /* não repetir no mesmo dia */
+  try{
+    new Notification(titulo, {body:corpo, icon:LOGO_DATA_URI, tag:chave});
+    p.avisados[chave] = hoje;
+    /* limpa registros antigos */
+    Object.keys(p.avisados).forEach(k=>{ if(p.avisados[k]!==hoje) delete p.avisados[k]; });
+    salvarPrefsNotif(p);
+  }catch(e){}
+}
+function testarNotificacao(){
+  if(!notificacoesSuportadas()){ toast('Este navegador não suporta notificações.','erro'); return; }
+  if(Notification.permission!=='granted'){ toast('Clique em "Ativar avisos" primeiro.','erro'); return; }
+  try{
+    new Notification('🔔 SuportMax CRM', {body:'Assim vão aparecer os avisos de follow-up, cobrança e contrato.', icon:LOGO_DATA_URI, tag:'teste'});
+    toast('Notificação de teste enviada.','ok');
+  }catch(e){ toast('Não foi possível enviar a notificação.','erro'); }
+}
+function checarNotificacoes(forcar){
+  const p = prefsNotif();
+  if(!forcar && !p.ativa) return;
+  if(!notificacoesSuportadas() || Notification.permission!=='granted') return;
+
+  /* follow-ups de hoje e atrasados */
+  const fu = agendaPendentes().filter(c=>{ const d = diasAte(c.followup.data); return d<=0; });
+  if(fu.length){
+    const atrasados = fu.filter(c=>diasAte(c.followup.data)<0).length;
+    const hoje = fu.length - atrasados;
+    const partes = [];
+    if(hoje) partes.push(`${hoje} para hoje`);
+    if(atrasados) partes.push(`${atrasados} atrasado(s)`);
+    notificar('⏰ Follow-ups pendentes', partes.join(' · ') + '. Toque para abrir a agenda.', 'followup-'+hojeISO());
+  }
+
+  /* títulos a receber vencidos */
+  const venc = contasReceber().filter(c=>c.vencido);
+  if(venc.length){
+    const total = venc.reduce((s,c)=>s+c.aberto,0);
+    notificar('💰 Cobranças vencidas', `${venc.length} título(s) vencido(s), total ${brl(total)}.`, 'cobranca-'+hojeISO());
+  }
+
+  /* contratos a vencer em 15 dias */
+  const cv = contratosVencendo(15);
+  if(cv.length){
+    notificar('🔁 Contratos a renovar', `${cv.length} contrato(s) vencem em até 15 dias.`, 'contrato-'+hojeISO());
+  }
+
+  /* NF pendente */
+  const nfp = listaOrcamentos().filter(nfPendente);
+  if(nfp.length){
+    notificar('📄 Notas fiscais pendentes', `${nfp.length} orçamento(s) aprovado(s) precisam de nota fiscal.`, 'nf-'+hojeISO());
+  }
+}
+
+/* =========================================================
    BACKUP AUTOMÁTICO (lembrete + cópia local)
    ========================================================= */
 const DIAS_BACKUP = 7;
@@ -6017,15 +6789,26 @@ function atualizarPrecosCSV(texto){
 }
 
 /* =========================================================
-   PWA — instalável no celular
+   PWA — instalável no celular + OFFLINE REAL (service worker)
    ========================================================= */
 let promptInstalar = null;
+function registrarServiceWorker(){
+  /* Service worker real (arquivo sw.js servido junto do CRM): guarda o CRM em cache
+     para abrir sem internet. Só funciona quando servido por http(s) — em file:// é ignorado. */
+  if(!('serviceWorker' in navigator)) return;
+  if(location.protocol!=='http:' && location.protocol!=='https:') return;
+  try{
+    /* sw.js fica na raiz do site (mesma pasta do CRM-basico.html) */
+    const url = new URL('sw.js', location.href).href;
+    navigator.serviceWorker.register(url, {scope:'./'}).catch(()=>{});
+  }catch(e){}
+}
 function iniciarPWA(){
   try{
     const manifest = {
       name:'SUPORT MAX — CRM', short_name:'SuportMax CRM', start_url:'./CRM-basico.html',
       display:'standalone', background_color:'#0f172a', theme_color:'#2563eb',
-      icons:[{src:LOGO_DATA_URI, sizes:'512x512', type:'image/jpeg', purpose:'any'}]
+      icons:[{src:LOGO_DATA_URI, sizes:'512x512', type:'image/jpeg', purpose:'any maskable'}]
     };
     const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
     const link = document.createElement('link');
@@ -6075,6 +6858,9 @@ function verificarOrcPublico(){
 aplicarMarca();
 aplicarTema();
 iniciarPWA();
+registrarServiceWorker();
+iniciarNotificacoes();
+iniciarAtalhos();
 try{
   if(!verificarOrcPublico()){
     iniciarBuscaGlobal();
