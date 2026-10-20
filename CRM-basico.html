@@ -5927,6 +5927,12 @@ function htmlDados(){
       <button class="btn ghost" id="btnPrecos">Escolher CSV de preços</button>
     </div>
     <div class="op-card">
+      <h4>🚚 Adicionar fornecedores (somar)</h4>
+      <p>Adiciona fornecedores a partir de um CSV ou JSON <b>sem apagar os existentes</b>. Colunas do CSV: <code>nome;contato;telefone;email;obs</code>. Quem tiver o mesmo nome ou e-mail é atualizado, não duplicado.</p>
+      <input type="file" id="arquivoForn" accept=".json,.csv" style="display:none">
+      <button class="btn ghost" id="btnSomarForn">➕ Adicionar fornecedores (somar)</button>
+    </div>
+    <div class="op-card">
       <h4>✨ Dados de exemplo</h4>
       <p>Popula o CRM com clientes fictícios para você testar as funcionalidades.</p>
       <button class="btn ghost" data-act="exemplo">Carregar exemplo</button>
@@ -5963,6 +5969,18 @@ function ligarDados(){
       if(!arq) return;
       const leitor = new FileReader();
       leitor.onload = ()=>{ importarSomando(String(leitor.result), arq.name); e.target.value=''; };
+      leitor.readAsText(arq, 'utf-8');
+    });
+  }
+  const inputForn = document.getElementById('arquivoForn');
+  const btnSomarForn = document.getElementById('btnSomarForn');
+  if(btnSomarForn && inputForn){
+    btnSomarForn.addEventListener('click', ()=>inputForn.click());
+    inputForn.addEventListener('change', e=>{
+      const arq = e.target.files[0];
+      if(!arq) return;
+      const leitor = new FileReader();
+      leitor.onload = ()=>{ importarFornecedoresSomando(String(leitor.result), arq.name); e.target.value=''; };
       leitor.readAsText(arq, 'utf-8');
     });
   }
@@ -6208,6 +6226,61 @@ function importarSomando(texto, nome){
   auditar('importacao', `Importação somando: ${add} novo(s), ${atual} atualizado(s)`);
   salvar(); view='clientes'; render();
   toast(`✅ ${add} cliente(s) adicionado(s)${atual?`, ${atual} atualizado(s)`:''}. Nada foi apagado.`, 'ok');
+}
+
+/* Importa fornecedores a partir de CSV/JSON sem apagar os existentes.
+   CSV: nome;contato;telefone;email;obs   (ou vírgula). JSON: array ou {fornecedores:[...]}. */
+function importarFornecedoresSomando(texto, nome){
+  const limpo = String(texto||'').replace(/^\ufeff/,'').trim();
+  let novos = [];
+  if(/\.json$/i.test(nome)){
+    let d;
+    try{ d = JSON.parse(limpo); }catch(e){ toast('Arquivo JSON inválido.','erro'); return; }
+    if(Array.isArray(d)) novos = d;
+    else if(d && Array.isArray(d.fornecedores)) novos = d.fornecedores;
+    else { toast('O JSON não contém uma lista de fornecedores.','erro'); return; }
+  }else{
+    const rows = parseCSV(limpo);
+    if(rows.length<2){ toast('CSV vazio ou sem dados.','erro'); return; }
+    const cab = rows[0].map(h=>String(h||'').trim().toLowerCase());
+    const idx = n => cab.indexOf(n);
+    novos = rows.slice(1).filter(r=>r.some(x=>String(x||'').trim())).map(r=>{
+      const g = n => idx(n)>=0 ? String(r[idx(n)]||'').trim() : '';
+      return {nome:g('nome'), contato:g('contato'), telefone:g('telefone'), email:g('email'), obs:g('obs')||g('observacoes')};
+    });
+  }
+  novos = novos.filter(f=>String(f&&f.nome||'').trim());
+  if(!novos.length){ toast('Nenhum fornecedor encontrado no arquivo.','erro'); return; }
+  if(!confirm(`Adicionar ${novos.length} fornecedor(es) SEM apagar os ${listaFornecedores().length} já existentes?\n\nFornecedores com o mesmo nome ou e-mail serão atualizados em vez de duplicados.`)) return;
+
+  let add = 0, atual = 0;
+  novos.forEach(f=>{
+    const nomeF = String(f.nome||'').trim();
+    const mail = String(f.email||'').trim().toLowerCase();
+    const existente = listaFornecedores().find(x=>{
+      if(String(x.nome||'').trim().toLowerCase()===nomeF.toLowerCase()) return true;
+      if(mail && String(x.email||'').trim().toLowerCase()===mail) return true;
+      return false;
+    });
+    if(existente){
+      /* completa apenas campos vazios, sem sobrescrever o que você digitou */
+      ['contato','telefone','email','obs'].forEach(k=>{ if(!existente[k] && f[k]) existente[k] = String(f[k]).trim(); });
+      atual++;
+    }else{
+      listaFornecedores().push({
+        id: f.id && !listaFornecedores().some(x=>x.id===f.id) ? f.id : uid(),
+        nome: nomeF,
+        contato: String(f.contato||'').trim(),
+        telefone: String(f.telefone||'').trim(),
+        email: String(f.email||'').trim(),
+        obs: String(f.obs||'').trim()
+      });
+      add++;
+    }
+  });
+  auditar('importacao', `Fornecedores somando: ${add} novo(s), ${atual} atualizado(s)`);
+  salvar(); view='catalogo'; render();
+  toast(`✅ ${add} fornecedor(es) adicionado(s)${atual?`, ${atual} atualizado(s)`:''}. Nada foi apagado.`, 'ok');
 }
 
 function parseCSV(texto){
