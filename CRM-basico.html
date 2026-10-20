@@ -2772,6 +2772,13 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='cli-modelo'){ const c=buscarCli(id)||{}; menuMensagens({cliente:c.nome, whats:()=>telZap(c.telefone)}); }
   /* Dados: backup interno, etiquetas, auditoria */
   else if(btn.dataset.act==='backup-restaurar') restaurarBackup(id);
+  else if(btn.dataset.act==='backups-limpar'){
+    if(!confirm('Excluir TODOS os backups internos armazenados neste navegador? Essa ação não afeta backups JSON baixados no PC.')) return;
+    db.backups = [];
+    try{ salvar(); }catch(e){}
+    render();
+    toast('Todos os backups internos foram limpos.');
+  }
   else if(btn.dataset.act==='imprimir-etiquetas') imprimirEtiquetas();
   else if(btn.dataset.act==='imprimir-lista') imprimirListaClientes();
   else if(btn.dataset.act==='auditar-copiar') copiarTexto(auditarTexto());
@@ -8016,6 +8023,7 @@ function htmlDados(){
       ${(db.backups||[]).length ? (db.backups.slice(0,6).map(b=>`
         <div class="linha-lista"><div><div class="nm">${esc(b.rotulo||'Backup')}</div><div class="mt">${esc(b.em)} · ${esc(b.resumo||'')}</div></div>
           <div class="end"><button class="btn ghost sm" data-act="backup-restaurar" data-id="${b.id}">Restaurar</button></div></div>`).join('')) : '<p class="mini">Nenhum backup interno ainda. Clique em "Backup agora".</p>'}
+      ${(db.backups||[]).length ? `<div style="margin-top:10px"><button class="btn danger sm" data-act="backups-limpar">🗑️ Limpar todos os backups internos</button></div>` : ''}
     </div>
     <div class="op-card">
       <h4>📲 Instalar como aplicativo</h4>
