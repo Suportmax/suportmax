@@ -1644,15 +1644,24 @@ function salvar(){
     try{
       if(db.produtos){
         db.produtos = db.produtos.map(p=>{
-          if(p.foto && typeof p.foto === 'string' && p.foto.length > 200000){
+          if(p.foto && typeof p.foto === 'string' && p.foto.length > 50000){
             const {foto,...rest} = p;
             return rest;
           }
           return p;
         });
       }
+      if(db.clientes){
+        db.clientes = db.clientes.map(c=>{
+          if(c.foto && typeof c.foto === 'string' && c.foto.length > 50000){
+            const {foto,...rest} = c;
+            return rest;
+          }
+          return c;
+        });
+      }
       try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e3){}
-      toast('Armazenamento cheio: removi fotos muito pesadas para liberar espaço. Exporte backup JSON agora.','erro');
+      toast('Armazenamento cheio: removi fotos pesadas. Exporte um backup JSON agora.','erro');
     }catch(e2){}
     if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
     return;
