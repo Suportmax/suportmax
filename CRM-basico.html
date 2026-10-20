@@ -2288,8 +2288,13 @@ function render(){
     btnNovo.textContent = '＋ Novo cliente';
     btnNovo.onclick = ()=>formCliente(null);
   }
+
+  const el = document.getElementById('view');
+  if(view==='orcamentos'){ estado.view='ordens'; view='ordens'; salvarPrefs(); }
   if(view==='funil'){ estado.view='painel'; view='painel'; salvarPrefs(); }
-  if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
+  if(view==='painel') el.innerHTML = htmlPainel();
+  else if(view==='clientes'){ el.innerHTML = htmlClientes(); ligarClientes(); }
+  else if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
   else if(view==='financeiro'){ el.innerHTML = htmlFinanceiro(); ligarFinanceiro(); }
   else if(view==='contratos'){ el.innerHTML = htmlContratos(); ligarContratos(); }
   else if(view==='mensagens'){ el.innerHTML = htmlMensagens(); ligarMensagens(); }
