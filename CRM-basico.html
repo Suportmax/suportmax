@@ -165,6 +165,33 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .foto-vazio{font-size:30px;opacity:.5}
 .foto-prod-acoes{flex:1;min-width:160px}
 .cat-foto{width:40px;height:40px;border-radius:8px;object-fit:cover;border:1px solid var(--borda);background:#fff;flex:0 0 auto}
+/* Seletor pesquisável de produto (itens do orçamento) */
+.prod-pick{display:flex;flex-direction:column;align-items:flex-start;gap:1px;flex:1;min-width:0;text-align:left;background:#fff;border:1px solid var(--borda);border-radius:9px;padding:7px 30px 7px 10px;cursor:pointer;position:relative;line-height:1.25;font:inherit;color:inherit}
+.prod-pick:hover{border-color:var(--primaria)}
+.prod-pick.vazio{border-style:dashed;color:var(--suave)}
+.prod-pick .pp-nome{font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.prod-pick .pp-sub{font-size:11.5px;color:var(--suave)}
+.prod-pick .pp-seta{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:13px;opacity:.6}
+.picker-busca{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--borda);border-radius:11px;padding:4px 10px;position:sticky;top:0;z-index:2}
+.picker-busca:focus-within{border-color:var(--primaria);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.picker-busca .pb-lupa{font-size:15px;opacity:.65}
+.picker-busca input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:15px;padding:9px 0}
+.picker-filtros{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0 2px}
+.chip{border:1px solid var(--borda);background:#fff;border-radius:999px;padding:5px 11px;font-size:12.5px;cursor:pointer;color:var(--texto);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip.on{background:var(--primaria);border-color:var(--primaria);color:#fff}
+.picker-lista{display:flex;flex-direction:column;gap:6px;margin-top:8px;max-height:min(58vh,460px);overflow:auto;-webkit-overflow-scrolling:touch}
+.pick-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--borda);border-radius:11px;padding:9px 11px;cursor:pointer;font:inherit;color:inherit}
+.pick-item:hover{border-color:var(--primaria);background:#f8fafc}
+.pick-foto{width:42px;height:42px;border-radius:9px;object-fit:cover;border:1px solid var(--borda);flex:0 0 auto;background:#fff}
+.pick-foto.vazia{display:flex;align-items:center;justify-content:center;font-size:19px;opacity:.45}
+.pick-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.pick-nome{font-weight:600;font-size:13.8px}
+.pick-desc{font-size:12px;color:var(--suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pick-forn{font-size:11px;color:var(--primaria)}
+.pick-preco{font-weight:700;font-size:13.5px;white-space:nowrap;flex:0 0 auto}
+.picker-vazio{padding:26px 12px;text-align:center;color:var(--suave);font-size:13.5px}
+body.tema-escuro .prod-pick,body.tema-escuro .picker-busca,body.tema-escuro .chip,body.tema-escuro .pick-item{background:#0d1728}
+body.tema-escuro .pick-item:hover{background:#0f1c30}
 .cat-item{display:flex;gap:10px;align-items:flex-start}
 body.tema-escuro .foto-prod-prev{background:#0d1728}
 .pub-wrap{max-width:900px;margin:0 auto;padding:20px}
@@ -350,6 +377,7 @@ body.tema-escuro .fup-pill.venc{background:#2a1215;color:#fca5a5}
 /* ---------- Modal ---------- */
 .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow-y:auto}
 .overlay.open{display:flex}
+#overlay2{z-index:70}
 .modal{background:#fff;border-radius:16px;width:100%;max-width:600px;box-shadow:0 25px 60px rgba(15,23,42,.35);animation:pop .18s ease}
 @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 .modal-h{padding:18px 22px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:10px}
@@ -545,7 +573,7 @@ body.tema-escuro .assin-area,body.tema-escuro .assin-preview{background:#0d1728;
 .login-status.error{color:#dc2626}
 .login-status.success{color:#16a34a}
 .login-status.info{color:#2563eb}
-.login-foot{margin-top:16px;padding-top:13px;border-top:1px solid #e2e8f0;font-size:11.5px;color:#94a3b8;text-align:center;line-height:1.5}
+.login-foot{margin-top:16px;padding-top:13px;border-top:1px solid #e2e8f0;font-size:11.5px;color:#64748b;text-align:center;line-height:1.5}
 
 /* Rodapé da sidebar: usuário logado + sair */
 .sidebar-user{border-top:1px solid rgba(255,255,255,.12);margin-top:8px;padding:10px 2px 0}
@@ -641,6 +669,7 @@ body.tema-escuro .assin-area,body.tema-escuro .assin-preview{background:#0d1728;
 </div>
 
 <div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+<div class="overlay" id="overlay2"><div class="modal" id="modal2"></div></div>
 <div id="toast"></div>
 <div id="areaImpressao"></div>
 
@@ -1672,10 +1701,16 @@ function toast(msg, tipo){
 /* ---------- Modal ---------- */
 const overlay = document.getElementById('overlay');
 const modal = document.getElementById('modal');
+const overlay2 = document.getElementById('overlay2');
+const modal2 = document.getElementById('modal2');
 function abrirModal(html, wide){ modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); }
-function fecharModal(){ overlay.classList.remove('open'); modal.classList.remove('wide'); modal.innerHTML=''; }
+function fecharModal(){ overlay.classList.remove('open'); modal.classList.remove('wide'); modal.innerHTML=''; fecharModal2(); }
+/* Segunda camada de modal (ex.: seletor de produto sobre o formulário do orçamento) */
+function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); }
+function fecharModal2(){ overlay2.classList.remove('open'); modal2.classList.remove('wide'); modal2.innerHTML=''; }
 overlay.addEventListener('mousedown', e=>{ if(e.target===overlay) fecharModal(); });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape') fecharModal(); });
+overlay2.addEventListener('mousedown', e=>{ if(e.target===overlay2) fecharModal2(); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ if(overlay2.classList.contains('open')) fecharModal2(); else fecharModal(); } });
 
 /* =========================================================
    NAVEGAÇÃO
@@ -3076,10 +3111,104 @@ function opcoesProduto(sel){
     + ps.map(p=>`<option value="${p.id}" ${sel===p.id?'selected':''}>${esc(p.nome)} — ${brl(p.preco)}</option>`).join('')
     + `<option value="__novo">＋ Novo produto / serviço...</option>`;
 }
+
+/* Seletor pesquisável de produto para os itens do orçamento.
+   Evita listar 100+ itens de uma vez — filtra enquanto digita. */
+function abrirSeletorProduto(itemId, aoEscolher){
+  let fornecedorFiltro = '';
+  let termo = '';
+  const total = listaProdutos().length;
+
+  abrirModal2(`
+    <div class="modal-h"><h2>🔍 Escolher produto / serviço</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      <div class="picker-busca">
+        <span class="pb-lupa">🔍</span>
+        <input id="pkBusca" type="search" autocomplete="off" placeholder="Digite o nome, descrição ou fornecedor..." autofocus>
+        <button type="button" class="icon-btn" id="pkLimpar" title="Limpar" hidden>✕</button>
+      </div>
+      <div class="picker-filtros" id="pkFiltros"></div>
+      <div class="contagem" id="pkContagem"></div>
+      <div id="pkLista" class="picker-lista"></div>
+    </div>
+    <div class="modal-f" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
+      <button type="button" class="btn ghost" id="pkNovo">＋ Novo produto / serviço</button>
+      <button type="button" class="btn ghost" data-fechar>Fechar</button>
+    </div>`, true);
+  modal2.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal2);
+
+  const inp = modal2.querySelector('#pkBusca');
+  const lista = modal2.querySelector('#pkLista');
+  const cont = modal2.querySelector('#pkContagem');
+  const btnLimpar = modal2.querySelector('#pkLimpar');
+  const fs = listaFornecedores().slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const boxFiltros = modal2.querySelector('#pkFiltros');
+  if(fs.length){
+    boxFiltros.innerHTML = `<button type="button" class="chip ${fornecedorFiltro===''?'on':''}" data-forn="">Todos</button>`
+      + fs.map(f=>`<button type="button" class="chip" data-forn="${f.id}">🚚 ${esc(f.nome)}</button>`).join('');
+    boxFiltros.addEventListener('click', e=>{
+      const b = e.target.closest('.chip'); if(!b) return;
+      fornecedorFiltro = b.dataset.forn;
+      boxFiltros.querySelectorAll('.chip').forEach(c=>c.classList.toggle('on', c===b));
+      renderLista();
+    });
+  } else { boxFiltros.hidden = true; }
+
+  function renderLista(){
+    const t = termo.trim().toLowerCase();
+    let ps = listaProdutos().slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+    if(fornecedorFiltro) ps = ps.filter(p=>p.fornecedorId===fornecedorFiltro);
+    if(t){
+      const pal = t.split(/\s+/).filter(Boolean);
+      ps = ps.filter(p=>{
+        const forn = p.fornecedorId ? buscarForn(p.fornecedorId) : null;
+        const alvo = `${p.nome||''} ${p.desc||''} ${p.un||''} ${forn?forn.nome:''}`.toLowerCase();
+        return pal.every(x=>alvo.includes(x));
+      });
+    }
+    if(!ps.length){
+      cont.innerHTML = `${total} produto(s) no catálogo`;
+      lista.innerHTML = `<div class="picker-vazio">Nenhum produto encontrado para “${esc(termo.trim())}”.</div>`;
+      return;
+    }
+    const limite = t || fornecedorFiltro ? ps.length : 40;
+    const vis = ps.slice(0, limite);
+    cont.innerHTML = `${vis.length} de ${ps.length} produto(s)${ps.length>vis.length?` — refine a busca para ver os demais`:''}`;
+    lista.innerHTML = vis.map(p=>`
+      <button type="button" class="pick-item" data-id="${p.id}">
+        ${p.foto?`<img class="pick-foto" src="${p.foto}" alt="">`:`<span class="pick-foto vazia">📦</span>`}
+        <span class="pick-txt">
+          <span class="pick-nome">${esc(p.nome)}</span>
+          <span class="pick-desc">${esc(p.desc||'Sem descrição padrão')}</span>
+          ${p.fornecedorId&&buscarForn(p.fornecedorId)?`<span class="pick-forn">🚚 ${esc(buscarForn(p.fornecedorId).nome)}</span>`:''}
+        </span>
+        <span class="pick-preco">${brl(p.preco)}</span>
+      </button>`).join('');
+  }
+
+  lista.addEventListener('click', e=>{
+    const b = e.target.closest('.pick-item'); if(!b) return;
+    const id = b.dataset.id;
+    fecharModal2();
+    aoEscolher(id);
+  });
+
+  inp.addEventListener('input', ()=>{ termo = inp.value; btnLimpar.hidden = !termo; renderLista(); });
+  btnLimpar.addEventListener('click', ()=>{ inp.value=''; termo=''; btnLimpar.hidden=true; inp.focus(); renderLista(); });
+  document.getElementById('pkNovo').onclick = ()=>{ fecharModal2(); aoEscolher('__novo'); };
+  inp.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ e.preventDefault(); const f=lista.querySelector('.pick-item'); if(f){ fecharModal2(); aoEscolher(f.dataset.id); } }
+  });
+
+  renderLista();
+}
 function itemOrcHTML(it){
   const dv = itemDescV(it);
+  const p = it.produtoId ? buscarProd(it.produtoId) : null;
+  const rotulo = p ? `${esc(p.nome)}` : '— Escolher produto —';
+  const subRot = p ? `${brl(p.preco)}` : 'Buscar no catálogo';
   return `<tr data-item="${it.id}">
-    <td><div style="display:flex;gap:6px;align-items:center">${it.produtoId&&buscarProd(it.produtoId)&&buscarProd(it.produtoId).foto?`<img class="cat-foto" data-foto-item src="${buscarProd(it.produtoId).foto}" alt="">`:'<span data-foto-item></span>'}<select data-campo="produto" style="flex:1;min-width:0">${opcoesProduto(it.produtoId)}</select></div></td>
+    <td><div style="display:flex;gap:6px;align-items:center">${p&&p.foto?`<img class="cat-foto" data-foto-item src="${p.foto}" alt="">`:'<span data-foto-item></span>'}<button type="button" class="prod-pick ${p?'':'vazio'}" data-campo="produto" data-prod-id="${esc(it.produtoId||'')}" title="Escolher produto do catálogo"><span class="pp-nome">${rotulo}</span><span class="pp-sub">${subRot}</span><span class="pp-seta">🔍</span></button></div></td>
     <td><input data-campo="desc" maxlength="160" value="${esc(it.desc)}" placeholder="Descrição do item"></td>
     <td class="col-qtd"><input data-campo="qtd" type="number" min="0" step="0.01" value="${Number(it.qtd)||0}"></td>
     <td class="col-unit"><input data-campo="unit" type="number" min="0" step="0.01" value="${Number(it.unit)||0}"></td>
@@ -3262,17 +3391,21 @@ function formOrcamento(id){
   tbody.addEventListener('change', e=>{
     const tr = e.target.closest('tr[data-item]'); if(!tr) return;
     if(e.target.dataset.campo==='descTipo'){ const it=lerItem(tr); if(it){ const dv=itemDescV(it); tr.querySelector('[data-tot]').innerHTML = brl(itemTotal(it)) + (dv>0?`<div class="mt" style="color:var(--erro)">− ${brl(dv)}</div>`:''); atualizarTotais(); } return; }
-    const sel = e.target.closest('[data-campo="produto"]'); if(!sel) return;
-    const it = lerItem(tr); if(!it) return;
-    if(sel.value==='__novo'){
+  });
+
+  /* Aplica um produto (ou "__novo"/vazio) a uma linha do orçamento */
+  function aplicarProduto(tr, prodId){
+    const it = v.itens.find(x=>x.id===tr.dataset.item); if(!it) return;
+    if(prodId==='__novo'){
       linhaNovoProd = tr;
       painelProd.hidden = false;
       document.getElementById('npNome').focus();
       return;
     }
-    it.produtoId = sel.value;
-    const p = buscarProd(sel.value);
+    it.produtoId = prodId || '';
+    const p = buscarProd(prodId);
     /* atualiza a miniatura da foto ao lado do seletor */
+    const btn = tr.querySelector('[data-campo="produto"]');
     const slotFoto = tr.querySelector('[data-foto-item]');
     if(slotFoto){
       const wrapF = slotFoto.parentElement;
@@ -3281,8 +3414,15 @@ function formOrcamento(id){
       if(p && p.foto){
         const im = document.createElement('img');
         im.className='cat-foto'; im.dataset.fotoItem=''; im.src=p.foto; im.alt='';
-        wrapF.insertBefore(im, sel);
+        wrapF.insertBefore(im, btn);
       }
+    }
+    /* rótulo do botão */
+    if(btn){
+      btn.dataset.prodId = prodId || '';
+      btn.classList.toggle('vazio', !p);
+      btn.querySelector('.pp-nome').textContent = p ? p.nome : '— Escolher produto —';
+      btn.querySelector('.pp-sub').textContent = p ? brl(p.preco) : 'Buscar no catálogo';
     }
     if(p){
       if(tr.dataset.previa!=='0'){
@@ -3292,9 +3432,17 @@ function formOrcamento(id){
       }
       it.unit = Math.max(0, Number(p.preco)||0);
       tr.querySelector('[data-campo="unit"]').value = it.unit;
-      tr.querySelector('[data-tot]').innerHTML = brl(itemTotal(it));
+      const dv = itemDescV(it);
+      tr.querySelector('[data-tot]').innerHTML = brl(itemTotal(it)) + (dv>0?`<div class="mt" style="color:var(--erro)">− ${brl(dv)}</div>`:'');
       atualizarTotais();
     }
+  }
+
+  /* Abre o seletor pesquisável de produtos */
+  tbody.addEventListener('click', e=>{
+    const btn = e.target.closest('[data-campo="produto"]'); if(!btn) return;
+    const tr = btn.closest('tr[data-item]'); if(!tr) return;
+    abrirSeletorProduto(tr.dataset.item, prodId=>aplicarProduto(tr, prodId));
   });
   tbody.addEventListener('click', e=>{
     const rm = e.target.closest('[data-rm-item]'); if(!rm) return;
@@ -3355,7 +3503,6 @@ function formOrcamento(id){
   };
   document.getElementById('npCancelar').onclick = ()=>{
     painelProd.hidden = true;
-    tbody.querySelectorAll('[data-campo="produto"]').forEach(s=>{ if(s.value==='__novo') s.value=''; });
     linhaNovoProd = null;
   };
   document.getElementById('npSalvar').onclick = ()=>{
