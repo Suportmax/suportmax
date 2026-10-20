@@ -1143,7 +1143,13 @@ function subtotalBrutoOrc(o){ return (o.itens||[]).reduce((s,i)=>s+itemBruto(i),
 function descItensOrc(o){ return (o.itens||[]).reduce((s,i)=>s+itemDescV(i),0); }
 function subtotalOrc(o){ return (o.itens||[]).reduce((s,i)=>s+itemTotal(i),0); }
 function freteOrc(o){ return Math.max(0, Number(o.frete)||0); }
-function totalOrc(o){ return Math.max(0, subtotalOrc(o) + freteOrc(o) - (Number(o.desconto)||0)); }
+function descGeralV(o){
+  const d = Math.max(0, Number(o.desconto)||0);
+  if(!d) return 0;
+  const base = subtotalOrc(o) + freteOrc(o);
+  return o.descGeralTipo==='%' ? base*(d/100) : d;
+}
+function totalOrc(o){ return Math.max(0, subtotalOrc(o) + freteOrc(o) - descGeralV(o)); }
 function nomeClienteOrc(o){
   const c = buscarCli(o.clienteId);
   return c ? c.nome : (o.clienteNome || 'Cliente removido');
@@ -1181,7 +1187,7 @@ function textoProntoOrc(o){
   });
   if((o.itens||[]).length>8) linhas.push(`• ... e mais ${o.itens.length-8} item(ns)`);
   if(freteOrc(o)>0) linhas.push(`• Frete/instalação: + ${brl(freteOrc(o))}`);
-  if((Number(o.desconto)||0)>0) linhas.push(`• Desconto: − ${brl(o.desconto)}`);
+  if(descGeralV(o)>0) linhas.push(`• Desconto${o.descGeralTipo==='%'?` (${Number(o.desconto)||0}%)`:''}: − ${brl(descGeralV(o))}`);
   linhas.push('');
   if(o.validade) linhas.push(`Validade: até ${fmtData(o.validade)}.`);
   const obs = String(o.obs||'').trim();
@@ -1950,7 +1956,7 @@ function tabelaOrcHTML(){
       <div class="nm">${esc(nomeClienteOrc(o))}</div>
       <div class="mt">${esc((buscarCli(o.clienteId)||{}).empresa || o.clienteNome || '')}</div>
     </td>
-    <td>${brl(subtotalOrc(o))}${(Number(o.desconto)||0)>0?`<div class="mt">desconto ${brl(o.desconto)}</div>`:''}</td>
+    <td>${brl(subtotalOrc(o))}${descGeralV(o)>0?`<div class="mt">desconto ${brl(descGeralV(o))}</div>`:''}</td>
     <td class="vl-total">${brl(totalOrc(o))}</td>
     <td>
       <select class="filtro" style="min-width:118px;padding:6px 8px" data-act="orc-status" data-id="${o.id}" title="Mudar status">
@@ -2107,7 +2113,15 @@ function formOrcamento(id){
 
           <div class="subtitulo">🚚 Frete e desconto geral</div>
           <div class="campo"><label>Frete / deslocamento / instalação (R$)</label><input type="number" name="frete" min="0" step="0.01" value="${Number(v.frete)||0}"></div>
-          <div class="campo"><label>Desconto geral (R$)</label><input type="number" name="desconto" min="0" step="0.01" value="${Number(v.desconto)||0}"></div>
+          <div class="campo"><label>Desconto geral</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="number" name="desconto" min="0" step="0.01" value="${Number(v.desconto)||0}" style="flex:1;min-width:0">
+              <select name="descGeralTipo" style="width:64px;flex:0 0 auto">
+                <option value="R$" ${(v.descGeralTipo||'R$')==='R$'?'selected':''}>R$</option>
+                <option value="%" ${v.descGeralTipo==='%'?'selected':''}>%</option>
+              </select>
+            </div>
+          </div>
 
           <div class="subtitulo">📝 Observações e condições</div>
           <div class="campo full"><textarea name="obs" maxlength="2000" placeholder="Ex.: Prazo de entrega: 15 dias corridos. Pagamento: 50% na assinatura e 50% na entrega. Garantia de 90 dias.">${esc(v.obs||'')}</textarea></div>
@@ -2126,17 +2140,21 @@ function formOrcamento(id){
   const tbody = document.getElementById('itensTbody');
   const descontoEl = modal.querySelector('[name="desconto"]');
   const freteEl = modal.querySelector('[name="frete"]');
+  const descGeralTipoEl = modal.querySelector('[name="descGeralTipo"]');
 
   function atualizarTotais(){
     const bruto = v.itens.reduce((s,i)=>s+itemBruto(i),0);
     const descItens = v.itens.reduce((s,i)=>s+itemDescV(i),0);
     const frete = Math.max(0, Number(freteEl.value)||0);
-    const desc = Math.max(0, Number(descontoEl.value)||0);
+    const descInfo = Math.max(0, Number(descontoEl.value)||0);
+    const tipo = descGeralTipoEl ? descGeralTipoEl.value : 'R$';
+    const base = bruto - descItens + frete;
+    const desc = tipo==='%' ? base*(descInfo/100) : descInfo;
     document.getElementById('tSubBruto').textContent = brl(bruto);
     document.getElementById('tDescItens').textContent = descItens>0 ? '− '+brl(descItens) : brl(0);
     document.getElementById('tFrete').textContent = frete>0 ? '+ '+brl(frete) : brl(0);
-    document.getElementById('tDesc').textContent = desc>0 ? '− '+brl(desc) : brl(0);
-    document.getElementById('tTot').textContent = brl(Math.max(0, bruto - descItens + frete - desc));
+    document.getElementById('tDesc').textContent = desc>0 ? '− '+brl(desc)+(tipo==='%'?` (${descInfo}%)`:'') : brl(0);
+    document.getElementById('tTot').textContent = brl(Math.max(0, base - desc));
   }
   function lerItem(tr){
     const it = v.itens.find(x=>x.id===tr.dataset.item);
@@ -2206,6 +2224,7 @@ function formOrcamento(id){
 
   descontoEl.addEventListener('input', atualizarTotais);
   freteEl.addEventListener('input', atualizarTotais);
+  if(descGeralTipoEl) descGeralTipoEl.addEventListener('change', atualizarTotais);
 
   /* Cadastro rápido de cliente */
   const painelCli = document.getElementById('cliRapido');
@@ -2295,6 +2314,7 @@ function formOrcamento(id){
       validade: String(f.get('validade')||''),
       status: String(f.get('status')||'rascunho'),
       desconto: Math.max(0, Number(f.get('desconto'))||0),
+      descGeralTipo: (String(f.get('descGeralTipo')||'R$')==='%'?'%':'R$'),
       frete: Math.max(0, Number(f.get('frete'))||0),
       obs: String(f.get('obs')||'').trim(),
       itens
@@ -2313,7 +2333,7 @@ function orcDocHTML(o){
   const em = db.emissor || emissorVazio();
   const cli = buscarCli(o.clienteId);
   const st = statusOrc(o.status);
-  const desc = Math.max(0, Number(o.desconto)||0);
+  const desc = descGeralV(o);
   const temEm = em.nome || em.telefone || em.email || em.endereco;
   return `
     <div class="topo">
@@ -2370,7 +2390,7 @@ function orcDocHTML(o){
       <div class="tot-line"><span>Subtotal</span><b>${brl(subtotalBrutoOrc(o))}</b></div>
       ${descItensOrc(o)>0?`<div class="tot-line"><span>Descontos nos itens</span><b>− ${brl(descItensOrc(o))}</b></div>`:''}
       ${freteOrc(o)>0?`<div class="tot-line"><span>Frete / instalação</span><b>+ ${brl(freteOrc(o))}</b></div>`:''}
-      ${desc>0?`<div class="tot-line"><span>Desconto geral</span><b>− ${brl(desc)}</b></div>`:''}
+      ${desc>0?`<div class="tot-line"><span>Desconto geral${o.descGeralTipo==='%'?` (${Number(o.desconto)||0}%)`:''}</span><b>− ${brl(desc)}</b></div>`:''}
       <div class="tot-line geral"><span>TOTAL</span><b>${brl(totalOrc(o))}</b></div>
     </div>
 
@@ -2648,13 +2668,13 @@ function exportarRelatorioCSV(){
   const { os } = resumoRelatorio();
   if(!os.length){ toast('Nenhum orçamento no período para exportar.','erro'); return; }
   const linhas = [];
-  linhas.push(['numero','cliente','data','validade','status','itens','subtotal','desconto_itens','frete','desconto_geral','total'].join(';'));
+  linhas.push(['numero','cliente','data','validade','status','itens','subtotal','desconto_itens','frete','desconto_geral','desconto_geral_tipo','total'].join(';'));
   os.slice().sort((a,b)=>String(a.data).localeCompare(String(b.data))).forEach(o=>{
     linhas.push([
       csvEsc(o.numero||''), csvEsc(nomeClienteOrc(o)), o.data||'', o.validade||'', statusOrc(o.status).label,
       (o.itens||[]).length,
       subtotalBrutoOrc(o).toFixed(2), descItensOrc(o).toFixed(2), freteOrc(o).toFixed(2),
-      (Number(o.desconto)||0).toFixed(2), totalOrc(o).toFixed(2)
+      descGeralV(o).toFixed(2), csvEsc(o.descGeralTipo==='%' ? (Number(o.desconto)||0)+'%' : 'R$'), totalOrc(o).toFixed(2)
     ].map(csvEsc).join(';'));
   });
   baixar(`relatorio-orcamentos-${hojeISO()}.csv`, linhas.join('\r\n'), 'text/csv;charset=utf-8');
