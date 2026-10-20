@@ -5594,11 +5594,23 @@ function formOrdem(id){
   if(inpBuscaCliOS && selCliOS){
     inpBuscaCliOS.addEventListener('input', ()=>{
       const t = inpBuscaCliOS.value.trim().toLowerCase();
+      let achou = false;
       Array.from(selCliOS.options).forEach(opt=>{
-        if(opt.value==='') return;
+        if(opt.value===''){
+          opt.hidden = !!t;
+          return;
+        }
         const txt = opt.textContent.toLowerCase();
-        opt.hidden = t && !txt.includes(t);
+        const vis = !t || txt.includes(t);
+        opt.hidden = !vis;
+        if(vis && !achou){
+          opt.selected = true;
+          achou = true;
+        }
       });
+      if(!achou && selCliOS.options.length>0){
+        selCliOS.selectedIndex = 0;
+      }
     });
   }
 
