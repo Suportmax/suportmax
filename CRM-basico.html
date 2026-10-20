@@ -1443,6 +1443,7 @@ function formLancamento(id, tipoPadrao){
         <div class="campo"><label>Forma / meio</label><select name="forma">${FORMAS_PGTO.concat(['Outro']).map(f=>`<option ${v.forma===f?'selected':''}>${esc(f)}</option>`).join('')}</select></div>
       </div>
       <div class="campo"><label>Observações</label><input name="obs" maxlength="180" value="${esc(v.obs||'')}"></div>
+      <label class="chk" style="margin-top:10px"><input type="checkbox" name="pago" ${(v.pago||v.recebidoEm)?'checked':''}> Marcar como recebido/pago agora</label>
       <div class="btn-linha" style="justify-content:flex-end;margin-top:16px">
         <button type="button" class="btn ghost" data-fechar>Cancelar</button>
         <button type="submit" class="btn primary">Salvar</button>
