@@ -210,6 +210,48 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .menu-pop button:hover{background:#f1f5f9}
 .secao-agenda h3 .link-btn{margin-left:auto;font-size:11.5px;text-transform:none;letter-spacing:0}
 
+/* ===== Calendário da agenda ===== */
+.cal{background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:14px;margin-top:16px}
+.cal-topo{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.cal-titulo{font-size:16px;font-weight:750;min-width:170px}
+.cal-nav{width:32px;height:32px;border-radius:9px;border:1px solid var(--borda);background:#fff;font-size:18px;line-height:1;color:var(--suave)}
+.cal-nav:hover{border-color:var(--prim);color:var(--prim)}
+.cal-info{margin-left:auto;font-size:12.6px;color:var(--suave)}
+.cal-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px}
+.cal-dow > div{text-align:center;font-size:11.5px;font-weight:750;color:var(--suave);text-transform:uppercase;letter-spacing:.4px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-dia{position:relative;min-height:74px;border:1px solid var(--borda);border-radius:9px;padding:5px 6px;background:#fff;cursor:pointer;overflow:hidden;transition:border-color .12s,box-shadow .12s}
+.cal-dia:hover{border-color:#bfdbfe;box-shadow:0 2px 10px rgba(37,99,235,.12)}
+.cal-dia.fora{opacity:.42}
+.cal-dia.hoje{border-color:var(--prim);box-shadow:inset 0 0 0 1px var(--prim)}
+.cal-dia.sel{border-color:var(--prim);background:#f8fbff;box-shadow:0 0 0 2px color-mix(in srgb,var(--prim) 22%,#fff)}
+.cal-dia.tem{background:#fbfdff}
+.cal-dia.atrasado{border-color:#fecaca;background:#fffbfb}
+.cal-num{font-size:12.4px;font-weight:700;color:#334155}
+.cal-dia.hoje .cal-num{color:var(--prim)}
+.cal-badge{position:absolute;top:4px;right:5px;background:var(--prim);color:#fff;font-size:10px;font-weight:800;border-radius:99px;min-width:16px;height:16px;display:grid;place-items:center;padding:0 4px}
+.cal-dia.atrasado .cal-badge{background:var(--erro)}
+.cal-chips{display:flex;flex-direction:column;gap:2px;margin-top:4px}
+.cal-chip{font-size:10.3px;padding:1px 5px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.cal-chip.alta{background:#fef2f2;color:#dc2626}
+.cal-chip.media{background:#fffbeb;color:#d97706}
+.cal-chip.baixa{background:#f0fdf4;color:#16a34a}
+.cal-chip.mais{background:#eef2f7;color:#475569}
+.cal-dia .cnt{background:#e2e8f0;color:#334155;border-radius:20px;padding:1px 8px;font-size:11.5px;font-weight:700}
+
+/* ===== Resumo de follow-ups no painel ===== */
+.fup-resumo{display:flex;gap:7px;flex-wrap:wrap;padding:2px 0 10px;border-bottom:1px solid var(--borda);margin-bottom:6px}
+.fup-pill{font-size:11.8px;font-weight:700;padding:3px 10px;border-radius:99px}
+.fup-pill.venc{background:#fef2f2;color:#b91c1c}
+.fup-pill.hoje{background:#fffbeb;color:#b45309}
+.fup-pill.sem{background:#eff6ff;color:#1d4ed8}
+@media (max-width:640px){
+  .cal-dia{min-height:56px;padding:4px}
+  .cal-chip{display:none}
+  .cal-titulo{min-width:0;font-size:15px}
+  .cal-info{width:100%;margin-left:0}
+}
+
 /* ---------- Modal ---------- */
 .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow-y:auto}
 .overlay.open{display:flex}
@@ -715,7 +757,8 @@ let filtro = {busca:'', status:'todos', ordenar:'recentes'};
 let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos'};
 let filtroOS = {busca:'', status:'todos'};
 let filtroCat = {busca:'', margem:'todos'};
-let filtroAgenda = {busca:'', periodo:'todos', prioridade:'todas', ordenar:'data'};
+let filtroAgenda = {busca:'', periodo:'todos', prioridade:'todas', ordenar:'data', modo:'lista'};
+let calRef = null; /* mês exibido na visão de calendário (Date do 1º dia do mês) */
 
 /* ---------- Persistência ---------- */
 function emissorVazio(){ return {nome:'', telefone:'', email:'', site:'', instagram:'', endereco:'', doc:''}; }
@@ -1431,7 +1474,12 @@ function htmlPainel(){
   const fechados = db.clientes.filter(c=>c.status==='fechado').length;
   const vencidos = db.clientes.filter(c=>c.followup && c.followup.data && diasAte(c.followup.data)<0).length;
   const fups = db.clientes.filter(c=>c.followup && c.followup.data)
-    .sort((a,b)=>a.followup.data.localeCompare(b.followup.data)).slice(0,5);
+    .sort((a,b)=>{
+      const da = diasAte(a.followup.data), dbv = diasAte(b.followup.data);
+      if(da<0 && dbv>=0) return -1;
+      if(da>=0 && dbv<0) return 1;
+      return String(a.followup.data).localeCompare(String(b.followup.data));
+    }).slice(0,5);
 
   const recentes = db.clientes.slice().sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||'')).slice(0,5);
 
@@ -1493,17 +1541,25 @@ function htmlPainel(){
     <div class="card">
       <div class="card-h"><h3>⏰ Follow-ups próximos</h3><button class="link" data-go="agenda">Ver agenda →</button></div>
       <div class="card-b">
-        ${fups.length ? fups.map(c=>{
-          const d = diasAte(c.followup.data);
-          return `<div class="linha-lista" data-abrir="${c.id}">
-            <div class="avatar">${iniciais(c.nome)}</div>
-            <div><div class="nm">${esc(c.nome)}</div><div class="mt">${esc(c.empresa||'—')}</div></div>
-            <div class="end">
-              <span class="${d<0?'atrasado':(d===0?'atrasado':'ok-texto')}">${rotuloPrazo(c.followup.data)}</span>
-              <span class="prio ${c.followup.prioridade||'media'}">${esc(c.followup.prioridade||'media')}</span>
-            </div>
+        ${(()=>{
+          const hojeN = agendaPendentes().filter(c=>diasAte(c.followup.data)===0).length;
+          const resumo = `<div class="fup-resumo">
+            <span class="fup-pill venc">🚨 ${vencidos} atrasado(s)</span>
+            <span class="fup-pill hoje">📍 ${hojeN} para hoje</span>
+            <span class="fup-pill sem">📅 ${agendaPendentes().filter(c=>{const d=diasAte(c.followup.data);return d>0&&d<=7;}).length} em 7 dias</span>
           </div>`;
-        }).join('') : `<div class="vazio"><span class="big">🎉</span>Nenhum follow-up pendente.</div>`}
+          return resumo + (fups.length ? fups.map(c=>{
+            const d = diasAte(c.followup.data);
+            return `<div class="linha-lista" data-abrir="${c.id}">
+              <div class="avatar">${iniciais(c.nome)}</div>
+              <div><div class="nm">${esc(c.nome)}</div><div class="mt">${esc(c.followup.nota||c.empresa||'—')}</div></div>
+              <div class="end">
+                <span class="${d<0?'atrasado':(d===0?'atrasado':'ok-texto')}">${rotuloPrazo(c.followup.data)}</span>
+                <span class="prio ${c.followup.prioridade||'media'}">${esc(c.followup.prioridade||'media')}</span>
+              </div>
+            </div>`;
+          }).join('') : `<div class="vazio"><span class="big">🎉</span>Nenhum follow-up pendente.</div>`);
+        })()}
       </div>
     </div>
 
@@ -1987,6 +2043,130 @@ document.getElementById('view').addEventListener('drop', e=>{
 function agendaPendentes(){
   return db.clientes.filter(c=>c.followup && c.followup.data);
 }
+/* ---------- Calendário da agenda ---------- */
+const MESES_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const DIAS_SEMANA_PT = ['D','S','T','Q','Q','S','S'];
+function isoDeData(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function calRefAtual(){
+  if(!calRef) calRef = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  return calRef;
+}
+function calMesAnterior(){ const r = calRefAtual(); calRef = new Date(r.getFullYear(), r.getMonth()-1, 1); }
+function calMesSeguinte(){ const r = calRefAtual(); calRef = new Date(r.getFullYear(), r.getMonth()+1, 1); }
+function calHoje(){ calRef = new Date(new Date().getFullYear(), new Date().getMonth(), 1); }
+function calGrade(){
+  /* 6 semanas × 7 dias cobrindo o mês (domingo como 1ª coluna) */
+  const ref = calRefAtual();
+  const inicio = new Date(ref.getFullYear(), ref.getMonth(), 1);
+  inicio.setDate(1 - inicio.getDay());
+  const dias = [];
+  for(let i=0;i<42;i++){
+    const d = new Date(inicio.getFullYear(), inicio.getMonth(), inicio.getDate()+i);
+    dias.push(d);
+  }
+  return dias;
+}
+function followupsPorDia(){
+  const map = {};
+  agendaPendentes().forEach(c=>{
+    const k = String(c.followup.data).slice(0,10);
+    (map[k] = map[k] || []).push(c);
+  });
+  return map;
+}
+function htmlCalendario(){
+  const ref = calRefAtual();
+  const hojeKey = hojeISO();
+  const refKey = ref.getFullYear()+'-'+String(ref.getMonth()+1).padStart(2,'0');
+  const map = followupsPorDia();
+  const totalMes = Object.keys(map).filter(k=>k.slice(0,7)===refKey).reduce((s,k)=>s+map[k].length,0);
+
+  const celulas = calGrade().map(d=>{
+    const key = isoDeData(d);
+    const doMes = d.getMonth()===ref.getMonth();
+    const lista = map[key] || [];
+    const temAtrasado = lista.some(c=>diasAte(c.followup.data)<0);
+    const cls = ['cal-dia'];
+    if(!doMes) cls.push('fora');
+    if(key===hojeKey) cls.push('hoje');
+    if(lista.length) cls.push('tem');
+    if(temAtrasado) cls.push('atrasado');
+    return `<div class="${cls.join(' ')}" data-dia="${key}" title="${fmtData(key)}${lista.length?` · ${lista.length} follow-up(s)`:''}">
+      <span class="cal-num">${d.getDate()}</span>
+      ${lista.length?`<span class="cal-badge">${lista.length}</span>`:''}
+      ${lista.length?`<div class="cal-chips">${lista.slice(0,2).map(c=>`<span class="cal-chip ${c.followup.prioridade||'media'}" title="${esc(c.nome)}">${esc(String(c.nome).split(' ')[0])}</span>`).join('')}${lista.length>2?`<span class="cal-chip mais">+${lista.length-2}</span>`:''}</div>`:''}
+    </div>`;
+  }).join('');
+
+  return `
+  <div class="cal">
+    <div class="cal-topo">
+      <button class="cal-nav" data-cal="prev" title="Mês anterior">‹</button>
+      <div class="cal-titulo">${MESES_PT[ref.getMonth()]} ${ref.getFullYear()}</div>
+      <button class="cal-nav" data-cal="next" title="Próximo mês">›</button>
+      <button class="btn ghost sm" data-cal="hoje" style="margin-left:6px">Hoje</button>
+      <div class="cal-info">${totalMes} follow-up(s) neste mês</div>
+    </div>
+    <div class="cal-dow">${DIAS_SEMANA_PT.map(d=>`<div>${d}</div>`).join('')}</div>
+    <div class="cal-grid">${celulas}</div>
+  </div>
+  <div class="card" id="calDetalhe" style="margin-top:14px"></div>`;
+}
+function calDetalheDia(key){
+  const lista = (followupsPorDia()[key] || []).slice().sort((a,b)=>{
+    const ordem={alta:0,media:1,baixa:2};
+    return (ordem[a.followup.prioridade||'media']-ordem[b.followup.prioridade||'media']);
+  });
+  const el = document.getElementById('calDetalhe');
+  if(!el) return;
+  if(!lista.length){
+    el.innerHTML = `<div class="card-h"><h3>📅 ${fmtData(key)}</h3><button class="link" data-cal-novo="${key}">＋ Agendar neste dia</button></div>
+      <div class="card-b"><div class="vazio"><span class="big">📭</span>Nenhum follow-up neste dia.</div></div>`;
+    return;
+  }
+  el.innerHTML = `<div class="card-h"><h3>📅 ${fmtData(key)} <span class="cnt">${lista.length}</span></h3><button class="link" data-cal-novo="${key}">＋ Agendar neste dia</button></div>
+    <div class="card-b">
+      ${lista.map(c=>{
+        const d = diasAte(c.followup.data);
+        return `<div class="linha-lista">
+          <div class="avatar">${iniciais(c.nome)}</div>
+          <div><div class="nm">${esc(c.nome)}</div><div class="mt">${esc(c.followup.nota||c.empresa||'—')}</div></div>
+          <div class="end">
+            <span class="prio ${c.followup.prioridade||'media'}">${esc(c.followup.prioridade||'media')}</span>
+            ${d<0?`<span class="atrasado">atrasado ${Math.abs(d)}d</span>`:`<span class="ok-texto">${rotuloPrazo(c.followup.data)}</span>`}
+            <button class="icon-btn" data-act="concluir" data-id="${c.id}" title="Concluir">✓</button>
+            <button class="icon-btn" data-act="cli-fup-zap" data-id="${c.id}" title="WhatsApp">💬</button>
+            <button class="icon-btn" data-act="editar" data-id="${c.id}" title="Editar cliente">✏️</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+function ligarCalendario(){
+  const cal = document.querySelector('.cal');
+  if(cal) cal.addEventListener('click', e=>{
+    const nav = e.target.closest('[data-cal]');
+    if(nav){
+      if(nav.dataset.cal==='prev') calMesAnterior();
+      else if(nav.dataset.cal==='next') calMesSeguinte();
+      else calHoje();
+      render(); return;
+    }
+    const dia = e.target.closest('[data-dia]');
+    if(dia){ document.querySelectorAll('.cal-dia.sel').forEach(x=>x.classList.remove('sel')); dia.classList.add('sel'); calDetalheDia(dia.dataset.dia); }
+  });
+  /* seleciona o dia de hoje ao abrir */
+  const hj = document.querySelector(`.cal-dia[data-dia="${hojeISO()}"]`);
+  if(hj){ hj.classList.add('sel'); calDetalheDia(hojeISO()); }
+  else { const alvo = document.querySelector('.cal-dia.tem') || document.querySelector('.cal-dia'); if(alvo){ alvo.classList.add('sel'); calDetalheDia(alvo.dataset.dia); } }
+  const det = document.getElementById('calDetalhe');
+  if(det) det.addEventListener('click', e=>{
+    const novo = e.target.closest('[data-cal-novo]');
+    if(novo){ formAgendarFollowup(novo.dataset.calNovo); }
+  });
+}
 function agendaFiltrados(){
   const q = filtroAgenda.busca.trim().toLowerCase();
   return agendaPendentes().filter(c=>{
@@ -2035,6 +2215,10 @@ function htmlAgenda(){
       ${[['todos','Todos'],['atrasados','Atrasados'],['hoje','Hoje'],['semana','7 dias'],['futuros','Mais à frente']]
         .map(([v,l])=>`<button class="seg-item${filtroAgenda.periodo===v?' active':''}" data-seg="${v}">${l}</button>`).join('')}
     </div>
+    <div class="seg" id="segModoAgenda" title="Como visualizar">
+      <button class="seg-item${filtroAgenda.modo==='lista'?' active':''}" data-modo="lista">☰ Lista</button>
+      <button class="seg-item${filtroAgenda.modo==='calendario'?' active':''}" data-modo="calendario">📅 Calendário</button>
+    </div>
     <div class="busca"><input id="buscaAgenda" placeholder="Buscar por nome, empresa, telefone, nota..." value="${esc(filtroAgenda.busca)}"></div>
     <select class="filtro" id="fPrioAgenda">
       <option value="todas" ${filtroAgenda.prioridade==='todas'?'selected':''}>Todas as prioridades</option>
@@ -2047,6 +2231,11 @@ function htmlAgenda(){
       <option value="prioridade" ${filtroAgenda.ordenar==='prioridade'?'selected':''}>Ordenar por prioridade</option>
     </select>
   </div>`;
+
+  /* Visão de calendário */
+  if(filtroAgenda.modo==='calendario'){
+    return stats + atalhos + toolbar + htmlCalendario();
+  }
 
   if(!todas.length){
     return stats + atalhos + `<div class="card" style="margin-top:16px"><div class="vazio" style="padding:46px 20px"><span class="big">🎉</span>Nenhum follow-up agendado!<br><br>
@@ -2133,6 +2322,19 @@ function ligarAgenda(){
     render();
   });
 
+  const segModo = document.getElementById('segModoAgenda');
+  if(segModo) segModo.addEventListener('click', e=>{
+    const si = e.target.closest('[data-modo]');
+    if(!si) return;
+    filtroAgenda.modo = si.dataset.modo;
+    render();
+  });
+
+  if(filtroAgenda.modo==='calendario'){
+    ligarCalendario();
+    return;
+  }
+
   /* Menu "Adiar" */
   document.querySelectorAll('[data-menu]').forEach(btn=>{
     btn.addEventListener('click', e=>{
@@ -2145,7 +2347,6 @@ function ligarAgenda(){
   });
   document.addEventListener('click', ()=>{ document.querySelectorAll('[data-menu-pop]').forEach(p=>p.hidden=true); });
 
-  /* Salvar busca no estado quando o usuário sai da tela */
   window.__agendaLigada = true;
 }
 function agendaAdiarTodos(grupo, dias){
@@ -2194,19 +2395,18 @@ function agendaEscolherData(id){
     toast(`Follow-up reagendado para ${fmtData(nova)}.`);
   };
 }
-function formAgendarFollowup(){
+function formAgendarFollowup(dataPre){
   const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
   if(!clientes.length){ toast('Cadastre um cliente primeiro.','erro'); return; }
   abrirModal(`
     <form id="fAgendar">
-      <div class="modal-h"><h2>⏰ Agendar follow-up</h2><button type="button" class="x" data-fechar>×</button></div>
-      <div class="modal-b"><div class="form-grid">
+      <div class="modal-h"><h2>⏰ Agendar follow-up</h2><button type="button" class="x" data-fechar>×</button></div>      <div class="modal-b"><div class="form-grid">
         <div class="campo full"><label>Cliente * <span class="req">*</span></label>
           <select name="clienteId" required>
             <option value="">— Selecione —</option>
             ${clientes.map(c=>`<option value="${c.id}">${esc(c.nome)}${c.empresa?' — '+esc(c.empresa):''}</option>`).join('')}
           </select></div>
-        <div class="campo"><label>Data</label><input type="date" name="data" value="${proximos7dias()}" required></div>
+        <div class="campo"><label>Data</label><input type="date" name="data" value="${dataPre||proximos7dias()}" required></div>
         <div class="campo"><label>Prioridade</label>
           <select name="prioridade">
             <option value="alta">🔴 Alta</option>
