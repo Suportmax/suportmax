@@ -138,6 +138,25 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .selo.vence{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
 .selo.ok{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
 .selo.info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+/* ---------- Contratos: cartões (mobile) ---------- */
+.contr-cards{display:none;flex-direction:column;gap:12px;margin-bottom:16px}
+.contr-card{background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:14px 15px}
+.contr-card .cc-top{display:flex;align-items:flex-start;gap:12px}
+.contr-card .nm{font-weight:700;font-size:15px}
+.contr-card .mt{font-size:12.5px;color:var(--suave);margin-top:2px}
+.cc-valor{font-weight:800;font-size:17px;white-space:nowrap;text-align:right}
+.cc-periodo{font-size:11px;font-weight:600;color:var(--suave);text-align:right}
+.cc-meta{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0 12px}
+.cc-acoes{display:flex;flex-wrap:wrap;gap:7px}
+.cc-acoes .btn{flex:1 1 auto;justify-content:center}
+.alerta-card{border-color:#fecaca}
+.alerta-card .card-h{background:#fef2f2;border-radius:var(--radius) var(--radius) 0 0}
+body.tema-escuro .contr-card{background:#0d1728}
+body.tema-escuro .alerta-card .card-h{background:#2a1414}
+@media (max-width:760px){
+  .contr-cards{display:flex}
+  .tabela-contratos{display:none}
+}
 .selo.margem-boa{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
 .selo.margem-media{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
 .selo.margem-baixa{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
@@ -279,7 +298,7 @@ body.tema-escuro .fup-pill.venc{background:#2a1215;color:#fca5a5}
 
 /* ===== PWA / instalar ===== */
 .pwa-dica{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;font-size:13px;margin-bottom:14px}
-.contagem{font-size:13px;color:var(--suave);margin:0 0 10px 2px}
+.contagem{font-size:13px;color:#475569;margin:0 0 10px 2px}
 
 /* ---------- Funil (Kanban) ---------- */
 .kanban{display:flex;gap:14px;overflow-x:auto;padding-bottom:14px;align-items:flex-start}
@@ -2176,6 +2195,8 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='cont-editar') formContrato(id);
   else if(btn.dataset.act==='cont-excluir') excluirContrato(id);
   else if(btn.dataset.act==='cont-renovar'){ const c=(db.contratos||[]).find(x=>x.id===id); if(c){ renovarContrato(c,1); salvar(); render(); toast('Contrato renovado por mais 1 mês.'); } }
+  else if(btn.dataset.act==='cont-renovar-todos') renovarTodosVencidos();
+  else if(btn.dataset.act==='cont-lembrete') lembreteContrato(id);
   /* Mensagens */
   else if(btn.dataset.act==='msg-editar') formMensagem(id);
   else if(btn.dataset.act==='msg-excluir') excluirMensagem(id);
@@ -4037,7 +4058,7 @@ function tabelaOSHTML(){
       <td><div class="nm">${esc(nomeClienteOrdem(os))}</div><div class="mt">${esc((buscarCli(os.clienteId)||{}).empresa||'')}</div>${os.fornecedorId&&buscarForn(os.fornecedorId)?`<div style="margin-top:4px"><span class="selo info" title="Fornecedor">🚚 ${esc(buscarForn(os.fornecedorId).nome)}</span></div>`:''}</td>
       <td class="vl-total">${brl(os.valor)}</td>
       <td>${pr.total?`<div style="font-size:12px;color:var(--suave)">${pr.feito}/${pr.total} · ${pr.pct}%</div><div class="meta-barra" style="width:90px"><i style="width:${pr.pct}%"></i></div>`:'<span class="mini">sem checklist</span>'}</td>
-      <td><select class="filtro" style="min-width:150px;padding:6px 8px" data-act="os-status" data-id="${os.id}">${STATUS_OS.map(s=>`<option value="${s.id}" ${os.status===s.id?'selected':''}>${s.label}</option>`).join('')}</select></td>
+      <td><select class="filtro" aria-label="Status da ordem de serviço ${esc(os.numero||'')}" style="min-width:150px;padding:6px 8px" data-act="os-status" data-id="${os.id}">${STATUS_OS.map(s=>`<option value="${s.id}" ${os.status===s.id?'selected':''}>${s.label}</option>`).join('')}</select></td>
       <td><div class="acoes">
         <button class="icon-btn" title="Abrir / Imprimir" data-act="os-ver" data-id="${os.id}">👁️</button>
         <button class="icon-btn" title="Editar" data-act="os-editar" data-id="${os.id}">✏️</button>
@@ -5248,19 +5269,74 @@ function verPagamentos(orcId){
 /* =========================================================
    CONTRATOS / RECORRÊNCIA
    ========================================================= */
-let filtroContrato = {busca:'', status:'todos'};
+let filtroContrato = {busca:'', status:'ativo', venc:'todos', ordem:'venc'};
+
+/* ---------- Métricas auxiliares de contrato ---------- */
+function mesesDeContrato(c){
+  if(!c.inicio) return null;
+  const a = new Date(c.inicio+'T12:00:00');
+  if(isNaN(a.getTime())) return null;
+  const b = new Date();
+  let m = (b.getFullYear()-a.getFullYear())*12 + (b.getMonth()-a.getMonth());
+  if(b.getDate() < a.getDate()) m--;
+  return Math.max(0, m);
+}
+function contratosPausadosCount(){ return (db.contratos||[]).filter(c=>c.status==='pausado').length; }
+function contratosEncerradosCount(){ return (db.contratos||[]).filter(c=>c.status==='encerrado').length; }
+/* contratos vencidos (próximo vencimento já passou) e ainda ativos */
+function contratosVencidos(){
+  return contratosAtivos().filter(c=>{ const d=contratoVence(c); return d!=null && d<0; })
+    .sort((a,b)=>String(a.proximoVenc).localeCompare(String(b.proximoVenc)));
+}
+/* receita já recebida no mês corrente (pagamentos vinculados a contratos não existem; usamos vencimentos pagos por mês) */
+function mrrStatus(){
+  const ativos = contratosAtivos();
+  const venc = contratosVencendo(0); /* vencidos ou vencendo hoje */
+  const emDia = ativos.filter(c=>{ const d=contratoVence(c); return d==null || d>0; });
+  return {
+    ativos: ativos.length,
+    total: ativos.reduce((s,c)=>s+valorMensalContrato(c),0),
+    emDia: emDia.reduce((s,c)=>s+valorMensalContrato(c),0),
+    vencidos: venc.reduce((s,c)=>s+valorMensalContrato(c),0),
+    ticket: ativos.length ? ativos.reduce((s,c)=>s+valorMensalContrato(c),0)/ativos.length : 0
+  };
+}
+
 function htmlContratos(){
   const ativos = contratosAtivos();
   const venc = contratosVencendo(15);
+  const vencidos = contratosVencidos();
+  const ms = mrrStatus();
+  const pausados = contratosPausadosCount();
+  const encerrados = contratosEncerradosCount();
+  const recorrenteAno = ms.total*12;
+
   return `
   <div class="grid-stats">
     ${stat('Contratos ativos', ativos.length, '🔁')}
-    ${stat('Receita mensal (MRR)', brl(mrr()), '💵')}
-    ${stat('Receita anual est.', brl(mrr()*12), '📈')}
+    ${stat('Receita mensal (MRR)', brl(ms.total), '💵')}
+    ${stat('Receita anual est.', brl(recorrenteAno), '📈')}
+    ${stat('Ticket médio', brl(ms.ticket), '🎯')}
     ${stat('Vencendo em 15 dias', venc.length, '⏳', venc.length>0)}
+    ${stat('Vencidos (renovar)', vencidos.length, '🚨', vencidos.length>0)}
   </div>
+
+  ${(vencidos.length) ? `<div class="card alerta-card" style="margin-bottom:16px">
+    <div class="card-h"><h2>🚨 Contratos vencidos para renovar</h2>
+      <button class="btn primary sm" style="margin-left:auto" data-act="cont-renovar-todos">🔄 Renovar todos +1 mês</button>
+    </div>
+    <div class="card-b">${vencidos.map(c=>`
+      <div class="linha-lista">
+        <div><div class="nm">${esc(c.clienteNome||nomeClienteOrc(c)||'—')}</div>
+          <div class="mt">${esc(c.descricao||'')} · venceu ${fmtData(c.proximoVenc)} <span class="selo vencido">${Math.abs(contratoVence(c))}d atrás</span></div></div>
+        <div class="end"><span class="vl-total">${brl(valorMensalContrato(c))}/mês</span>
+          <button class="btn ghost sm" data-act="cont-renovar" data-id="${c.id}">Renovar +1 mês</button>
+        </div>
+      </div>`).join('')}</div>
+  </div>`:''}
+
   ${venc.length ? `<div class="card" style="margin-bottom:16px">
-    <div class="card-h"><h2>⚠️ Contratos a renovar</h2></div>
+    <div class="card-h"><h2>⚠️ Contratos a renovar (15 dias)</h2></div>
     <div class="card-b">${venc.map(c=>`
       <div class="linha-lista">
         <div><div class="nm">${esc(c.clienteNome||nomeClienteOrc(c)||'—')}</div><div class="mt">${esc(c.descricao||'')} · vence ${fmtData(c.proximoVenc)}</div></div>
@@ -5268,17 +5344,35 @@ function htmlContratos(){
         <button class="btn ghost sm" data-act="cont-renovar" data-id="${c.id}">Renovar +1 mês</button></div>
       </div>`).join('')}</div>
   </div>`:''}
+
   <div class="toolbar">
-    <div class="busca"><input id="buscaContrato" placeholder="Buscar por cliente ou descrição..." value="${esc(filtroContrato.busca)}"></div>
-    <select class="filtro" id="fStatusContrato">
-      <option value="todos">Todos os status</option>
-      <option value="ativo" ${filtroContrato.status==='ativo'?'selected':''}>Ativos</option>
-      <option value="pausado" ${filtroContrato.status==='pausado'?'selected':''}>Pausados</option>
-      <option value="encerrado" ${filtroContrato.status==='encerrado'?'selected':''}>Encerrados</option>
+    <div class="busca"><input id="buscaContrato" placeholder="Buscar por cliente, descrição ou contato..." value="${esc(filtroContrato.busca)}"></div>
+    <select class="filtro" id="fStatusContrato" title="Status">
+      <option value="todos" ${filtroContrato.status==='todos'?'selected':''}>Todos os status</option>
+      <option value="ativo" ${filtroContrato.status==='ativo'?'selected':''}>🟢 Ativos (${ativos.length})</option>
+      <option value="pausado" ${filtroContrato.status==='pausado'?'selected':''}>🟡 Pausados (${pausados})</option>
+      <option value="encerrado" ${filtroContrato.status==='encerrado'?'selected':''}>⚪ Encerrados (${encerrados})</option>
     </select>
+    <select class="filtro" id="fVencContrato" title="Vencimento">
+      <option value="todos" ${filtroContrato.venc==='todos'?'selected':''}>Vencimento: todos</option>
+      <option value="vencidos" ${filtroContrato.venc==='vencidos'?'selected':''}>🚨 Vencidos</option>
+      <option value="7" ${filtroContrato.venc==='7'?'selected':''}>⏳ Em 7 dias</option>
+      <option value="15" ${filtroContrato.venc==='15'?'selected':''}>⏳ Em 15 dias</option>
+      <option value="30" ${filtroContrato.venc==='30'?'selected':''}>⏳ Em 30 dias</option>
+    </select>
+    <select class="filtro" id="fOrdemContrato" title="Ordenar">
+      <option value="venc" ${filtroContrato.ordem==='venc'?'selected':''}>Ordenar: vencimento</option>
+      <option value="valor" ${filtroContrato.ordem==='valor'?'selected':''}>Ordenar: maior valor</option>
+      <option value="cliente" ${filtroContrato.ordem==='cliente'?'selected':''}>Ordenar: cliente</option>
+      <option value="inicio" ${filtroContrato.ordem==='inicio'?'selected':''}>Ordenar: início</option>
+    </select>
+    <button class="btn ghost" id="btnImprimirContratos" title="Imprimir lista de contratos">🖨️ Imprimir</button>
   </div>
   <div class="contagem" id="contContrato"></div>
-  <div class="tabela-wrap"><table>
+
+  <div class="contr-cards" id="cardsContrato"></div>
+
+  <div class="tabela-wrap tabela-contratos"><table>
     <thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Início</th><th>Próximo venc.</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead>
     <tbody id="tabelaContrato"></tbody>
   </table></div>`;
@@ -5288,33 +5382,61 @@ function ligarContratos(){
   if(b) b.addEventListener('input', ()=>{ filtroContrato.busca=b.value; atualizarTabelaContrato(); });
   const f = document.getElementById('fStatusContrato');
   if(f) f.addEventListener('change', e=>{ filtroContrato.status=e.target.value; atualizarTabelaContrato(); });
+  const fv = document.getElementById('fVencContrato');
+  if(fv) fv.addEventListener('change', e=>{ filtroContrato.venc=e.target.value; atualizarTabelaContrato(); });
+  const fo = document.getElementById('fOrdemContrato');
+  if(fo) fo.addEventListener('change', e=>{ filtroContrato.ordem=e.target.value; atualizarTabelaContrato(); });
+  const bi = document.getElementById('btnImprimirContratos');
+  if(bi) bi.addEventListener('click', imprimirContratos);
   atualizarTabelaContrato();
 }
 function listaContratoFiltrada(){
   const q = filtroContrato.busca.trim().toLowerCase();
-  return (db.contratos||[]).filter(c=>{
+  let l = (db.contratos||[]).filter(c=>{
     if(filtroContrato.status!=='todos' && c.status!==filtroContrato.status) return false;
+    if(filtroContrato.venc!=='todos'){
+      const d = contratoVence(c);
+      if(filtroContrato.venc==='vencidos'){ if(!(d!=null && d<0)) return false; }
+      else { const n=Number(filtroContrato.venc); if(!(d!=null && d>=0 && d<=n)) return false; }
+    }
     if(!q) return true;
-    return [c.clienteNome, c.descricao].some(v=>String(v||'').toLowerCase().includes(q));
-  }).sort((a,b)=>String(a.proximoVenc||'9999').localeCompare(String(b.proximoVenc||'9999')));
+    const cl = buscarCli(c.clienteId);
+    return [c.clienteNome, c.descricao, cl&&cl.nome, cl&&cl.empresa, cl&&cl.telefone, cl&&cl.email]
+      .some(v=>String(v||'').toLowerCase().includes(q));
+  });
+  const ordem = filtroContrato.ordem;
+  l.sort((a,b)=>{
+    if(ordem==='valor') return valorMensalContrato(b)-valorMensalContrato(a);
+    if(ordem==='cliente') return String(a.clienteNome||'').localeCompare(String(b.clienteNome||''),'pt-BR');
+    if(ordem==='inicio') return String(b.inicio||'').localeCompare(String(a.inicio||''));
+    return String(a.proximoVenc||'9999').localeCompare(String(b.proximoVenc||'9999'));
+  });
+  return l;
 }
 const STATUS_CONTRATO = [['ativo','🟢 Ativo'],['pausado','🟡 Pausado'],['encerrado','⚪ Encerrado']];
+function statusContratoSelo(st){
+  const m = {ativo:'ok', pausado:'vence', encerrado:''};
+  const r = (STATUS_CONTRATO.find(x=>x[0]===st)||['','—'])[1];
+  return `<span class="selo ${m[st]||''}">${r}</span>`;
+}
 function tabelaContratoHTML(){
   const l = listaContratoFiltrada();
   if(!(db.contratos||[]).length)
     return `<tr><td colspan="7"><div class="vazio"><span class="big">🔁</span>Nenhum contrato ainda.<br>Cadastre clientes com mensalidade ou manutenção recorrente.</div></td></tr>`;
-  if(!l.length) return `<tr><td colspan="7"><div class="vazio"><span class="big">🔍</span>Nenhum contrato encontrado.</div></td></tr>`;
+  if(!l.length) return `<tr><td colspan="7"><div class="vazio"><span class="big">🔍</span>Nenhum contrato encontrado com esses filtros.</div></td></tr>`;
   return l.map(c=>{
     const d = contratoVence(c);
     const alerta = contratoAtivo(c) && d!=null && d<=15;
+    const badge = (alerta && d!=null) ? (d<0?`<span class="selo vencido">vencido ${Math.abs(d)}d</span>`:`<span class="selo vence">em ${d}d</span>`) : '';
     return `<tr>
       <td><div class="nm">${esc(c.clienteNome||nomeClienteOrc(c)||'—')}</div></td>
       <td><div class="mt">${esc(c.descricao||'—')}</div></td>
       <td class="vl-total">${brl(valorMensalContrato(c))}</td>
       <td>${c.inicio?fmtData(c.inicio):'—'}</td>
-      <td>${c.proximoVenc?`${fmtData(c.proximoVenc)} ${alerta?'<span class="selo venc">'+(d<0?'vencido':'em '+d+'d')+'</span>':''}`:'—'}</td>
-      <td><select class="filtro" style="min-width:130px;padding:6px 8px" data-act="cont-status" data-id="${c.id}">${STATUS_CONTRATO.map(([v,r])=>`<option value="${v}" ${c.status===v?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td>${c.proximoVenc?`${fmtData(c.proximoVenc)} ${badge}`:'—'}</td>
+      <td><select class="filtro" aria-label="Status do contrato de ${esc(c.clienteNome||nomeClienteOrc(c)||'')}" style="min-width:130px;padding:6px 8px" data-act="cont-status" data-id="${c.id}">${STATUS_CONTRATO.map(([v,r])=>`<option value="${v}" ${c.status===v?'selected':''}>${r}</option>`).join('')}</select></td>
       <td><div class="acoes">
+        <button class="icon-btn" title="Enviar lembrete (WhatsApp)" data-act="cont-lembrete" data-id="${c.id}">💬</button>
         <button class="icon-btn" title="Renovar +1 mês" data-act="cont-renovar" data-id="${c.id}">🔄</button>
         <button class="icon-btn" title="Editar" data-act="cont-editar" data-id="${c.id}">✏️</button>
         <button class="icon-btn del" title="Excluir" data-act="cont-excluir" data-id="${c.id}">🗑️</button>
@@ -5322,12 +5444,102 @@ function tabelaContratoHTML(){
     </tr>`;
   }).join('');
 }
+function cardContratoHTML(c){
+  const d = contratoVence(c);
+  const alerta = contratoAtivo(c) && d!=null && d<=15;
+  const badge = (alerta && d!=null) ? (d<0?`<span class="selo vencido">vencido ${Math.abs(d)}d</span>`:`<span class="selo vence">em ${d}d</span>`) : '';
+  const dur = mesesDeContrato(c);
+  const cl = buscarCli(c.clienteId);
+  return `<div class="contr-card">
+    <div class="cc-top">
+      <div style="flex:1;min-width:0">
+        <div class="nm">${esc(c.clienteNome||nomeClienteOrc(c)||'—')}</div>
+        <div class="mt">${esc(c.descricao||'—')}</div>
+      </div>
+      <div class="cc-valor">${brl(valorMensalContrato(c))}<div class="cc-periodo">/mês</div></div>
+    </div>
+    <div class="cc-meta">
+      ${statusContratoSelo(c.status)}
+      ${c.proximoVenc?`<span class="selo info">📅 ${fmtData(c.proximoVenc)}</span> ${badge}`:'<span class="selo info">sem vencimento</span>'}
+      ${dur!=null?`<span class="selo">${dur} ${dur===1?'mês':'meses'}</span>`:''}
+    </div>
+    <div class="cc-acoes">
+      ${cl&&cl.telefone?`<a class="btn ghost sm" href="https://wa.me/${telZap(cl.telefone)}" target="_blank" rel="noopener">💬 WhatsApp</a>`:''}
+      <button class="btn ghost sm" data-act="cont-lembrete" data-id="${c.id}">📨 Lembrete</button>
+      <button class="btn ghost sm" data-act="cont-renovar" data-id="${c.id}">🔄 Renovar</button>
+      <button class="btn ghost sm" data-act="cont-editar" data-id="${c.id}">✏️ Editar</button>
+      <button class="btn ghost sm del" data-act="cont-excluir" data-id="${c.id}">🗑️ Excluir</button>
+    </div>
+  </div>`;
+}
 function atualizarTabelaContrato(){
   const tb = document.getElementById('tabelaContrato'); if(!tb) return;
   tb.innerHTML = tabelaContratoHTML();
+  const cards = document.getElementById('cardsContrato');
+  if(cards){
+    const l = listaContratoFiltrada();
+    cards.innerHTML = l.length ? l.map(cardContratoHTML).join('')
+      : `<div class="vazio"><span class="big">🔍</span>Nenhum contrato encontrado com esses filtros.</div>`;
+  }
   const c = document.getElementById('contContrato');
   if(c) c.textContent = `${listaContratoFiltrada().length} de ${(db.contratos||[]).length} contrato(s)`;
 }
+function renovarTodosVencidos(){
+  const v = contratosVencidos();
+  if(!v.length) return toast('Nenhum contrato vencido.','ok');
+  if(!confirm(`Renovar ${v.length} contrato(s) vencido(s) por mais 1 mês cada?`)) return;
+  v.forEach(c=>renovarContrato(c,1));
+  auditar('contrato', `${v.length} contrato(s) vencido(s) renovado(s) em lote`);
+  salvar(); render(); toast(`✅ ${v.length} contrato(s) renovado(s).`,'ok');
+}
+function lembreteContrato(id){
+  const c = (db.contratos||[]).find(x=>x.id===id); if(!c) return;
+  const cl = buscarCli(c.clienteId);
+  menuMensagens({
+    cliente: c.clienteNome||nomeClienteOrc(c)||'',
+    numero: c.descricao||'',
+    total: brl(valorMensalContrato(c)),
+    validade: c.proximoVenc?fmtData(c.proximoVenc):'',
+    assunto: 'Renovação de contrato',
+    whats: ()=> cl&&cl.telefone ? telZap(cl.telefone) : ''
+  });
+}
+function contratosHTMLImpressao(){
+  const l = listaContratoFiltrada();
+  const em = db.emissor || emissorVazio();
+  const ms = mrrStatus();
+  const rows = l.map(c=>`<tr>
+    <td>${esc(c.clienteNome||nomeClienteOrc(c)||'—')}</td>
+    <td>${esc(c.descricao||'—')}</td>
+    <td style="text-align:right">${brl(valorMensalContrato(c))}</td>
+    <td>${c.inicio?fmtData(c.inicio):'—'}</td>
+    <td>${c.proximoVenc?fmtData(c.proximoVenc):'—'}</td>
+    <td>${(STATUS_CONTRATO.find(x=>x[0]===c.status)||['','—'])[1].replace(/^\\S+\\s/,'')}</td>
+  </tr>`).join('');
+  return `
+    <div class="topo">
+      <div class="marca-doc">
+        <img class="doc-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
+        <div class="marca-txt">
+          <div style="font-size:16.5px;font-weight:800">${em.nome?esc(em.nome):esc(MARCA_NOME)}</div>
+          ${em.telefone?`<div>${esc(em.telefone)}</div>`:''}
+          ${em.email?`<div>${esc(em.email)}</div>`:''}
+          ${em.doc?`<div>${esc(em.doc)}</div>`:''}
+        </div>
+      </div>
+      <div class="doc-titulo"><div class="t">RELAÇÃO DE CONTRATOS</div><div class="n">${l.length} contrato(s)</div></div>
+    </div>
+    <div class="doc-info">
+      <div><b>Emitido em:</b> ${fmtDT(agoraDT())}</div>
+      <div><b>Receita mensal recorrente (MRR):</b> ${brl(ms.total)} · <b>Anual:</b> ${brl(ms.total*12)}</div>
+    </div>
+    <table class="tab-doc">
+      <thead><tr><th>Cliente</th><th>Descrição</th><th style="text-align:right">Valor/mês</th><th>Início</th><th>Próximo venc.</th><th>Status</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="6" style="text-align:center">Nenhum contrato nos filtros atuais.</td></tr>'}</tbody>
+    </table>
+    <div class="rodape-doc">Documento gerado pelo CRM ${esc(MARCA_NOME)} — ${em.email?esc(em.email):''}</div>`;
+}
+function imprimirContratos(){ imprimirDoc(contratosHTMLImpressao()); }
 function formContrato(id){
   const c = id ? (db.contratos||[]).find(x=>x.id===id) : null;
   if(id && !c) return;
@@ -5381,6 +5593,7 @@ function excluirContrato(id){
   auditar('contrato', `Contrato excluído de ${c.clienteNome||''}`);
   salvar(); render(); toast('Contrato excluído.');
 }
+
 
 /* =========================================================
    MENSAGENS — modelos prontos para WhatsApp / e-mail
