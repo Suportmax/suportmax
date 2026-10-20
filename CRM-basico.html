@@ -5400,7 +5400,8 @@ function tabelaOSHTML(){
   if(!l.length) return `<tr><td colspan="6"><div class="vazio"><span class="big">🔍</span>Nenhuma ordem encontrada.</div></td></tr>`;
   return l.map(os=>{
     const pr = osProgresso(os);
-    return `<tr>
+    const vendida = !!vendaDaOS(os);
+    return `<tr style="border-left:4px solid ${vendida?'#10b981':'#ef4444'}">
       <td><div class="nm">${esc(os.numero||'—')}</div><div class="mt">${fmtData(os.data)}</div></td>
       <td><div class="nm">${esc(nomeClienteOrdem(os))}</div><div class="mt">${esc((buscarCli(os.clienteId)||{}).empresa||'')}</div>${os.fornecedorId&&buscarForn(os.fornecedorId)?`<div style="margin-top:4px"><span class="selo info" title="Fornecedor">🚚 ${esc(buscarForn(os.fornecedorId).nome)}</span></div>`:''}</td>
       <td class="vl-total">${brl(totalOS(os))}</td>
