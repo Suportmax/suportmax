@@ -1282,7 +1282,7 @@ let db = carregar();
 let view = 'painel';
 let filtro = {busca:'', status:'todos', ordenar:'recentes'};
 let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos'};
-let filtroOS = {busca:'', status:'todos', fornecedor:''};
+let filtroOS = {busca:'', status:'todos', fornecedor:'', rapido:'todas'};
 let filtroCat = {busca:'', margem:'todos'};
 let filtroAgenda = {busca:'', periodo:'todos', prioridade:'todas', ordenar:'data', modo:'lista'};
 let filtroFunil = {busca:'', origem:'todas', prio:'todas', fup:'todos', ordem:'fup', esfriando:false, etapa:'', colapsados:{}, metaEditar:false, refModo:'hoje', refAno:new Date().getFullYear(), refMes:new Date().getMonth()+1};
@@ -2287,6 +2287,20 @@ function render(){
   }else{
     btnNovo.textContent = '＋ Novo cliente';
     btnNovo.onclick = ()=>formCliente(null);
+  }
+  /* Filtros rápidos nas Ordens de Serviço */
+  if(view==='ordens'){
+    const tb = document.getElementById('filtroOSRapido');
+    if(tb){
+      tb.innerHTML = `
+        <button type="button" class="btn sm ghost ${filtroOS.rapido==='todas'?'primary':''}" data-osr="todas">Todas</button>
+        <button type="button" class="btn sm ghost ${filtroOS.rapido==='abertas'?'primary':''}" data-osr="abertas">Abertas</button>
+        <button type="button" class="btn sm ghost ${filtroOS.rapido==='vencer'?'primary':''}" data-osr="vencer">Vencem hoje</button>
+        <button type="button" class="btn sm ghost ${filtroOS.rapido==='vencidas'?'primary':''}" data-osr="vencidas">Vencidas</button>
+        <button type="button" class="btn sm ghost ${filtroOS.rapido==='minhas'?'primary':''}" data-osr="minhas">Minhas</button>
+      `;
+      tb.querySelectorAll('[data-osr]').forEach(b=>b.onclick=()=>{ filtroOS.rapido=b.dataset.osr; render(); });
+    }
   }
 
   const el = document.getElementById('view');
@@ -5260,6 +5274,7 @@ function htmlOrdens(){
     </select>`:''}
     <button class="btn primary" id="btnNovaOS">＋ Nova ordem de serviço</button>
   </div>
+  <div class="toolbar" id="filtroOSRapido" style="margin:-6px 0 12px;gap:8px"></div>
   <div class="contagem" id="contOS"></div>
   <div class="tabela-wrap"><table>
     <thead><tr><th>Ordem</th><th>Cliente</th><th>Valor</th><th>Progresso</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead>
@@ -5277,9 +5292,24 @@ function ligarOrdens(){
 }
 function listaOSFiltrada(){
   const q = filtroOS.busca.trim().toLowerCase();
+  const hoje = hojeISO();
   return listaOrdens().filter(o=>{
     if(filtroOS.status!=='todos' && o.status!==filtroOS.status) return false;
     if(filtroOS.fornecedor && o.fornecedorId!==filtroOS.fornecedor) return false;
+    if(filtroOS.rapido==='abertas' && ['concluida','cancelada','vendida'].includes(o.status)) return false;
+    if(filtroOS.rapido==='vencidas'){
+      if(!o.prazo) return false;
+      if(o.prazo >= hoje) return false;
+      if(o.status==='concluida'||o.status==='vendida') return false;
+    }
+    if(filtroOS.rapido==='vencer'){
+      if(!o.prazo) return false;
+      if(o.prazo !== hoje) return false;
+      if(o.status==='concluida'||o.status==='vendida') return false;
+    }
+    if(filtroOS.rapido==='minhas'){
+      if(!o.responsavel || !o.responsavel.trim()) return false;
+    }
     if(!q) return true;
     const forn = o.fornecedorId ? buscarForn(o.fornecedorId) : null;
     return [o.numero, o.clienteNome, nomeClienteOrdem(o), o.descricao, o.responsavel, forn&&forn.nome].some(v=>String(v||'').toLowerCase().includes(q));
