@@ -83,12 +83,12 @@ a{color:var(--prim)}
 .vazio .big{font-size:26px;display:block;margin-bottom:6px}
 
 /* ---------- Badges ---------- */
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.7px;font-weight:700;background:color-mix(in srgb,var(--c) 13%,#fff);color:var(--c);border:1px solid color-mix(in srgb,var(--c) 30%,#fff);white-space:nowrap}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11.7px;font-weight:700;background:color-mix(in srgb,var(--c) 13%,#fff);color:color-mix(in srgb,var(--c) 45%,#0b1220);border:1px solid color-mix(in srgb,var(--c) 38%,#fff);white-space:nowrap}
 .prio{font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.3px}
 .prio.alta{background:#fef2f2;color:#dc2626}
 .prio.media{background:#fffbeb;color:#d97706}
 .prio.baixa{background:#f0fdf4;color:#16a34a}
-.atrasado{color:var(--erro);font-weight:700}
+.atrasado{color:#b91c1c;font-weight:700}
 .ok-texto{color:#047857;font-weight:600}
 
 /* ---------- Toolbar / tabela ---------- */
@@ -342,7 +342,100 @@ body.tema-escuro .fup-pill.venc{background:#2a1215;color:#fca5a5}
 .card-cli .rodape{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
 .mini{font-size:11.3px;color:#475569;background:#f1f5f9;border-radius:6px;padding:2px 7px}
 .mini.fup{background:#eff6ff;color:#1d4ed8}
-.mini.venc{background:#fef2f2;color:#dc2626;font-weight:700}
+.mini.venc{background:#fef2f2;color:#b91c1c;font-weight:700}
+
+/* ---------- Funil: cabeçalho e indicadores ---------- */
+.funil-topo{display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:14px 16px;margin-bottom:16px}
+.funil-topo-info{flex:1;min-width:230px}
+.funil-topo-info b{font-size:14.5px;display:block;margin-bottom:2px}
+.funil-topo-info span{font-size:12.8px;color:#475569;display:block;line-height:1.45}
+.funil-acoes{display:flex;gap:9px;flex-wrap:wrap}
+.funil-metas{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-bottom:16px}
+.funil-meta{background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:14px 16px}
+.funil-meta .fm-topo{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.funil-meta .fm-lbl{font-size:12.3px;font-weight:700;color:#334155;letter-spacing:.2px}
+.funil-meta .fm-val{font-size:19px;font-weight:800;margin:5px 0 3px}
+.funil-meta .fm-sub{font-size:12px;color:#475569}
+.funil-meta .fm-barra{height:7px;border-radius:20px;background:#e2e8f0;overflow:hidden;margin-top:9px}
+.funil-meta .fm-barra i{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#3b82f6,#8b5cf6);transition:width .3s}
+.funil-metas .fm-conf{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.funil-metas .fm-conf input{width:110px}
+.funil-metas .fm-conf input.fm-tx{width:78px;text-align:right}
+
+/* ---------- Funil: termômetro / etapas ---------- */
+.funil-funil{display:flex;gap:10px;align-items:stretch;overflow-x:auto;padding:4px 2px 10px;margin-bottom:16px}
+.ff-etapa{flex:1;min-width:126px;border-radius:12px;padding:12px 13px 11px;cursor:pointer;transition:.15s;border:1.5px solid var(--borda);border-left:6px solid var(--ff-cor);text-align:left;background:var(--painel);box-shadow:var(--sombra)}
+.ff-etapa:hover{border-color:#cbd5e1;transform:translateY(-2px)}
+.ff-etapa.on{border-color:var(--ff-cor);background:#f8fafc;box-shadow:0 4px 16px rgba(15,23,42,.14)}
+.ff-etapa .ff-nome{font-size:12.3px;font-weight:700;color:#334155;display:flex;align-items:center;gap:6px}
+.ff-etapa .ff-nome .dot{width:8px;height:8px;border-radius:50%;background:var(--ff-cor)}
+.ff-etapa .ff-num{font-size:22px;font-weight:800;line-height:1.15;margin-top:3px;color:var(--texto)}
+.ff-etapa .ff-tot{font-size:11.7px;color:#475569;margin-top:2px;font-weight:600}
+.ff-etapa .ff-setas{display:flex;gap:5px;margin-top:7px;align-items:center;font-size:10.6px;color:#475569}
+.ff-etapa .ff-setas em{font-style:normal;background:#eef2f7;color:#334155;border-radius:5px;padding:1px 6px;font-weight:700}
+body.tema-escuro .ff-etapa{background:#0d1728}
+
+/* ---------- Funil: filtros ---------- */
+.funil-filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.funil-resumo{font-size:12.8px;color:#475569;margin-bottom:11px}
+.funil-resumo b{color:var(--texto)}
+
+/* ---------- Funil: colunas ---------- */
+.col{background:#e8edf5}
+.col-h .n.money{background:#0f172a;color:#fff;border-color:#0f172a;font-weight:700}
+.col-h .n.money.small{font-size:10.4px;letter-spacing:-.2px}
+.col-b .vazio-drop{color:#5b6b83;font-weight:600}
+.col-add{margin-top:2px;width:100%;border:1.5px dashed #cbd5e1;border-radius:9px;padding:8px;background:rgba(255,255,255,.6);font-size:12.4px;font-weight:650;color:#475569;cursor:pointer}
+.col-add:hover{border-color:var(--prim);color:var(--prim);background:#fff}
+.card-cli{position:relative}
+.card-cli .stale{position:absolute;top:8px;right:9px;font-size:11px;font-weight:800;color:#b45309;background:#fffbeb;border:1px solid #fde68a;border-radius:6px;padding:1px 6px;cursor:help}
+.card-cli .card-acoes{display:flex;gap:5px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.ff-empty{background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:26px 22px;text-align:center}
+.ff-empty .big-ico{font-size:34px;display:block;margin-bottom:10px}
+.ff-empty h3{font-size:16px;margin-bottom:6px}
+.ff-empty p{font-size:13.2px;color:#475569;max-width:520px;margin:0 auto 8px;line-height:1.5}
+.ff-empty .funil-acoes{justify-content:center;margin-top:14px}
+
+/* ---------- Modal do cliente: bloco de conversão ---------- */
+.conv-bloco{background:#f8fafc;border:1px solid var(--borda);border-radius:12px;padding:12px 14px;margin:14px 0 4px}
+.conv-bloco h4{font-size:12.6px;text-transform:uppercase;letter-spacing:.4px;color:#334155;margin-bottom:10px}
+.conv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}
+.conv-item{background:#fff;border:1px solid var(--borda);border-radius:10px;padding:10px 12px}
+.conv-item .ci-lbl{font-size:11.6px;font-weight:650;color:#475569}
+.conv-item .ci-val{font-size:16px;font-weight:800;margin-top:3px}
+.vl-total.stale{color:#b45309}
+.vl-total.zero{color:#64748b;font-weight:600}
+
+/* ---------- Funil: acompanhamento (seções recolhíveis) ---------- */
+.acompl{margin-top:4px}
+.acompl h2{font-size:15px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.acompl h2 .cnt{background:#e2e8f0;color:#334155;border-radius:20px;padding:1px 9px;font-size:11.5px;font-weight:700}
+.grupo{margin-bottom:12px;border:1px solid var(--borda);border-radius:var(--radius);background:var(--painel);box-shadow:var(--sombra);overflow:hidden}
+.grupo-topo{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;user-select:none}
+.grupo-topo:hover{background:#f8fafc}
+.grupo-topo .seta{transition:.18s;color:var(--suave);font-size:12px}
+.grupo.recolhido .seta{transform:rotate(-90deg)}
+.grupo-topo b{font-size:13.5px}
+.grupo-topo .cnt{background:#e2e8f0;color:#334155;border-radius:20px;padding:1px 9px;font-size:11.5px;font-weight:700}
+.grupo-topo .resumo-g{font-size:12.3px;color:#475569;margin-left:auto}
+.grupo.recolhido .grupo-corpo{display:none}
+.grupo-corpo{padding:0 14px 12px;border-top:1px solid var(--borda)}
+.grupo.g-venc .grupo-topo b{color:#b91c1c}
+.grupo.g-venc{border-left:4px solid var(--erro)}
+.grupo.g-esfriando{border-left:4px solid #f59e0b}
+.tabela-acompl td .cli-nome{font-weight:650}
+.tabela-acompl .sem-fup{color:#b45309;font-weight:650}
+
+/* ---------- Números ---------- */
+.numero-celula{display:flex;flex-direction:column;gap:7px;flex:1;min-width:230px}
+.numero-topo{display:flex;gap:8px;align-items:center}
+.numero-topo .np-ico{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-size:18px;flex:0 0 auto;color:#fff}
+.np-ico.rec{background:linear-gradient(135deg,#3b82f6,#2563eb)}
+.np-ico.des{background:linear-gradient(135deg,#64748b,#475569)}
+.np-txt{font-size:11.9px;color:#475569;line-height:1.35}
+.numero-btns{display:flex;gap:8px;flex-wrap:wrap}
+.numero-btns .btn{white-space:nowrap}
+.numero-btns .btn.mini-btn{padding:6px 11px;font-size:12.4px}
 
 /* ---------- Agenda ---------- */
 .secao-agenda{margin-bottom:22px}
@@ -743,7 +836,7 @@ const STAGES = [
 const TITULOS = {
   painel:['Painel','Visão geral do seu negócio'],
   clientes:['Clientes','Cadastro e acompanhamento dos seus clientes'],
-  funil:['Funil de vendas','Arraste os clientes entre as etapas'],
+  funil:['Funil de vendas','Acompanhe cada negociação, o valor em jogo e o próximo contato'],
   orcamentos:['Orçamentos','Crie orçamentos com produtos, totais e impressão'],
   ordens:['Ordens de serviço','Acompanhe a execução dos serviços aprovados'],
   financeiro:['Financeiro','Contas a receber, pagamentos e fluxo de caixa'],
@@ -968,6 +1061,7 @@ let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos'};
 let filtroOS = {busca:'', status:'todos', fornecedor:''};
 let filtroCat = {busca:'', margem:'todos'};
 let filtroAgenda = {busca:'', periodo:'todos', prioridade:'todas', ordenar:'data', modo:'lista'};
+let filtroFunil = {busca:'', origem:'todas', prio:'todas', fup:'todos', ordem:'fup', esfriando:false, etapa:'', colapsados:{}, metaEditar:false, refModo:'hoje', refAno:new Date().getFullYear(), refMes:new Date().getMonth()+1};
 let calRef = null; /* mês exibido na visão de calendário (Date do 1º dia do mês) */
 
 /* ---------- Persistência ---------- */
@@ -1930,7 +2024,7 @@ function render(){
   const el = document.getElementById('view');
   if(view==='painel') el.innerHTML = htmlPainel();
   else if(view==='clientes'){ el.innerHTML = htmlClientes(); ligarClientes(); }
-  else if(view==='funil') el.innerHTML = htmlFunil();
+  else if(view==='funil'){ el.innerHTML = htmlFunil(); ligarFunil(); }
   else if(view==='orcamentos'){ el.innerHTML = htmlOrcamentos(); ligarOrcamentos(); }
   else if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
   else if(view==='financeiro'){ el.innerHTML = htmlFinanceiro(); ligarFinanceiro(); }
@@ -2308,6 +2402,23 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='fin-lanc-editar') formLancamento(id);
   else if(btn.dataset.act==='fin-lanc-excluir') excluirLancamento(id);
   else if(btn.dataset.act==='orc-abrir'){ verOrc(id); }
+  /* Funil */
+  else if(btn.dataset.act==='funil-novo') formCliente(null, btn.dataset.etapa||undefined);
+  else if(btn.dataset.act==='funil-registrar') formHistorico(id);
+  else if(btn.dataset.act==='funil-agenda'){ view='agenda'; render(); }
+  else if(btn.dataset.act==='funil-esfriando'){ filtroFunil.esfriando = !filtroFunil.esfriando; render(); }
+  else if(btn.dataset.act==='funil-limpar-etapa'){ filtroFunil.etapa=''; render(); }
+  else if(btn.dataset.act==='funil-meta-editar'){ filtroFunil.metaEditar=true; render(); }
+  else if(btn.dataset.act==='funil-meta-cancelar'){ filtroFunil.metaEditar=false; render(); }
+  else if(btn.dataset.act==='funil-meta-salvar'){
+    const tx = document.getElementById('funilMetaTx');
+    const vl = document.getElementById('funilMetaVal');
+    db.meta = db.meta || {};
+    db.meta.valorMensal = Math.max(0, Number(tx && tx.value)||0);
+    db.meta.metaVendas = Math.max(0, Number(vl && vl.value)||0);
+    filtroFunil.metaEditar=false; salvar(); render();
+    toast(db.meta.valorMensal>0?`Meta definida: ${brl(db.meta.valorMensal)}.`:'Meta removida.');
+  }
   /* Contratos */
   else if(btn.dataset.act==='cont-editar') formContrato(id);
   else if(btn.dataset.act==='cont-excluir') excluirContrato(id);
@@ -2367,10 +2478,43 @@ function excluirCliente(id){
 /* =========================================================
    FORMULÁRIO DE CLIENTE
    ========================================================= */
-function formCliente(id){
+/* Bloco "acompanhamento da conversão" exibido no modal do cliente */
+function blocoConversaoCliente(c){
+  const d = funilDiasAte(c.criadoEm);
+  const naEtapa = diasNaEtapa(c);
+  const valor = funilValorCliente(c);
+  const decididoEm = c.fechadoEm || c.perdidoEm;
+  return `<div class="conv-bloco">
+    <h4>📈 Acompanhamento da negociação</h4>
+    <div class="conv-grid">
+      <div class="conv-item">
+        <div class="ci-lbl">Valor em negociação</div>
+        <div class="ci-val ${valor>0?'':'zero'}">${valor>0?brl(valor):'—'}</div>
+        <div class="ci-lbl" style="margin-top:4px">${valor>0?'soma dos orçamentos abertos':'sem orçamento vinculado'}</div>
+      </div>
+      <div class="conv-item">
+        <div class="ci-lbl">Tempo na etapa atual</div>
+        <div class="ci-val ${funilEsfriando(c)?'stale':''}">${naEtapa!=null?naEtapa+' dia(s)':'—'}</div>
+        <div class="ci-lbl" style="margin-top:4px">${funilEsfriando(c)?`🤒 parado há ${DIAS_ESFRIANDO}+ dias`:'movimentando bem'}</div>
+      </div>
+      <div class="conv-item">
+        <div class="ci-lbl">No funil há</div>
+        <div class="ci-val">${d!=null?Math.abs(d)+' dia(s)':'—'}</div>
+        <div class="ci-lbl" style="margin-top:4px">desde o cadastro</div>
+      </div>
+      ${decididoEm?`<div class="conv-item">
+        <div class="ci-lbl">${c.status==='fechado'?'Ganho em':'Perdido em'}</div>
+        <div class="ci-val">${fmtData(decididoEm)}</div>
+        <div class="ci-lbl" style="margin-top:4px">${c.status==='perdido'&&c.motivoPerda?esc(c.motivoPerda):(c.status==='fechado'&&c.valorNegocio?'valor '+brl(c.valorNegocio):'registrado')}</div>
+      </div>`:''}
+    </div>
+  </div>`;
+}
+
+function formCliente(id, etapaPre){
   const c = id ? buscarCli(id) : null;
   if(id && !c) return;
-  const v = c || {nome:'',empresa:'',telefone:'',email:'',cpf:'',cnpj:'',status:'novo',origem:'',notas:'',followup:null};
+  const v = c || {nome:'',empresa:'',telefone:'',email:'',cpf:'',cnpj:'',status:etapaPre||'novo',origem:'',notas:'',followup:null};
   const fu = v.followup || {};
 
   abrirModal(`
@@ -2395,6 +2539,7 @@ function formCliente(id){
           </div>
 
           ${c?`<div class="campo full"><div class="info-resumo" id="resumoOrcCli"></div></div>`:''}
+          ${c?`<div class="campo full">${blocoConversaoCliente(c)}</div>`:''}
 
           <div class="subtitulo">⏰ Próximo follow-up (opcional)</div>          <div class="campo"><label>Data do próximo contato</label><input type="date" name="fup_data" value="${esc(fu.data||'')}"></div>
           <div class="campo"><label>Prioridade</label>
@@ -2460,6 +2605,11 @@ function formCliente(id){
     else{
       db.clientes.unshift({id:uid(), criadoEm:agoraDT(), contatos:[], ...dados});
       toast('Cliente cadastrado com sucesso!');
+    }
+    const alvo = c || db.clientes[0];
+    if(alvo){
+      if(alvo.status==='fechado' && !alvo.fechadoEm) alvo.fechadoEm = agoraDT();
+      if(alvo.status==='perdido' && !alvo.perdidoEm) alvo.perdidoEm = agoraDT();
     }
     salvar(); fecharModal(); render();
   };
@@ -2558,36 +2708,396 @@ function renderSidebarPill(){
 /* =========================================================
    FUNIL (KANBAN)
    ========================================================= */
-function htmlFunil(){
-  if(!db.clientes.length){
-    return `<div class="card"><div class="vazio" style="padding:50px 20px"><span class="big">🗂️</span>Sem clientes para exibir no funil.<br>Cadastre seu primeiro cliente para começar.</div></div>`;
-  }
-  return `<div class="kanban">
-    ${STAGES.map(s=>{
-      const l = db.clientes.filter(c=>c.status===s.id)
-        .sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
-      return `<div class="col" data-stage="${s.id}">
-        <div class="col-h"><span class="dot" style="background:${s.cor}"></span>${s.label}<span class="n">${l.length}</span></div>
-        <div class="col-b">
-          ${l.map(c=>{
-            const fu = c.followup && c.followup.data;
-            const d = fu ? diasAte(c.followup.data) : null;
-            return `<div class="card-cli" draggable="true" data-id="${c.id}" data-act="editar">
-              <div class="nm">${esc(c.nome)}</div>
-              <div class="mt">${esc(c.empresa||c.telefone||'—')}</div>
-              <div class="rodape">
-                ${fu?`<span class="mini ${d<0?'venc':'fup'}">⏰ ${rotuloPrazo(c.followup.data)}</span>`:''}
-                ${(c.contatos||[]).length?`<span class="mini">🗒️ ${c.contatos.length}</span>`:''}
-              </div>
-            </div>`;
-          }).join('') || `<div class="vazio" style="padding:14px 6px;font-size:12.5px">Arraste clientes para cá</div>`}
-        </div>
-      </div>`;
-    }).join('')}
-  </div>
-  <div style="margin-top:12px;font-size:12.5px;color:var(--suave)">💡 Arraste um cliente de uma coluna para outra para mudar a etapa. Clique no card para editar.</div>`;
+const NOTA_MINIMA_FECHADO = 100;
+const DIAS_ESFRIANDO = 14;
+const MOTIVOS_PERDA = [
+  'Preço alto','Escolheu outro fornecedor','Não era o momento','Sem resposta / não respondeu',
+  'Sem verba no momento','Já tinha fornecedor','Produto indisponível','Outro motivo'
+];
+const FUNIL_ABERTOS = ['novo','contato','proposta'];
+
+/* "Agora" com a data de referência escolhida no funil (simulação de data) */
+function funilAgora(){
+  const ref = String(filtroFunil.dataRef||'').slice(0,10);
+  if(!ref) return new Date();
+  const d = new Date(ref+'T23:59:00');
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+function funilHojeISO(){ const d=funilAgora(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+function funilDiasAte(iso){
+  if(!iso) return null;
+  const a = new Date(String(iso).slice(0,10)+'T00:00:00');
+  const b = new Date(funilHojeISO()+'T00:00:00');
+  if(isNaN(a.getTime())) return null;
+  return Math.round((a-b)/86400000);
+}
+/* MM/AAAA da referência (preferências: hoje = mês atual +anos, senão mês/ano escolhidos) */
+function funilRefMes(){
+  if(filtroFunil.refModo==='hoje') return hojeISO().slice(0,7);
+  const y = Number(filtroFunil.refAno)||new Date().getFullYear();
+  const m = clamp(Number(filtroFunil.refMes), 1, 12) || (new Date().getMonth()+1);
+  return `${y}-${String(m).padStart(2,'0')}`;
+}
+function funilValorCliente(c){
+  const abertos = listaOrcamentos().filter(o=>o.clienteId===c.id && (o.status==='rascunho'||o.status==='enviado'));
+  if(abertos.length) return abertos.reduce((s,o)=>s+totalOrc(o),0);
+  const ro = resumoOrcCliente(c.id);
+  if(ro.total) return ro.total;
+  return Math.abs(Number(c.valorNegocio)||0);
+}
+/* Dias parados na etapa: desde o último contato, ou desde o cadastro se nunca houve contato */
+function diasNaEtapa(c){
+  const base = ultimoContato(c) || c.criadoEm || '';
+  const d = funilDiasAte(base);
+  return d==null ? null : Math.max(0, -d);
+}
+function funilEsfriando(c){
+  if(!FUNIL_ABERTOS.includes(c.status)) return false;
+  const d = diasNaEtapa(c);
+  return d!=null && d >= DIAS_ESFRIANDO;
+}
+function funilSemFollowup(c){
+  return FUNIL_ABERTOS.includes(c.status) && !(c.followup && c.followup.data);
+}
+function funilPrecisaAtencao(c){
+  const f = c.followup && c.followup.data;
+  if(f) return funilDiasAte(f) <= 0;
+  return funilEsfriando(c);
+}
+function funilOrdenar(arr, criterio){
+  const l = arr.slice();
+  const prioOrdem = {alta:0, media:1, baixa:2};
+  const fupDias = c => (c.followup && c.followup.data) ? funilDiasAte(c.followup.data) : 9999;
+  if(criterio==='valor') l.sort((a,b)=>funilValorCliente(b)-funilValorCliente(a));
+  else if(criterio==='recente') l.sort((a,b)=>String(b.criadoEm||'').localeCompare(String(a.criadoEm||'')));
+  else if(criterio==='prioridade') l.sort((a,b)=>{
+    const pa = c=> (c.followup&&c.followup.prioridade)||'media';
+    const dif = prioOrdem[pa(a)]-prioOrdem[pa(b)];
+    return dif!==0 ? dif : fupDias(a)-fupDias(b);
+  });
+  else l.sort((a,b)=>{ /* 'fup': quem precisa de atenção primeiro */
+    const at = c=> (funilFupAtrasado(c)||funilEsfriando(c))?0:(funilSemFollowup(c)?1:2);
+    const dif = at(a)-at(b);
+    return dif!==0 ? dif : fupDias(a)-fupDias(b);
+  });
+  return l;
+}
+function funilFupAtrasado(c){
+  const f = c.followup && c.followup.data;
+  return !!f && funilDiasAte(f) < 0;
+}
+/* Estágios visíveis incluindo "Ganho"/"Perdido" na coluna final */
+function funilEstagiosVisiveis(){
+  return STAGES.map(s=>({id:s.id, label:s.label, cor:s.cor, aceita:s.id}));
+}
+function funilCards(){
+  return db.clientes.filter(c=>{
+    const cf = c.criadoEm ? String(c.criadoEm).slice(0,7) : '';
+    if(cf && cf > funilRefMes()) return false;  /* ainda não existia na referência */
+    const q = String(filtroFunil.busca||'').trim().toLowerCase();
+    if(q && ![c.nome, c.empresa, c.telefone, c.email, c.origem, c.notas].some(v=>String(v||'').toLowerCase().includes(q))) return false;
+    if(filtroFunil.origem && filtroFunil.origem!=='todas' && (c.origem||'—')!==filtroFunil.origem) return false;
+    if(filtroFunil.prio && filtroFunil.prio!=='todas'){
+      const p = (c.followup && c.followup.prioridade) || 'media';
+      if(p!==filtroFunil.prio) return false;
+    }
+    if(filtroFunil.fup==='sem' && !funilSemFollowup(c)) return false;
+    if(filtroFunil.fup==='atrasado' && !funilFupAtrasado(c)) return false;
+    if(filtroFunil.fup==='semana'){ const d=funilDiasAte(c.followup&&c.followup.data); if(!(d!=null && d>=0 && d<=7)) return false; }
+    if(filtroFunil.esfriando && !funilEsfriando(c)) return false;
+    if(filtroFunil.etapa && c.status!==filtroFunil.etapa) return false;
+    return true;
+  });
+}
+/* Movimentação histórica da etapa (auditoria) */
+function funilMovimentos(){
+  return (db.auditoria||[]).filter(a=>a.acao==='funil').slice().sort((a,b)=>String(b.em||'').localeCompare(String(a.em||'')));
+}
+function funilResumoComercial(){
+  const todos = db.clientes;
+  const abertos = todos.filter(c=>FUNIL_ABERTOS.includes(c.status));
+  const fech = todos.filter(c=>c.status==='fechado');
+  const perd = todos.filter(c=>c.status==='perdido');
+  const decididos = fech.length + perd.length;
+  const valorPipeline = abertos.reduce((s,c)=>s+funilValorCliente(c),0);
+  const valorGanho = fech.reduce((s,c)=>s+funilValorCliente(c),0);
+  const ticket = fech.length ? valorGanho/fech.length : 0;
+  return {abertos, fech, perd, decididos, valorPipeline, valorGanho, ticket, conv: decididos?Math.round(fech.length/decididos*100):0};
+}
+function funilTaxaEtapa(id, base){
+  const de = db.clientes.filter(c=>c.status===id).length;
+  return base>0 ? Math.round(de/base*100) : 0;
 }
 
+function htmlFunil(){
+  const c = funilCards();
+  const ordenados = funilOrdenar(c, filtroFunil.ordem||'fup');
+  const origens = Array.from(new Set(db.clientes.map(x=>x.origem||'—'))).sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  const esfriando = db.clientes.filter(funilEsfriando).length;
+  const r = funilResumoComercial();
+
+  /* ---- Cabeçalho ---- */
+  const topo = `<div class="funil-topo">
+    <div class="funil-topo-info">
+      <b>🎯 Funil de vendas</b>
+      <span>Arraste os cards entre as colunas para mudar a etapa. Use o <b>＋ Registrar</b> abaixo dos cards para anotar um contato e agendar o próximo sem sair da tela.</span>
+    </div>
+    <div class="funil-acoes">
+      <button class="btn primary" data-act="funil-novo">＋ Novo cliente no funil</button>
+      <button class="btn ghost" data-act="funil-agenda">📅 Ver agenda de follow-ups</button>
+    </div>
+  </div>`;
+
+  /* ---- Termômetro: quantidade + valor por etapa ---- */
+  const funilBarra = `<div class="funil-funil">
+    ${STAGES.filter(s=>s.id!=='perdido').map(s=>{
+      const arr = ordenados.filter(x=>x.status===s.id);
+      const val = arr.reduce((sum,x)=>sum+funilValorCliente(x),0);
+      const base = s.id==='novo' ? Math.max(r.abertos.length,1) : (r.abertos.length||1);
+      const pct = funilTaxaEtapa(s.id, base);
+      return `<button type="button" class="ff-etapa${(filtroFunil.etapa===s.id)?' on':''}" style="--ff-cor:${s.cor}" data-funil-etapa="${s.id}" title="Filtrar somente ${s.label}">
+        <span class="ff-nome"><span class="dot"></span>${s.label}</span>
+        <span class="ff-num">${arr.length}</span>
+        <span class="ff-tot">${val>0?brl(val):'sem valor'}</span>
+        <span class="ff-setas">${s.id==='novo'
+          ? '<span>entrada do funil</span>'
+          : `${pct>0?`<em>${pct}%</em>`:''}<span>do total em aberto</span>`}</span>
+      </button>`;
+    }).join('')}
+  </div>`;
+
+  /* ---- Indicadores: meta, conversão, pipeline, alertas ---- */
+  const metaMes = Math.max(0, Number(db.meta && db.meta.valorMensal)||0);
+  const refMes = funilRefMes();
+  const ganhoRef = db.clientes.filter(x=>x.status==='fechado').reduce((s,x)=>{
+    const quando = (x.fechadoEm || ultimoContato(x) || x.criadoEm || '').slice(0,7);
+    return (quando===refMes) ? s+funilValorCliente(x) : s;
+  },0);
+  const pctMeta = metaMes>0 ? Math.min(100, Math.round(ganhoRef/metaMes*100)) : 0;
+  const [anoRef, mesRef] = refMes.split('-');
+  const cardMeta = `<div class="funil-meta">
+    <div class="fm-topo"><span class="fm-lbl">🎯 Meta de vendas</span>
+      ${filtroFunil.metaEditar
+        ? `<span class="fm-conf">
+             <input class="fm-tx" type="number" min="0" step="0.01" id="funilMetaTx" value="${metaMes?Number(metaMes).toFixed(2):''}" placeholder="%">
+             <input type="number" min="0" step="1" id="funilMetaVal" value="${(db.meta&&db.meta.metaVendas)||0}" placeholder="Meta R$" title="Meta de faturamento do mês (opcional)">
+             <button class="btn sm primary" data-act="funil-meta-salvar">OK</button>
+             <button class="btn sm ghost" data-act="funil-meta-cancelar">×</button>
+           </span>`
+        : `<button class="btn sm ghost" data-act="funil-meta-editar" title="Definir meta do mês">✏️ Definir</button>`}
+    </div>
+    <div class="fm-val">${brl(ganhoRef)}</div>
+    <div class="fm-sub">${metaMes>0
+      ? `de ${brl(metaMes)} em ${mesRef}/${anoRef} · faltam <b>${brl(Math.max(0,metaMes-ganhoRef))}</b>`
+      : `Faturamento ganho em ${mesRef}/${anoRef}. Defina uma meta para acompanhar o progresso.`}</div>
+    ${metaMes>0?`<div class="fm-barra"><i style="width:${pctMeta}%"></i></div>
+      <div class="fm-sub" style="margin-top:5px"><b>${pctMeta}%</b> da meta${pctMeta>=100?' — meta batida! 🎉':''}</div>`:''}
+  </div>`;
+
+  const cardConv = `<div class="funil-meta">
+    <div class="fm-topo"><span class="fm-lbl">📈 Taxa de conversão</span></div>
+    <div class="fm-val">${r.conv}%</div>
+    <div class="fm-sub"><b>${r.fech.length} ganho(s)</b> de ${r.decididos} oportunidade(s) decidida(s)</div>
+    <div class="fm-sub" style="margin-top:6px">Ganhos: <b>${brl(r.valorGanho)}</b> · Ticket médio: <b>${brl(r.ticket)}</b></div>
+  </div>`;
+
+  const cardPipe = `<div class="funil-meta">
+    <div class="fm-topo"><span class="fm-lbl">💼 Pipeline em aberto</span></div>
+    <div class="fm-val">${brl(r.valorPipeline)}</div>
+    <div class="fm-sub"><b>${r.abertos.length}</b> oportunidade(s) em Novo, Em contato ou Proposta</div>
+    <div class="fm-sub" style="margin-top:6px">Perdidos: <b>${r.perd.length}</b></div>
+  </div>`;
+
+  const cardAlerta = `<div class="funil-meta">
+    <div class="fm-topo"><span class="fm-lbl">🔔 Precisa de atenção</span></div>
+    <div class="fm-val" style="color:${(esfriando+r.abertos.filter(funilSemFollowup).length)>0?'#b91c1c':'#15803d'}">${esfriando + r.abertos.filter(funilSemFollowup).length}</div>
+    <div class="fm-sub"><b>${esfriando}</b> esfriando (${DIAS_ESFRIANDO}+ dias na etapa)</div>
+    <div class="fm-sub"><b>${r.abertos.filter(funilSemFollowup).length}</b> em aberto sem follow-up agendado</div>
+  </div>`;
+
+  /* ---- Filtros ---- */
+  const filtros = `<div class="funil-filtros">
+    <div class="busca"><input id="funilBusca" placeholder="Buscar por nome, empresa, telefone, origem..." value="${esc(filtroFunil.busca)}"></div>
+    <select class="filtro" id="funilOrigem" title="Origem do contato" aria-label="Filtrar por origem">
+      <option value="todas">Todas as origens</option>
+      ${origens.map(o=>`<option value="${esc(o)}" ${filtroFunil.origem===o?'selected':''}>${esc(o)}</option>`).join('')}
+    </select>
+    <select class="filtro" id="funilPrio" title="Prioridade do follow-up" aria-label="Filtrar por prioridade">
+      <option value="todas">Todas as prioridades</option>
+      <option value="alta" ${filtroFunil.prio==='alta'?'selected':''}>🔴 Alta</option>
+      <option value="media" ${filtroFunil.prio==='media'?'selected':''}>🟡 Média</option>
+      <option value="baixa" ${filtroFunil.prio==='baixa'?'selected':''}>🟢 Baixa</option>
+    </select>
+    <select class="filtro" id="funilFup" title="Situação do follow-up" aria-label="Filtrar por follow-up">
+      <option value="todos" ${filtroFunil.fup==='todos'?'selected':''}>Follow-up: todos</option>
+      <option value="atrasado" ${filtroFunil.fup==='atrasado'?'selected':''}>⏰ Atrasados</option>
+      <option value="semana" ${filtroFunil.fup==='semana'?'selected':''}>📅 Nos próximos 7 dias</option>
+      <option value="sem" ${filtroFunil.fup==='sem'?'selected':''}>🚫 Sem follow-up agendado</option>
+    </select>
+    <select class="filtro" id="funilOrdem" title="Ordenar" aria-label="Ordenar cards">
+      <option value="fup" ${filtroFunil.ordem==='fup'?'selected':''}>Ordenar: quem precisa de atenção</option>
+      <option value="valor" ${filtroFunil.ordem==='valor'?'selected':''}>Maior valor primeiro</option>
+      <option value="prioridade" ${filtroFunil.ordem==='prioridade'?'selected':''}>Prioridade do follow-up</option>
+      <option value="recente" ${filtroFunil.ordem==='recente'?'selected':''}>Cadastro mais recente</option>
+      <option value="nome" ${filtroFunil.ordem==='nome'?'selected':''}>Nome (A–Z)</option>
+    </select>
+    <button class="btn ghost sm ${filtroFunil.esfriando?'primary':''}" data-act="funil-esfriando" title="Mostrar somente negociações esfriando">🥶 Só esfriando${esfriando?` (${esfriando})`:''}</button>
+    <button class="btn ghost sm ${filtroFunil.etapa?'primary':''}" data-act="funil-limpar-etapa" title="Mostrar todas as etapas">🧹 Etapa: ${filtroFunil.etapa?esc(stage(filtroFunil.etapa).label):'todas'}</button>
+  </div>`;
+
+  const nCards = ordenados.length;
+  const valorVis = ordenados.reduce((s,x)=>s+funilValorCliente(x),0);
+  const resumo = `<div class="funil-resumo">Mostrando <b>${nCards}</b> de <b>${db.clientes.length}</b> cliente(s)${nCards?` · valor em negociação <b>${brl(valorVis)}</b>`:''} — referência <b>${mesRef}/${anoRef}</b>.</div>`;
+
+  /* ---- Sem clientes ---- */
+  if(!db.clientes.length){
+    return topo + `<div class="ff-empty">
+      <span class="big-ico">🎯</span>
+      <h3>Seu funil está vazio</h3>
+      <p>Cadastre os clientes e leads que você está negociando. Cada um entra na etapa <b>Novo</b> e vai avançando conforme o contato acontece.</p>
+      <p class="mini" style="display:inline-block">💡 Dica: registre um contato pelo histórico do cliente e o CRM agenda o próximo follow-up automaticamente.</p>
+      <div class="funil-acoes">
+        <button class="btn primary" data-act="funil-novo">＋ Cadastrar primeiro cliente</button>
+        <button class="btn ghost" data-act="exemplo">📦 Carregar dados de exemplo</button>
+      </div>
+    </div>`;
+  }
+
+  /* ---- Colunas ---- */
+  const colunas = STAGES.map(s=>{
+    const arr = ordenados.filter(x=>x.status===s.id);
+    const valor = arr.reduce((sum,x)=>sum+funilValorCliente(x),0);
+    return `<div class="col" data-stage="${s.id}" aria-label="Etapa ${s.label}">
+      <div class="col-h">
+        <span class="dot" style="background:${s.cor}"></span>${s.label}
+        <span class="n">${arr.length}</span>
+        ${valor>0?`<span class="n money ${valor>=100000?'small':''}" title="Valor em negociação nesta etapa">${brl(valor)}</span>`:''}
+      </div>
+      <div class="col-b">
+        ${arr.map(c=>{
+          const fu = c.followup && c.followup.data;
+          const d = fu ? funilDiasAte(fu) : null;
+          const val = funilValorCliente(c);
+          const esf = funilEsfriando(c);
+          const de = diasNaEtapa(c);
+          return `<div class="card-cli" draggable="true" data-id="${c.id}" data-abrir="${c.id}" title="Clique para editar · arraste para mudar de etapa">
+            ${esf?`<span class="stale" title="Sem contato desde ${de} dias">🤒 ${de}d</span>`:''}
+            <div class="nm">${esc(c.nome)}</div>
+            <div class="mt">${esc(c.empresa||c.telefone||'—')}</div>
+            <div class="mt" style="margin-top:5px">${val>0?`💼 <b>${brl(val)}</b>`:'<span style="color:#64748b">sem orçamento</span>'}</div>
+            <div class="rodape">
+              ${fu?`<span class="mini ${d<0?'venc':'fup'}" title="${c.followup.nota?esc(c.followup.nota):''}">⏰ ${rotuloPrazo(fu)}</span>`:`<span class="mini" style="background:#fffbeb;color:#b45309;font-weight:700">🚫 sem follow-up</span>`}
+              ${(c.contatos||[]).length?`<span class="mini" title="Contatos registrados">🗒️ ${c.contatos.length}</span>`:''}
+              ${c.origem?`<span class="mini">${esc(c.origem)}</span>`:''}
+            </div>
+            <div class="card-acoes">
+              <button class="btn sm ghost mini-btn" data-act="funil-registrar" data-id="${c.id}" title="Registrar contato e agendar o próximo">🗒️ Registrar</button>
+              ${c.telefone?`<button class="btn sm ghost mini-btn" data-act="cli-zap" data-id="${c.id}" title="Falar no WhatsApp">💬</button>`:''}
+              ${fu?`<button class="btn sm ghost mini-btn" data-act="concluir" data-id="${c.id}" title="Concluir o follow-up atual">✓</button>`:''}
+            </div>
+          </div>`;
+        }).join('') || `<div class="vazio vazio-drop" style="padding:14px 6px;font-size:12.5px">Arraste clientes para cá</div>`}        <button class="col-add" data-act="funil-novo" data-etapa="${s.id}" title="Cadastrar um cliente já nesta etapa">＋ Adicionar em ${s.label}</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  /* ---- Acompanhamento detalhado ---- */
+  const acompanhamento = funilAcompanhamentoHTML();
+
+  return topo + `<div class="funil-metas">${cardMeta}${cardConv}${cardPipe}${cardAlerta}</div>`
+    + funilBarra + filtros + resumo
+    + `<div class="kanban">${colunas}</div>`
+    + `<div style="margin-top:2px;font-size:12.5px;color:#475569">💡 Clique no card para abrir o cliente, ou arraste-o entre as colunas para mudar a etapa.</div>`
+    + acompanhamento;
+}
+
+/* ---------- Acompanhamento: grupos e tabela ---------- */
+function funilAcompanhamentoHTML(){
+  const base = funilOrdenar(funilCards().filter(x=>FUNIL_ABERTOS.includes(x.status)), 'fup');
+  if(!base.length) return '';
+  const hoje = [], atras = [], sem = [], esf = [], futuros = [];
+  base.forEach(c=>{
+    const fu = c.followup && c.followup.data;
+    if(fu){
+      const d = funilDiasAte(fu);
+      if(d<0) atras.push(c);
+      else if(d===0) hoje.push(c);
+      else if(d<=7) futuros.push(c);
+      else futuros.push(c);
+    } else if(funilEsfriando(c)) esf.push(c);
+    else sem.push(c);
+  });
+  const colapsado = k => (filtroFunil.colapsados||{})[k];
+  const grupo = (key, titulo, ico, arr, cls, obs) => {
+    if(!arr.length) return '';
+    const valor = arr.reduce((s,x)=>s+funilValorCliente(x),0);
+    const recolhido = colapsado(key);
+    return `<div class="grupo ${cls||''} ${recolhido?'recolhido':''}" data-grupo="${key}">
+      <div class="grupo-topo" data-act="funil-grupo" data-key="${key}" role="button" tabindex="0" aria-expanded="${recolhido?'false':'true'}">
+        <span class="seta">▾</span><b>${ico} ${titulo}</b>
+        <span class="cnt">${arr.length}</span>
+        ${valor>0?`<span class="mini">${brl(valor)}</span>`:''}
+        <span class="resumo-g">${obs||''}</span>
+      </div>
+      <div class="grupo-corpo">
+        <div class="tabela-wrap"><table class="tabela-acompl">
+          <thead><tr><th>Cliente</th><th>Etapa</th><th>Valor</th><th>Último contato</th><th>Follow-up</th><th style="text-align:right">Ações</th></tr></thead>
+          <tbody>${arr.map(c=>funilLinha(c)).join('')}</tbody>
+        </table></div>
+      </div>
+    </div>`;
+  };
+  return `<div class="acompl">
+    <h2>📋 Acompanhamento <span class="cnt">${base.length} em aberto</span></h2>
+    ${grupo('venc','Atrasados','🚨',atras,'g-venc','follow-up vencido — fale hoje')}
+    ${grupo('hoje','Para hoje','📍',hoje,'','contato marcado para hoje')}
+    ${grupo('esf','Esfriando','🤒',esf,'g-esfriando',`${DIAS_ESFRIANDO}+ dias sem contato — retome a conversa`)}
+    ${grupo('sem','Sem follow-up agendado','🚫',sem,'','agende o próximo passo')}
+    ${grupo('fut','Agendados','📅',futuros,'','próximos contatos marcados')}
+  </div>`;
+}
+function funilLinha(c){
+  const fu = c.followup && c.followup.data;
+  const d = fu ? funilDiasAte(fu) : null;
+  const val = funilValorCliente(c);
+  const uc = ultimoContato(c);
+  return `<tr>
+    <td><span class="cli-nome">${esc(c.nome)}</span>${c.empresa?`<div class="mt">${esc(c.empresa)}</div>`:''}${c.origem?`<div class="mt">${esc(c.origem)}</div>`:''}</td>
+    <td>${badgeStatus(c.status)}</td>
+    <td>${val>0?brl(val):'<span class="mt">—</span>'}</td>
+    <td>${uc?fmtDT(uc):'<span class="mt">—</span>'}</td>
+    <td>${fu?`<span class="${d<0?'atrasado':''}">${fmtData(fu)}</span> <span class="mt">(${rotuloPrazo(fu)})</span>`:'<span class="sem-fup">🚫 sem follow-up</span>'}</td>
+    <td><div class="acoes" style="justify-content:flex-end">
+      <button class="icon-btn" title="Registrar contato" data-act="funil-registrar" data-id="${c.id}">🗒️</button>
+      ${c.telefone?`<button class="icon-btn" title="WhatsApp" data-act="cli-zap" data-id="${c.id}">💬</button>`:''}
+      <button class="icon-btn" title="Editar cliente" data-act="editar" data-id="${c.id}">✏️</button>
+    </div></td>
+  </tr>`;
+}
+function ligarFunil(){
+  const b = document.getElementById('funilBusca');
+  if(b) b.addEventListener('input', ()=>{ filtroFunil.busca=b.value; render(); });
+  const fo = document.getElementById('funilOrigem');
+  if(fo) fo.addEventListener('change', e=>{ filtroFunil.origem=e.target.value; render(); });
+  const fp = document.getElementById('funilPrio');
+  if(fp) fp.addEventListener('change', e=>{ filtroFunil.prio=e.target.value; render(); });
+  const ff = document.getElementById('funilFup');
+  if(ff) ff.addEventListener('change', e=>{ filtroFunil.fup=e.target.value; render(); });
+  const ford = document.getElementById('funilOrdem');
+  if(ford) ford.addEventListener('change', e=>{ filtroFunil.ordem=e.target.value; render(); });
+  /* termômetro: clicar numa etapa filtra por ela */
+  document.querySelectorAll('[data-funil-etapa]').forEach(btn=>btn.addEventListener('click', ()=>{
+    const id = btn.dataset.funilEtapa;
+    filtroFunil.etapa = (filtroFunil.etapa===id) ? '' : id;
+    render();
+  }));
+  /* recolher/expandir grupos de acompanhamento */
+  document.querySelectorAll('[data-act="funil-grupo"]').forEach(el=>{
+    const alternar = ()=>{ const k=el.dataset.key; filtroFunil.colapsados = filtroFunil.colapsados||{}; filtroFunil.colapsados[k] = !filtroFunil.colapsados[k]; render(); };
+    el.addEventListener('click', alternar);
+    el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); alternar(); } });
+  });
+}
 let arrastando = null;
 document.getElementById('view').addEventListener('dragstart', e=>{
   const card = e.target.closest('.card-cli');
@@ -2615,13 +3125,67 @@ document.getElementById('view').addEventListener('drop', e=>{
   e.preventDefault();
   const c = buscarCli(arrastando);
   if(c && c.status !== col.dataset.stage){
+    const de = stage(c.status).label;
     c.status = col.dataset.stage;
+    const para = stage(c.status).label;
+    if(c.status==='fechado') c.fechadoEm = agoraDT();
+    if(c.status==='perdido') c.perdidoEm = agoraDT();
+    auditar('funil', `${c.nome}: ${de} → ${para}`);
     salvar();
-    toast(`${c.nome} movido para "${stage(c.status).label}".`);
+    toast(`${c.nome} movido para "${para}".`);
+    if(c.status==='fechado' || c.status==='perdido'){
+      setTimeout(()=>perguntarProximoPasso(c.id, de), 250);
+    }
   }
   arrastando = null;
   render();
 });
+/* Pergunta o valor/motivo ao concluir a negociação (ganho ou perdido) */
+function perguntarProximoPasso(id, de){
+  const c = buscarCli(id);
+  if(!c) return;
+  const ganhou = c.status==='fechado';
+  const aberto = (db.orcamentos||[]).filter(o=>o.clienteId===c.id && (o.status==='rascunho'||o.status==='enviado'));
+  const fechados = (db.orcamentos||[]).filter(o=>o.clienteId===c.id && (o.status==='aprovado'||o.status==='entregue'));
+  const sugerido = aberto.length ? aberto.reduce((s,o)=>s+totalOrc(o),0) : (fechados.length ? fechados.reduce((s,o)=>s+totalOrc(o),0) : 0);
+  abrirModal(`
+    <div class="modal-h"><h2>${ganhou?'🎉 Negócio ganho!':'😔 Negócio perdido'}</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      <p class="mini" style="display:block;margin-bottom:14px">${esc(c.nome)}${de?` · veio de <b>${esc(de)}</b>`:''}</p>
+      <div class="form-grid">
+        <div class="campo"><label>Valor fechado (R$)</label><input type="number" step="0.01" min="0" id="ppValor" value="${sugerido?Number(sugerido).toFixed(2):''}" placeholder="0,00"></div>
+        <div class="campo"><label>Data da decisão</label><input type="date" id="ppData" value="${hojeISO()}"></div>
+        ${ganhou?'':`<div class="campo full"><label>Motivo da perda</label>
+          <select id="ppMotivo">${MOTIVOS_PERDA.map(m=>`<option>${esc(m)}</option>`).join('')}</select></div>`}
+        <div class="campo full"><label>Observação (opcional)</label><input id="ppObs" maxlength="200" placeholder="${ganhou?'Ex.: cliente pediu nota fiscal e prazo de entrega':'Ex.: disse que o concorrente cobrou menos'}"></div>
+      </div>
+    </div>
+    <div class="modal-f">
+      <button type="button" class="btn ghost" data-fechar>Pular</button>
+      <button type="button" class="btn primary" id="ppSalvar">${ganhou?'✓ Salvar ganho':'✓ Salvar perda'}</button>
+    </div>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  document.getElementById('ppSalvar').onclick = ()=>{
+    const val = Math.abs(Number(document.getElementById('ppValor').value)||0);
+    const data = String(document.getElementById('ppData').value||hojeISO());
+    const obs = String(document.getElementById('ppObs').value||'').trim();
+    c.valorNegocio = val;
+    if(ganhou){
+      c.fechadoEm = data+'T12:00';
+      delete c.perdidoEm; delete c.motivoPerda;
+    } else {
+      c.perdidoEm = data+'T12:00';
+      c.motivoPerda = String(document.getElementById('ppMotivo').value||'Outro motivo');
+      delete c.fechadoEm;
+    }
+    if(obs){
+      c.notas = (c.notas? c.notas+'\n' : '') + `[${ganhou?'Ganho':'Perdido'} ${fmtData(data)}] ${obs}`;
+    }
+    auditar('funil', `${c.nome}: ${ganhou?'ganho':'perdido'}${val>0?` ${brl(val)}`:''}${!ganhou&&c.motivoPerda?` — ${c.motivoPerda}`:''}`);
+    salvar(); fecharModal(); render();
+    toast(ganhou?`Ganho registrado${val>0?': '+brl(val):''}.`:`Perda registrada${c.motivoPerda?': '+c.motivoPerda:''}.`);
+  };
+}
 
 /* =========================================================
    AGENDA DE FOLLOW-UPS
