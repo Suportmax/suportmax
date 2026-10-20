@@ -2343,7 +2343,10 @@ function render(){
   }else if(view==='mensagens'){
     btnNovo.textContent = '＋ Nova mensagem';
     btnNovo.onclick = ()=>formMensagem(null);
+  }else if(view==='aniversarios'){
+    btnNovo.style.display = 'none';
   }else{
+    btnNovo.style.display = 'inline-flex';
     btnNovo.textContent = '＋ Novo cliente';
     btnNovo.onclick = ()=>formCliente(null);
   }
@@ -2381,7 +2384,7 @@ function render(){
   /* aviso de offline (os dados continuam salvos localmente e sincronizam depois) */
   if(!navigator.onLine){
     const el2 = document.getElementById('view');
-    el2.insertAdjacentHTML('afterbegin', `<div class="offline-banner">📴 <div><b>Você está sem conexão.</b> Pode continuar trabalhando — tudo fica salvo neste aparelho e sobe para a nuvem quando a internet voltar.</div></div>`);
+    if(el2) el2.insertAdjacentHTML('afterbegin', `<div class="offline-banner">📴 <div><b>Você está sem conexão.</b> Pode continuar trabalhando — tudo fica salvo neste aparelho e sobe para a nuvem quando a internet voltar.</div></div>`);
   }
 }
 
