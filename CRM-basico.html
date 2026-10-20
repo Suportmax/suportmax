@@ -105,6 +105,7 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .icon-btn{width:30px;height:30px;border-radius:7px;display:grid;place-items:center;font-size:14px;border:1px solid var(--borda);background:#fff;transition:.15s}
 .icon-btn:hover{background:#f1f5f9;border-color:#cbd5e1}
 .icon-btn.del:hover{background:#fef2f2;border-color:#fecaca}
+.icon-btn.nf-on{background:#fffbeb;border-color:#fde68a}
 .contagem{font-size:13px;color:var(--suave);margin:0 0 10px 2px}
 
 /* ---------- Funil (Kanban) ---------- */
@@ -626,7 +627,7 @@ const CATALOGO_INFO = [
 let db = carregar();
 let view = 'painel';
 let filtro = {busca:'', status:'todos', ordenar:'recentes'};
-let filtroOrc = {busca:'', status:'todos'};
+let filtroOrc = {busca:'', status:'todos', nf:'todos'};
 
 /* ---------- Persistência ---------- */
 function emissorVazio(){ return {nome:'', telefone:'', email:'', site:'', instagram:'', endereco:'', doc:''}; }
@@ -1346,6 +1347,7 @@ function htmlPainel(){
     ${stat('Follow-ups vencidos', vencidos, '⏰', vencidos>0)}
     ${stat('Orçamentos em aberto', orcAbertos.length, '🧾')}
     ${stat('Valor aprovado', brl(valorAprov), '💰')}
+    ${stat('NF pendentes', qtdNFPendentes(), '📄', qtdNFPendentes()>0)}
   </div>
 
   <div class="cols">
@@ -1531,6 +1533,7 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='orc-mail') enviarMail(id);
   else if(btn.dataset.act==='orc-copiar') copiarOrc(id);
   else if(btn.dataset.act==='orc-produtos') catalogoProdutos();
+  else if(btn.dataset.act==='orc-nf') formNotaFiscal(id);
   else if(btn.dataset.act==='export-json') exportarJSON();
   else if(btn.dataset.act==='export-csv') exportarCSV();
   else if(btn.dataset.act==='exemplo') carregarExemplo();
@@ -1894,6 +1897,8 @@ function listaOrcFiltrada(){
   return listaOrcamentos().filter(o=>{
     const okS = filtroOrc.status==='todos' || o.status===filtroOrc.status;
     if(!okS) return false;
+    if(filtroOrc.nf==='pendentes' && !nfPendente(o)) return false;
+    if(filtroOrc.nf==='emitidas' && !nfEmitida(o)) return false;
     if(!q) return true;
     return [o.numero, nomeClienteOrc(o), o.obs].some(v=>String(v||'').toLowerCase().includes(q));
   }).sort((a,b)=>String(b.criadoEm||b.data||'').localeCompare(String(a.criadoEm||a.data||'')));
@@ -1921,6 +1926,11 @@ function htmlOrcamentos(){
     <select class="filtro" id="fStatusOrc">
       <option value="todos">Todos os status</option>
       ${STATUS_ORC.map(s=>`<option value="${s.id}" ${filtroOrc.status===s.id?'selected':''}>${s.label}</option>`).join('')}
+    </select>
+    <select class="filtro" id="fNFOrc" title="Filtrar por nota fiscal">
+      <option value="todos" ${filtroOrc.nf==='todos'?'selected':''}>NF: todas</option>
+      <option value="pendentes" ${filtroOrc.nf==='pendentes'?'selected':''}>📄 NF pendentes (${qtdNFPendentes()})</option>
+      <option value="emitidas" ${filtroOrc.nf==='emitidas'?'selected':''}>✅ NF emitidas</option>
     </select>
     <button class="btn ghost" id="btnCatalogo">📦 Catálogo de produtos</button>
     <button class="btn primary" id="btnNovoOrc">＋ Novo orçamento</button>
@@ -1951,6 +1961,7 @@ function tabelaOrcHTML(){
     <td>
       <div class="nm">${esc(o.numero||'—')}</div>
       <div class="mt">${fmtData(o.data)}${o.validade?` · válido até ${fmtData(o.validade)}`:''} · ${(o.itens||[]).length} item(ns)</div>
+      ${precisaNF(o)?`<div style="margin-top:4px">${badgeNF(o)}</div>`:''}
     </td>
     <td>
       <div class="nm">${esc(nomeClienteOrc(o))}</div>
@@ -1966,6 +1977,7 @@ function tabelaOrcHTML(){
     <td>
       <div class="acoes">
         <button class="icon-btn" title="Ver / Imprimir" data-act="orc-ver" data-id="${o.id}">👁️</button>
+        <button class="icon-btn${nfPendente(o)?' nf-on':''}" title="${podeMarcarNF(o)?'Nota fiscal (controle)':(precisaNF(o)?'Nota fiscal (controle)':'Só em orçamentos aprovados')}" data-act="orc-nf" data-id="${o.id}" style="${podeMarcarNF(o)||precisaNF(o)?'':'opacity:.35'}">📄</button>
         <button class="icon-btn" title="Duplicar" data-act="orc-duplicar" data-id="${o.id}">📋</button>
         <button class="icon-btn" title="Enviar por WhatsApp" data-act="orc-zap" data-id="${o.id}">💬</button>
         <button class="icon-btn" title="Editar" data-act="orc-editar" data-id="${o.id}">✏️</button>
@@ -1979,6 +1991,8 @@ function ligarOrcamentos(){
   const b = document.getElementById('buscaOrc');
   b.addEventListener('input', ()=>{ filtroOrc.busca = b.value; atualizarTabelaOrc(); });
   document.getElementById('fStatusOrc').addEventListener('change', e=>{ filtroOrc.status = e.target.value; atualizarTabelaOrc(); });
+  const fNF = document.getElementById('fNFOrc');
+  if(fNF) fNF.addEventListener('change', e=>{ filtroOrc.nf = e.target.value; atualizarTabelaOrc(); });
   document.getElementById('btnNovoOrc').addEventListener('click', ()=>formOrcamento(null));
   document.getElementById('btnCatalogo').addEventListener('click', catalogoProdutos);
   atualizarTabelaOrc();
@@ -2395,6 +2409,7 @@ function orcDocHTML(o){
     </div>
 
     ${o.obs?`<div class="obs"><b>Observações e condições:</b><br>${esc(o.obs)}</div>`:''}
+    ${nfEmitida(o)?`<div class="obs" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><b>Nota fiscal:</b> emitida${nfDe(o).numero?` nº ${esc(nfDe(o).numero)}`:''}${nfDe(o).emitidaEm?` em ${fmtData(nfDe(o).emitidaEm)}`:''}.</div>`:''}
     <div class="assinaturas">
       <div>Assinatura do cliente</div>
       <div>Responsável pela emissão</div>
@@ -2448,6 +2463,108 @@ function excluirOrc(id){
   if(!confirm(`Excluir o orçamento ${o.numero}? Essa ação não pode ser desfeita.`)) return;
   db.orcamentos = listaOrcamentos().filter(x=>x.id!==id);
   salvar(); render(); toast('Orçamento excluído.');
+}
+
+/* =========================================================
+   NOTA FISCAL (controle interno — a emissão é feita em outro sistema)
+   ========================================================= */
+/* o.nf = { precisa:true, status:'pendente'|'emitida', numero:'', obs:'', atualizadoEm:'' } */
+function nfDe(o){ return (o && o.nf && typeof o.nf==='object') ? o.nf : null; }
+function precisaNF(o){ const n=nfDe(o); return !!(n && n.precisa); }
+function nfEmitida(o){ const n=nfDe(o); return !!(n && n.precisa && n.status==='emitida'); }
+function nfPendente(o){ const n=nfDe(o); return !!(n && n.precisa && n.status!=='emitida'); }
+function qtdNFPendentes(){ return listaOrcamentos().filter(nfPendente).length; }
+function badgeNF(o){
+  if(!precisaNF(o)) return '';
+  return nfEmitida(o)
+    ? `<span class="badge" style="--c:#10b981">NF emitida${nfDe(o).numero?' · '+esc(nfDe(o).numero):''}</span>`
+    : `<span class="badge" style="--c:#f59e0b">NF pendente</span>`;
+}
+function podeMarcarNF(o){ return o && o.status==='aprovado'; }
+
+function formNotaFiscal(id){
+  const o = buscarOrc(id); if(!o) return;
+  if(!podeMarcarNF(o)){ toast('Só é possível marcar nota fiscal em orçamentos com status "Aprovado".','erro'); return; }
+  const n = nfDe(o) || { precisa:false, status:'pendente', numero:'', obs:'' };
+  const cli = buscarCli(o.clienteId);
+  abrirModal(`
+    <form id="fNF">
+      <div class="modal-h"><h2>📄 Nota fiscal — ${esc(o.numero||'')}</h2><button type="button" class="x" data-fechar>×</button></div>
+      <div class="modal-b">
+        <div class="nota-rodape" style="margin:0 0 14px;background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a">
+          Este controle <b>não emite a nota</b>. Ele só registra que o orçamento precisa de nota, para você lançar no seu sistema de emissão e depois dar baixa aqui.
+        </div>
+        <div class="form-grid">
+          <div class="campo full"><label>Situação do controle</label>
+            <select name="status">
+              <option value="pendente" ${n.status!=='emitida'?'selected':''}>📄 Precisa emitir (pendente)</option>
+              <option value="emitida" ${n.status==='emitida'?'selected':''}>✅ Já emitida</option>
+            </select>
+          </div>
+          <div class="campo"><label>Número da nota (quando emitir)</label><input name="numero" maxlength="40" value="${esc(n.numero||'')}" placeholder="Ex.: 12345"></div>
+          <div class="campo"><label>Data de emissão</label><input type="date" name="emitidaEm" value="${esc(n.emitidaEm||'')}"></div>
+          <div class="campo full"><label>Observação (ex.: o que precisa na nota)</label><input name="obs" maxlength="160" value="${esc(n.obs||'')}" placeholder="Ex.: emitir com os dados da empresa tal / destacar ICMS"></div>
+        </div>
+
+        <div class="subtitulo">📋 Resumo para lançar no seu emissor</div>
+        <div class="op-card" style="box-shadow:none">
+          <div style="font-size:13px;line-height:1.9">
+            <div><b>Cliente:</b> ${esc(cli?cli.nome:o.clienteNome||'—')}${cli&&cli.empresa?` — ${esc(cli.empresa)}`:''}</div>
+            ${docCliente(cli)?`<div><b>${docCliente(cli).rotulo}:</b> ${esc(docCliente(cli).valor)}</div>`:''}
+            ${cli&&cli.telefone?`<div><b>Telefone:</b> ${esc(cli.telefone)}</div>`:''}
+            <div><b>Valor total:</b> ${brl(totalOrc(o))}</div>
+            <div><b>Itens:</b> ${(o.itens||[]).map(i=>esc(i.desc||'')).filter(Boolean).join(' · ')||'—'}</div>
+          </div>
+          <div style="margin-top:10px"><button type="button" class="btn ghost sm" id="btnCopiarNF">📋 Copiar resumo</button></div>
+        </div>
+      </div>
+      <div class="modal-f">
+        ${precisaNF(o)?`<button type="button" class="btn ghost" id="btnRemoverNF">Remover aviso de NF</button>`:''}
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">Salvar</button>
+      </div>
+    </form>`, true);
+
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+
+  document.getElementById('btnCopiarNF').onclick = ()=>{
+    const linhas = [];
+    linhas.push('DADOS PARA NOTA FISCAL');
+    linhas.push('Orçamento: ' + (o.numero||''));
+    linhas.push('Cliente: ' + (cli?cli.nome:o.clienteNome||''));
+    if(cli&&cli.empresa) linhas.push('Empresa: ' + cli.empresa);
+    if(docCliente(cli)) linhas.push(docCliente(cli).rotulo + ': ' + docCliente(cli).valor);
+    if(cli&&cli.telefone) linhas.push('Telefone: ' + cli.telefone);
+    if(cli&&cli.email) linhas.push('E-mail: ' + cli.email);
+    linhas.push('Valor total: ' + brl(totalOrc(o)));
+    linhas.push('Itens:');
+    (o.itens||[]).forEach(i=>linhas.push(`  - ${i.desc} — ${Number(i.qtd)||0} × ${brl(i.unit)} = ${brl(itemTotal(i))}`));
+    copiarTexto(linhas.join('\n'));
+    toast('Resumo copiado! Cole no seu sistema de emissão.');
+  };
+
+  const btnRemover = document.getElementById('btnRemoverNF');
+  if(btnRemover) btnRemover.onclick = ()=>{
+    if(!confirm('Remover o aviso de nota fiscal deste orçamento?')) return;
+    delete o.nf; salvar(); fecharModal(); render();
+    toast('Aviso de NF removido.');
+  };
+
+  document.getElementById('fNF').onsubmit = e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const st = String(f.get('status')||'pendente');
+    o.nf = {
+      precisa: true,
+      status: st==='emitida' ? 'emitida' : 'pendente',
+      numero: String(f.get('numero')||'').trim(),
+      emitidaEm: String(f.get('emitidaEm')||''),
+      obs: String(f.get('obs')||'').trim(),
+      atualizadoEm: agoraDT()
+    };
+    salvar(); fecharModal(); render();
+    toast(o.nf.status==='emitida' ? '✅ Nota registrada como emitida.' : '📄 Aviso de nota fiscal salvo — pendente de emissão.', 'ok');
+  };
 }
 
 /* =========================================================
