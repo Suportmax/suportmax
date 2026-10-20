@@ -287,7 +287,14 @@ table.itens .num{text-align:right;white-space:nowrap}
 
 /* Rodapé da sidebar: usuário logado + sair */
 .sidebar-user{border-top:1px solid rgba(255,255,255,.12);margin-top:8px;padding:10px 2px 0}
-.sidebar-user .u-mail{display:block;font-size:11.5px;color:#94a3b8;word-break:break-all;margin-bottom:8px}
+.sidebar-user .u-mail{display:block;font-size:11.5px;color:#94a3b8;word-break:break-all;margin-bottom:6px}
+.nuvem-status{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:600;margin-bottom:8px;
+  padding:3px 9px;border-radius:999px;border:1px solid transparent}
+.nuvem-status::before{content:'☁️';font-size:12px}
+.nuvem-status.ok{color:#6ee7b7;background:rgba(16,185,129,.14);border-color:rgba(16,185,129,.35)}
+.nuvem-status.carregando{color:#93c5fd;background:rgba(59,130,246,.14);border-color:rgba(59,130,246,.35)}
+.nuvem-status.erro{color:#fca5a5;background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.35)}
+.nuvem-status.off{color:#94a3b8;background:rgba(148,163,184,.12);border-color:rgba(148,163,184,.3)}
 .sidebar-user .btn-sair{width:100%;background:rgba(255,255,255,.08);color:#e2e8f0;border:1px solid rgba(255,255,255,.16);
   border-radius:8px;padding:8px;font-size:13px;font-family:inherit;cursor:pointer;transition:background .15s}
 .sidebar-user .btn-sair:hover{background:rgba(239,68,68,.22);border-color:rgba(239,68,68,.45)}
@@ -332,9 +339,10 @@ table.itens .num{text-align:right;white-space:nowrap}
       <button class="nav-item" data-view="agenda"><span class="ico">⏰</span><span>Agenda</span><span class="pill" id="pillAgenda" style="display:none">0</span></button>
       <button class="nav-item" data-view="dados"><span class="ico">💾</span><span>Dados</span></button>
     </nav>
-    <div class="sidebar-foot">Os dados ficam salvos apenas neste navegador. Faça backup regularmente na aba Dados.</div>
+    <div class="sidebar-foot">Os dados são salvos na nuvem e sincronizados entre celular e computador. Você também pode exportar um backup na aba Dados.</div>
     <div class="sidebar-user" id="sidebarUser" hidden>
       <span class="u-mail" id="userEmail"></span>
+      <span class="nuvem-status off" data-nuvem-status>Somente neste aparelho</span>
       <button class="btn-sair" type="button" id="btnSair">↩ Sair</button>
     </div>
   </aside>
@@ -613,15 +621,7 @@ function normalizar(d){
   return d;
 }
 function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], emissor:emissorVazio(), seqOrc:0}; }
-function carregar(){
-  let nova = null;
-  try{
-    const raw = localStorage.getItem(KEY);
-    if(raw) nova = normalizar(JSON.parse(raw));
-    else nova = baseVazia();
-  }catch(e){ console.warn('Falha ao ler dados', e); nova = baseVazia(); }
-  if(!nova) nova = baseVazia();
-
+function prepararPrimeiroUso(nova){
   /* Primeira abertura (ou catálogo vazio): carrega o modelo de informática, uma única vez */
   if(!nova.catalogoInfoCarregado){
     let n = 0;
@@ -637,9 +637,118 @@ function carregar(){
   }
   return nova;
 }
+function carregar(){
+  let nova = null;
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw) nova = normalizar(JSON.parse(raw));
+    else nova = baseVazia();
+  }catch(e){ console.warn('Falha ao ler dados', e); nova = baseVazia(); }
+  if(!nova) nova = baseVazia();
+  return prepararPrimeiroUso(nova);
+}
+
+/* ---------- Nuvem (Supabase): sincroniza celular e computador ---------- */
+let nuvemLigada = false;       /* fica true quando o login na nuvem deu certo */
+let nuvemPronta = false;       /* evita salvar de volta no primeiro carregamento */
+let nuvemTimer = null;
+let nuvemStatus = 'off';       /* off | carregando | ok | enviando | erro */
+
+function setNuvemStatus(s){
+  nuvemStatus = s;
+  document.querySelectorAll('[data-nuvem-status]').forEach(el=>{
+    const mapa = {
+      off:        {txt:'Somente neste aparelho',  cls:'off'},
+      carregando: {txt:'Sincronizando…',          cls:'carregando'},
+      ok:         {txt:'Sincronizado',            cls:'ok'},
+      enviando:   {txt:'Salvando…',               cls:'carregando'},
+      erro:       {txt:'Sem conexão — salvo aqui', cls:'erro'}
+    };
+    const m = mapa[s] || mapa.off;
+    el.textContent = m.txt;
+    el.className = 'nuvem-status ' + m.cls;
+  });
+}
+
+/* Lê os dados da nuvem (uma linha por usuário) e devolve o objeto ou null */
+async function nuvemCarregar(){
+  if(!crmClient) return null;
+  const { data: sess } = await crmClient.auth.getSession();
+  const uid = sess && sess.session && sess.session.user ? sess.session.user.id : null;
+  if(!uid) return null;
+  const { data, error } = await crmClient
+    .from('crm_state')
+    .select('dados')
+    .eq('user_id', uid)
+    .maybeSingle();
+  if(error){ console.warn('Nuvem: falha ao ler', error); throw error; }
+  if(!data || !data.dados) return null;
+  return normalizar(data.dados);
+}
+
+/* Grava os dados atuais na nuvem (upsert) */
+async function nuvemSalvarAgora(){
+  if(!nuvemLigada || !crmClient) return;
+  try{
+    const { data: sess } = await crmClient.auth.getSession();
+    const uid = sess && sess.session && sess.session.user ? sess.session.user.id : null;
+    if(!uid) return;
+    setNuvemStatus('enviando');
+    const { error } = await crmClient
+      .from('crm_state')
+      .upsert({ user_id: uid, dados: db, atualizado_em: new Date().toISOString() }, { onConflict:'user_id' });
+    if(error) throw error;
+    setNuvemStatus('ok');
+  }catch(e){
+    console.warn('Nuvem: falha ao salvar', e);
+    setNuvemStatus('erro');
+  }
+}
+
+/* Agenda o envio para a nuvem (junta várias alterações seguidas) */
+function nuvemSalvarAgendado(){
+  if(!nuvemLigada) return;
+  if(nuvemTimer) clearTimeout(nuvemTimer);
+  nuvemTimer = setTimeout(()=>{ nuvemSalvarAgora(); }, 900);
+}
+
 function salvar(){
   try{ localStorage.setItem(KEY, JSON.stringify(db)); }
   catch(e){ toast('Não foi possível salvar os dados (armazenamento cheio?)','erro'); }
+  if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
+}
+
+/* Carrega tudo da nuvem ao entrar; se ainda não houver nada lá, envia o que existe aqui */
+async function iniciarNuvem(){
+  if(!crmClient) return;
+  setNuvemStatus('carregando');
+  let remoto = null;
+  try{
+    remoto = await nuvemCarregar();
+  }catch(e){
+    nuvemLigada = false; nuvemPronta = false;
+    setNuvemStatus('erro');
+    const faltaTabela = e && (e.code === 'PGRST205' || /crm_state/.test(String(e.message||'')));
+    if(faltaTabela){
+      toast('Sincronização ainda não ativada: rode o arquivo crm-schema.sql no SQL Editor do Supabase (cria a tabela crm_state) e entre novamente.', 'erro');
+    } else {
+      toast('Não foi possível conectar à nuvem agora. Você continua trabalhando e os dados serão sincronizados quando a conexão voltar.', 'erro');
+    }
+    return;
+  }
+  if(remoto){
+    db = prepararPrimeiroUso(remoto);
+    try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){}
+    aplicarMarca();
+    render();
+    toast('☁️ Dados sincronizados da nuvem.', 'ok');
+  } else {
+    /* Primeiro uso na nuvem: sobe o que já existe neste aparelho */
+    db = prepararPrimeiroUso(db);
+  }
+  nuvemLigada = true;
+  nuvemPronta = true;
+  await nuvemSalvarAgora();
 }
 
 /* ---------- Utilidades ---------- */
@@ -1152,6 +1261,8 @@ function render(){
   else if(view==='orcamentos'){ el.innerHTML = htmlOrcamentos(); ligarOrcamentos(); }
   else if(view==='agenda') el.innerHTML = htmlAgenda();
   else if(view==='dados'){ el.innerHTML = htmlDados(); ligarDados(); }
+  /* mantém os indicadores de nuvem em dia após redesenhar a tela */
+  try{ setNuvemStatus(nuvemStatus); }catch(e){}
 }
 
 /* =========================================================
@@ -2388,6 +2499,15 @@ function htmlDados(){
   </div>
 
   <div class="op-card" style="margin-bottom:16px">
+    <h4>☁️ Sincronização com a nuvem</h4>
+    <p>Seus dados ficam salvos na nuvem e aparecem automaticamente no celular e no computador, ao entrar com a mesma conta.</p>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span class="nuvem-status off" data-nuvem-status style="margin:0">Somente neste aparelho</span>
+      <button class="btn ghost sm" type="button" data-act="nuvem-agora">🔄 Sincronizar agora</button>
+    </div>
+  </div>
+
+  <div class="op-card" style="margin-bottom:16px">
     <h4>🏢 Dados da empresa (cabeçalho dos orçamentos)</h4>
     <p>Aparecem no topo do orçamento impresso. Deixe em branco o que não quiser exibir.</p>
     <form id="fEmissor" class="form-grid" style="gap:12px">
@@ -2432,8 +2552,8 @@ function htmlDados(){
   </div>
 
   <div class="nota-rodape">
-    <b>Como funciona o armazenamento:</b> os dados ficam no <b>localStorage deste navegador</b> — nada é enviado para a internet.
-    Se você limpar os dados do navegador ou trocar de computador, os dados somem: <b>faça o backup JSON com frequência</b>.
+    <b>Como funciona o armazenamento:</b> os dados ficam salvos na <b>nuvem</b> (sincronizados entre seus aparelhos) e também
+    neste navegador. Mesmo assim, <b>faça backup JSON de vez em quando</b> por segurança.
   </div>`;
 }
 
@@ -2461,6 +2581,31 @@ function ligarDados(){
     };
     salvar(); toast('Dados da empresa salvos!');
   });
+  const btnNuvem = document.querySelector('[data-act="nuvem-agora"]');
+  if(btnNuvem){
+    btnNuvem.addEventListener('click', async ()=>{
+      if(!crmClient){ toast('Faça login para sincronizar.', 'erro'); return; }
+      setNuvemStatus('carregando');
+      try{
+        const remoto = await nuvemCarregar();
+        if(remoto){
+          db = prepararPrimeiroUso(remoto);
+          try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){}
+          nuvemLigada = true; nuvemPronta = true;
+          aplicarMarca(); render();
+          setNuvemStatus('ok');
+          toast('☁️ Dados atualizados da nuvem.', 'ok');
+        } else {
+          nuvemLigada = true; nuvemPronta = true;
+          await nuvemSalvarAgora();
+          toast('☁️ Dados enviados para a nuvem.', 'ok');
+        }
+      }catch(e){
+        setNuvemStatus('erro');
+        toast('Não foi possível sincronizar agora: ' + (e && e.message ? e.message : e), 'erro');
+      }
+    });
+  }
 }
 
 function baixar(nome, conteudo, tipo){
@@ -2700,7 +2845,7 @@ function mostrarLogin(msg, tipo){
   if(sidebarUser) sidebarUser.hidden = true;
   if(msg) setLoginStatus(msg, tipo);
 }
-function entrarNoApp(user){
+async function entrarNoApp(user){
   const { screen, app, sidebarUser, userEmail } = loginEls();
   if(screen) screen.hidden = true;
   if(app) app.hidden = false;
@@ -2708,6 +2853,8 @@ function entrarNoApp(user){
   if(userEmail) userEmail.textContent = (user && user.email) ? user.email : '';
   aplicarMarca();
   render();
+  /* Sincroniza os dados com a nuvem (celular + computador juntos) */
+  await iniciarNuvem();
 }
 /* Valida se a conta está autorizada (public.is_crm_member) e entra */
 async function validarEEntrar(user){
