@@ -106,6 +106,57 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .icon-btn:hover{background:#f1f5f9;border-color:#cbd5e1}
 .icon-btn.del:hover{background:#fef2f2;border-color:#fecaca}
 .icon-btn.nf-on{background:#fffbeb;border-color:#fde68a}
+.icon-btn.ok-on{background:#f0fdf4;border-color:#bbf7d0}
+
+@keyframes pulseBorda{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.35)}50%{box-shadow:0 0 0 6px rgba(37,99,235,0)}}
+.btn.pulse{animation:pulseBorda 1.8s ease-in-out infinite;border-color:#93c5fd}
+
+/* ===== Busca global (topo) ===== */
+.busca-global{position:relative;display:flex;align-items:center;gap:0}
+.busca-global input{width:250px;padding:9px 12px 9px 32px;border:1px solid var(--borda);border-radius:9px;background:#fff;font-size:13.5px;color:var(--texto)}
+.busca-global input:focus{outline:none;border-color:var(--prim);box-shadow:0 0 0 3px color-mix(in srgb,var(--prim) 14%,#fff)}
+.busca-global .ico-busca{position:absolute;left:10px;font-size:13px;opacity:.6;pointer-events:none}
+.busca-resultados{position:absolute;top:calc(100% + 6px);right:0;width:420px;max-width:88vw;max-height:60vh;overflow:auto;background:#fff;border:1px solid var(--borda);border-radius:12px;box-shadow:0 14px 40px rgba(15,23,42,.16);z-index:60;padding:6px}
+.busca-resultados .br-grupo{padding:7px 10px 3px;font-size:11px;font-weight:800;letter-spacing:.4px;text-transform:uppercase;color:var(--suave)}
+.busca-resultados .br-item{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:8px;cursor:pointer}
+.busca-resultados .br-item:hover{background:#f1f5f9}
+.busca-resultados .br-item .br-ico{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:#eff6ff;font-size:14px;flex:0 0 auto}
+.busca-resultados .br-item .br-main{flex:1;min-width:0}
+.busca-resultados .br-item .br-main b{font-size:13.5px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.busca-resultados .br-item .br-main span{font-size:12px;color:var(--suave)}
+.busca-resultados .br-vazio{padding:16px;text-align:center;color:var(--suave);font-size:13px}
+
+/* ===== Selos de validade / OS / margem ===== */
+.selo{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:700;white-space:nowrap}
+.selo.vencido{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.selo.vence{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.selo.ok{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.selo.info{background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe}
+.selo.margem-boa{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.selo.margem-media{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+.selo.margem-baixa{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+
+/* ===== Checklists (ordem de serviço) ===== */
+.check-linha{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--borda);border-radius:9px;margin-bottom:7px;background:#fff}
+.check-linha.feito{background:#f0fdf4;border-color:#bbf7d0}
+.check-linha input[type=checkbox]{margin-top:3px;width:17px;height:17px;accent-color:#10b981}
+.check-linha .cl-txt{flex:1;min-width:0}
+.check-linha.feito .cl-txt b{text-decoration:line-through;color:var(--suave)}
+.check-linha .cl-txt b{font-size:13.5px;display:block}
+.check-linha .cl-txt span{font-size:12px;color:var(--suave)}
+
+/* ===== Link público do orçamento ===== */
+.link-box{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap}
+.link-box input{flex:1;min-width:200px;padding:9px 11px;border:1px solid var(--borda);border-radius:9px;font-size:12.5px;color:var(--suave);background:#f8fafc}
+.pub-wrap{max-width:900px;margin:0 auto;padding:20px}
+.pub-acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+
+/* ===== Metas / comissão ===== */
+.meta-barra{height:12px;border-radius:99px;background:#e2e8f0;overflow:hidden;margin-top:8px}
+.meta-barra > i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2563eb,#10b981)}
+
+/* ===== PWA / instalar ===== */
+.pwa-dica{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;font-size:13px;margin-bottom:14px}
 .contagem{font-size:13px;color:var(--suave);margin:0 0 10px 2px}
 
 /* ---------- Funil (Kanban) ---------- */
@@ -236,6 +287,8 @@ table.itens .num{text-align:right;white-space:nowrap}
 
 /* ---------- Documento de orçamento / impressão ---------- */
 #areaImpressao{display:none}
+body.modo-publico #areaImpressao{display:block}
+body.modo-publico{background:#f1f5f9;padding:20px 0}
 .orc-doc{font-size:14px;line-height:1.55;color:#0f172a;background:#fff}
 .orc-doc .topo{display:flex;justify-content:space-between;gap:20px;border-bottom:3px solid #0f172a;padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap}
 .orc-doc .num{font-size:19px;font-weight:800;letter-spacing:.5px}
@@ -355,8 +408,10 @@ table.itens .num{text-align:right;white-space:nowrap}
       <button class="nav-item" data-view="clientes"><span class="ico">👥</span><span>Clientes</span></button>
       <button class="nav-item" data-view="funil"><span class="ico">🗂️</span><span>Funil</span></button>
       <button class="nav-item" data-view="orcamentos"><span class="ico">🧾</span><span>Orçamentos</span></button>
+      <button class="nav-item" data-view="ordens"><span class="ico">🛠️</span><span>Ordens de serviço</span><span class="pill" id="pillOS" style="display:none">0</span></button>
       <button class="nav-item" data-view="relatorios"><span class="ico">📈</span><span>Relatórios</span></button>
       <button class="nav-item" data-view="agenda"><span class="ico">⏰</span><span>Agenda</span><span class="pill" id="pillAgenda" style="display:none">0</span></button>
+      <button class="nav-item" data-view="catalogo"><span class="ico">📦</span><span>Catálogo</span></button>
       <button class="nav-item" data-view="dados"><span class="ico">💾</span><span>Dados</span></button>
     </nav>
     <div class="sidebar-foot">Os dados são salvos na nuvem e sincronizados entre celular e computador. Você também pode exportar um backup na aba Dados.</div>
@@ -374,6 +429,13 @@ table.itens .num{text-align:right;white-space:nowrap}
         <div class="sub" id="viewSub">Visão geral do seu negócio</div>
       </div>
       <div class="topbar-actions">
+        <div class="busca-global">
+          <span class="ico-busca">🔍</span>
+          <input id="buscaGlobal" placeholder="Buscar cliente, orçamento, produto..." autocomplete="off">
+          <div class="busca-resultados" id="buscaResultados" hidden></div>
+        </div>
+        <button class="btn ghost" id="btnInstalar" hidden title="Instalar o CRM no seu aparelho">📲 Instalar app</button>
+        <button class="btn ghost" id="btnBackupTopo" title="Baixar uma cópia de segurança dos seus dados">💾 Backup</button>
         <button class="btn ghost" id="btnExportRapido" title="Exportar backup JSON">⬇ Exportar</button>
         <button class="btn primary" id="btnNovo">＋ Novo cliente</button>
       </div>
@@ -413,8 +475,10 @@ const TITULOS = {
   clientes:['Clientes','Cadastro e acompanhamento dos seus clientes'],
   funil:['Funil de vendas','Arraste os clientes entre as etapas'],
   orcamentos:['Orçamentos','Crie orçamentos com produtos, totais e impressão'],
-  relatorios:['Relatórios','Faturamento, orçamentos e ranking de itens'],
+  ordens:['Ordens de serviço','Acompanhe a execução dos serviços aprovados'],
+  relatorios:['Relatórios','Faturamento, comissões, orçamentos e ranking de itens'],
   agenda:['Agenda de follow-ups','Contatos que precisam da sua atenção'],
+  catalogo:['Catálogo','Produtos, serviços, fornecedores e margem'],
   dados:['Dados','Backup, importação e configurações']
 };
 
@@ -627,7 +691,9 @@ const CATALOGO_INFO = [
 let db = carregar();
 let view = 'painel';
 let filtro = {busca:'', status:'todos', ordenar:'recentes'};
-let filtroOrc = {busca:'', status:'todos', nf:'todos'};
+let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos'};
+let filtroOS = {busca:'', status:'todos'};
+let filtroCat = {busca:'', margem:'todos'};
 
 /* ---------- Persistência ---------- */
 function emissorVazio(){ return {nome:'', telefone:'', email:'', site:'', instagram:'', endereco:'', doc:''}; }
@@ -636,12 +702,20 @@ function normalizar(d){
   if(!d || typeof d!=='object' || !Array.isArray(d.clientes)) return null;
   if(!Array.isArray(d.orcamentos)) d.orcamentos = [];
   if(!Array.isArray(d.produtos)) d.produtos = [];
+  if(!Array.isArray(d.fornecedores)) d.fornecedores = [];
+  if(!Array.isArray(d.ordens)) d.ordens = [];
   if(!d.emissor || typeof d.emissor!=='object') d.emissor = emissorVazio();
   else { if(typeof d.emissor.site!=='string') d.emissor.site = ''; if(typeof d.emissor.instagram!=='string') d.emissor.instagram = ''; }
   if(typeof d.seqOrc!=='number') d.seqOrc = 0;
+  if(typeof d.seqOS!=='number') d.seqOS = 0;
+  if(!d.meta || typeof d.meta!=='object') d.meta = {};
+  if(typeof d.meta.comissao!=='number') d.meta.comissao = 10;
+  if(typeof d.meta.valorMensal!=='number') d.meta.valorMensal = 0;
+  if(typeof d.role!=='string') d.role = 'admin';
+  if(typeof d.ultimoBackup!=='string') d.ultimoBackup = '';
   return d;
 }
-function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], emissor:emissorVazio(), seqOrc:0}; }
+function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:''}; }
 function prepararPrimeiroUso(nova){
   /* Primeira abertura (ou catálogo vazio): carrega o modelo de informática, uma única vez */
   if(!nova.catalogoInfoCarregado){
@@ -1277,6 +1351,8 @@ document.querySelector('.nav').addEventListener('click', e=>{
   render();
 });
 document.getElementById('btnExportRapido').addEventListener('click', exportarJSON);
+document.getElementById('btnInstalar').addEventListener('click', instalarApp);
+document.getElementById('btnBackupTopo').addEventListener('click', baixarBackupAgora);
 
 function render(){
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
@@ -1287,10 +1363,20 @@ function render(){
   pill.style.display = pend ? '' : 'none';
   pill.textContent = pend;
 
+  const osAbertas = listaOrdens().filter(o=>o.status!=='concluida' && o.status!=='cancelada').length;
+  const pillOS = document.getElementById('pillOS');
+  if(pillOS){ pillOS.style.display = osAbertas ? '' : 'none'; pillOS.textContent = osAbertas; }
+
   const btnNovo = document.getElementById('btnNovo');
   if(view==='orcamentos'){
     btnNovo.textContent = '＋ Novo orçamento';
     btnNovo.onclick = ()=>formOrcamento(null);
+  }else if(view==='ordens'){
+    btnNovo.textContent = '＋ Nova ordem de serviço';
+    btnNovo.onclick = ()=>formOrdem(null);
+  }else if(view==='catalogo'){
+    btnNovo.textContent = '＋ Novo item';
+    btnNovo.onclick = ()=>formProduto(null);
   }else{
     btnNovo.textContent = '＋ Novo cliente';
     btnNovo.onclick = ()=>formCliente(null);
@@ -1301,8 +1387,10 @@ function render(){
   else if(view==='clientes'){ el.innerHTML = htmlClientes(); ligarClientes(); }
   else if(view==='funil') el.innerHTML = htmlFunil();
   else if(view==='orcamentos'){ el.innerHTML = htmlOrcamentos(); ligarOrcamentos(); }
+  else if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
   else if(view==='relatorios'){ el.innerHTML = htmlRelatorios(); ligarRelatorios(); }
   else if(view==='agenda') el.innerHTML = htmlAgenda();
+  else if(view==='catalogo'){ el.innerHTML = htmlCatalogo(); ligarCatalogo(); }
   else if(view==='dados'){ el.innerHTML = htmlDados(); ligarDados(); }
   /* mantém os indicadores de nuvem em dia após redesenhar a tela */
   try{ setNuvemStatus(nuvemStatus); }catch(e){}
@@ -1348,7 +1436,33 @@ function htmlPainel(){
     ${stat('Orçamentos em aberto', orcAbertos.length, '🧾')}
     ${stat('Valor aprovado', brl(valorAprov), '💰')}
     ${stat('NF pendentes', qtdNFPendentes(), '📄', qtdNFPendentes()>0)}
+    ${stat('Vencendo / vencidos', orcamentosVencendo(5).length, '⏳', orcamentosVencendo(5).length>0)}
   </div>
+
+  ${(()=>{
+    const venc = orcamentosVencendo(5);
+    const nfp = listaOrcamentos().filter(nfPendente);
+    const osab = listaOrdens().filter(o=>o.status!=='concluida'&&o.status!=='cancelada');
+    if(!venc.length && !nfp.length && !osab.length) return '';
+    return `<div class="card" style="margin-bottom:18px;border-color:#fde68a">
+      <div class="card-h"><h3>⚠️ Precisa da sua atenção</h3></div>
+      <div class="card-b" style="display:grid;gap:10px">
+        ${venc.length?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span class="selo vence">⏳ ${venc.length} orçamento(s) vencendo/vencido(s)</span>
+          <span style="font-size:12.8px;color:var(--suave)">${venc.slice(0,3).map(o=>esc(o.numero)).join(' · ')}</span>
+          <button class="link-btn" data-go="orcamentos">Ver →</button>
+        </div>`:''}
+        ${nfp.length?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span class="selo vence">📄 ${nfp.length} NF pendente(s) de emissão</span>
+          <button class="link-btn" data-go="orcamentos">Ver →</button>
+        </div>`:''}
+        ${osab.length?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span class="selo info">🛠️ ${osab.length} ordem(ns) de serviço em aberto</span>
+          <button class="link-btn" data-go="ordens">Ver →</button>
+        </div>`:''}
+      </div>
+    </div>`;
+  })()}
 
   <div class="cols">
     <div class="card">
@@ -1483,6 +1597,7 @@ function tabelaHTML(){
       <td>${fu ? `<span class="${d<0?'atrasado':''}">${fmtData(c.followup.data)} <span class="mt">(${rotuloPrazo(c.followup.data)})</span></span>` : '<span class="mt">—</span>'}</td>
       <td>
         <div class="acoes">
+          <button class="icon-btn" title="Falar no WhatsApp" data-act="cli-zap" data-id="${c.id}">💬</button>
           <button class="icon-btn" title="Registrar contato" data-act="historico" data-id="${c.id}">🗒️</button>
           <button class="icon-btn" title="Editar" data-act="editar" data-id="${c.id}">✏️</button>
           <button class="icon-btn del" title="Excluir" data-act="excluir" data-id="${c.id}">🗑️</button>
@@ -1534,14 +1649,34 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='orc-copiar') copiarOrc(id);
   else if(btn.dataset.act==='orc-produtos') catalogoProdutos();
   else if(btn.dataset.act==='orc-nf') formNotaFiscal(id);
+  else if(btn.dataset.act==='orc-link') mostrarLinkOrc(id);
+  else if(btn.dataset.act==='orc-os') converterOrcEmOS(id);
+  else if(btn.dataset.act==='orc-zap-fup') enviarFollowupZap(id);
+  else if(btn.dataset.act==='os-ver') verOrdem(id);
+  else if(btn.dataset.act==='os-editar') formOrdem(id);
+  else if(btn.dataset.act==='os-excluir') excluirOrdem(id);
+  else if(btn.dataset.act==='cli-zap') enviarClienteZap(id);
+  else if(btn.dataset.act==='cli-fup-zap') enviarFollowupZap(id, true);
   else if(btn.dataset.act==='export-json') exportarJSON();
   else if(btn.dataset.act==='export-csv') exportarCSV();
   else if(btn.dataset.act==='exemplo') carregarExemplo();
+  else if(btn.dataset.act==='backup-agora') baixarBackupAgora();
+  else if(btn.dataset.act==='instalar-app') instalarApp();
+  else if(btn.dataset.act==='nuvem-agora'){ /* tratado em ligarDados */ }
   else if(btn.dataset.act==='limpar') limparDados();
 });
 
 /* Mudança de status de orçamento direto na tabela */
 document.getElementById('view').addEventListener('change', e=>{
+  const selOrdem = e.target.closest('select[data-act="os-status"]');
+  if(selOrdem){
+    const os = buscarOrdem(selOrdem.dataset.id);
+    if(!os) return;
+    os.status = selOrdem.value;
+    salvar(); render();
+    toast(`Ordem ${os.numero} agora está "${statusOS(os.status).label}".`);
+    return;
+  }
   const sel = e.target.closest('select[data-act="orc-status"]');
   if(!sel) return;
   const o = buscarOrc(sel.dataset.id);
@@ -1852,6 +1987,7 @@ function htmlAgenda(){
           <span class="prio ${c.followup.prioridade||'media'}">${esc(c.followup.prioridade||'media')}</span>
           <div class="agenda-acoes">
             <button class="btn sm ok" data-act="concluir" data-id="${c.id}" title="Registra o contato e limpa o follow-up">✓ Concluir</button>
+            <button class="btn sm ghost" data-act="cli-fup-zap" data-id="${c.id}" title="Enviar mensagem de follow-up no WhatsApp">💬 WhatsApp</button>
             <button class="btn sm ghost" data-act="adiar1" data-id="${c.id}" title="Adiar 1 dia">+1d</button>
             <button class="btn sm ghost" data-act="adiar" data-id="${c.id}" title="Adiar 7 dias">+7d</button>
             <button class="btn sm ghost" data-act="historico" data-id="${c.id}">🗒️ Histórico</button>
@@ -1899,6 +2035,8 @@ function listaOrcFiltrada(){
     if(!okS) return false;
     if(filtroOrc.nf==='pendentes' && !nfPendente(o)) return false;
     if(filtroOrc.nf==='emitidas' && !nfEmitida(o)) return false;
+    if(filtroOrc.venc==='vencendo'){ const v=validadeInfo(o); if(!v || v.dias<0 || v.dias>5) return false; }
+    if(filtroOrc.venc==='vencidos'){ const v=validadeInfo(o); if(!v || v.dias>=0) return false; }
     if(!q) return true;
     return [o.numero, nomeClienteOrc(o), o.obs].some(v=>String(v||'').toLowerCase().includes(q));
   }).sort((a,b)=>String(b.criadoEm||b.data||'').localeCompare(String(a.criadoEm||a.data||'')));
@@ -1919,6 +2057,7 @@ function htmlOrcamentos(){
     ${stat('Aprovados', aprovados.length, '✅')}
     ${stat('Valor aprovado', brl(valorAprov), '💰')}
     ${stat('Recusados', recusados.length, '❌')}
+    ${stat('Vencendo / vencidos', orcamentosVencendo(5).length, '⏳', orcamentosVencendo(5).length>0)}
   </div>
 
   <div class="toolbar">
@@ -1931,6 +2070,11 @@ function htmlOrcamentos(){
       <option value="todos" ${filtroOrc.nf==='todos'?'selected':''}>NF: todas</option>
       <option value="pendentes" ${filtroOrc.nf==='pendentes'?'selected':''}>📄 NF pendentes (${qtdNFPendentes()})</option>
       <option value="emitidas" ${filtroOrc.nf==='emitidas'?'selected':''}>✅ NF emitidas</option>
+    </select>
+    <select class="filtro" id="fVencOrc" title="Filtrar por validade">
+      <option value="todos" ${filtroOrc.venc==='todos'?'selected':''}>Validade: todas</option>
+      <option value="vencendo" ${filtroOrc.venc==='vencendo'?'selected':''}>⏳ Vencendo (5 dias)</option>
+      <option value="vencidos" ${filtroOrc.venc==='vencidos'?'selected':''}>🔴 Vencidos</option>
     </select>
     <button class="btn ghost" id="btnCatalogo">📦 Catálogo de produtos</button>
     <button class="btn primary" id="btnNovoOrc">＋ Novo orçamento</button>
@@ -1961,7 +2105,7 @@ function tabelaOrcHTML(){
     <td>
       <div class="nm">${esc(o.numero||'—')}</div>
       <div class="mt">${fmtData(o.data)}${o.validade?` · válido até ${fmtData(o.validade)}`:''} · ${(o.itens||[]).length} item(ns)</div>
-      ${precisaNF(o)?`<div style="margin-top:4px">${badgeNF(o)}</div>`:''}
+      <div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">${seloValidade(o)}${precisaNF(o)?badgeNF(o):''}${osDeOrcamento(o.id)?`<span class="selo info">🛠️ ${esc(osDeOrcamento(o.id).numero)}</span>`:''}</div>
     </td>
     <td>
       <div class="nm">${esc(nomeClienteOrc(o))}</div>
@@ -1977,6 +2121,9 @@ function tabelaOrcHTML(){
     <td>
       <div class="acoes">
         <button class="icon-btn" title="Ver / Imprimir" data-act="orc-ver" data-id="${o.id}">👁️</button>
+        <button class="icon-btn" title="Link público para o cliente" data-act="orc-link" data-id="${o.id}">🔗</button>
+        <button class="icon-btn" title="Cobrar / acompanhar por WhatsApp" data-act="orc-zap-fup" data-id="${o.id}">🔔</button>
+        <button class="icon-btn${o.status==='aprovado'?' ok-on':''}" title="${o.status==='aprovado'?'Gerar ordem de serviço':'Só em orçamentos aprovados'}" data-act="orc-os" data-id="${o.id}" style="${o.status==='aprovado'?'':'opacity:.35'}">🛠️</button>
         <button class="icon-btn${nfPendente(o)?' nf-on':''}" title="${podeMarcarNF(o)?'Nota fiscal (controle)':(precisaNF(o)?'Nota fiscal (controle)':'Só em orçamentos aprovados')}" data-act="orc-nf" data-id="${o.id}" style="${podeMarcarNF(o)||precisaNF(o)?'':'opacity:.35'}">📄</button>
         <button class="icon-btn" title="Duplicar" data-act="orc-duplicar" data-id="${o.id}">📋</button>
         <button class="icon-btn" title="Enviar por WhatsApp" data-act="orc-zap" data-id="${o.id}">💬</button>
@@ -1993,6 +2140,8 @@ function ligarOrcamentos(){
   document.getElementById('fStatusOrc').addEventListener('change', e=>{ filtroOrc.status = e.target.value; atualizarTabelaOrc(); });
   const fNF = document.getElementById('fNFOrc');
   if(fNF) fNF.addEventListener('change', e=>{ filtroOrc.nf = e.target.value; atualizarTabelaOrc(); });
+  const fVenc = document.getElementById('fVencOrc');
+  if(fVenc) fVenc.addEventListener('change', e=>{ filtroOrc.venc = e.target.value; atualizarTabelaOrc(); });
   document.getElementById('btnNovoOrc').addEventListener('click', ()=>formOrcamento(null));
   document.getElementById('btnCatalogo').addEventListener('click', catalogoProdutos);
   atualizarTabelaOrc();
@@ -2448,15 +2597,16 @@ function verOrc(id){
   modal.querySelector('[data-act="orc-zap"]').onclick = ()=>enviarZap(o.id);
 }
 
-function imprimirOrc(o){
+function imprimirDoc(html){
   const area = document.getElementById('areaImpressao');
-  area.innerHTML = `<div class="orc-doc orc-print">${orcDocHTML(o)}</div>`;
+  area.innerHTML = `<div class="orc-doc orc-print">${html}</div>`;
   document.body.classList.add('imprimindo');
   const limpar = ()=>{ document.body.classList.remove('imprimindo'); window.removeEventListener('afterprint', limpar); };
   window.addEventListener('afterprint', limpar);
   try{ window.print(); }catch(e){ toast('Não foi possível abrir a janela de impressão.','erro'); }
   setTimeout(limpar, 1500);
 }
+function imprimirOrc(o){ imprimirDoc(orcDocHTML(o)); }
 
 function excluirOrc(id){
   const o = buscarOrc(id); if(!o) return;
@@ -2568,6 +2718,713 @@ function formNotaFiscal(id){
 }
 
 /* =========================================================
+   ORDENS DE SERVIÇO
+   ========================================================= */
+const STATUS_OS = [
+  {id:'aberta',     label:'Aberta',        cor:'#2563eb'},
+  {id:'andamento',  label:'Em andamento',  cor:'#f59e0b'},
+  {id:'aguardando', label:'Aguardando cliente', cor:'#8b5cf6'},
+  {id:'concluida',  label:'Concluída',     cor:'#10b981'},
+  {id:'cancelada',  label:'Cancelada',     cor:'#ef4444'}
+];
+function statusOS(id){ return STATUS_OS.find(s=>s.id===id) || STATUS_OS[0]; }
+function listaOrdens(){ return db.ordens || (db.ordens=[]); }
+function buscarOrdem(id){ return listaOrdens().find(o=>o.id===id); }
+function badgeOS(id){ const s=statusOS(id); return `<span class="badge" style="--c:${s.cor}">${s.label}</span>`; }
+function novoNumeroOS(){ const n = (db.seqOS||0)+1; db.seqOS = n; return 'OS-'+new Date().getFullYear()+'-'+String(n).padStart(4,'0'); }
+function osProgresso(os){
+  const itens = os.checklist||[];
+  const feito = itens.filter(i=>i.feito).length;
+  return { feito, total: itens.length, pct: itens.length ? Math.round(feito/itens.length*100) : 0 };
+}
+function osDeOrcamento(orcId){ return listaOrdens().find(o=>o.orcamentoId===orcId); }
+
+function htmlOrdens(){
+  const todas = listaOrdens().slice().sort((a,b)=>String(b.criadoEm||b.data||'').localeCompare(String(a.criadoEm||a.data||'')));
+  const abertas = todas.filter(o=>o.status!=='concluida'&&o.status!=='cancelada');
+  const valor = todas.filter(o=>o.status==='concluida').reduce((s,o)=>s+(Number(o.valor)||0),0);
+  return `
+  <div class="grid-stats">
+    ${stat('Ordens abertas', abertas.length, '🛠️')}
+    ${stat('Concluídas', todas.filter(o=>o.status==='concluida').length, '✅')}
+    ${stat('Valor concluído', brl(valor), '💰')}
+  </div>
+  <div class="toolbar">
+    <div class="busca"><input id="buscaOS" placeholder="Buscar por número, cliente ou serviço..." value="${esc(filtroOS.busca)}"></div>
+    <select class="filtro" id="fStatusOS">
+      <option value="todos">Todos os status</option>
+      ${STATUS_OS.map(s=>`<option value="${s.id}" ${filtroOS.status===s.id?'selected':''}>${s.label}</option>`).join('')}
+    </select>
+    <button class="btn primary" id="btnNovaOS">＋ Nova ordem de serviço</button>
+  </div>
+  <div class="contagem" id="contOS"></div>
+  <div class="tabela-wrap"><table>
+    <thead><tr><th>Ordem</th><th>Cliente</th><th>Valor</th><th>Progresso</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead>
+    <tbody id="tabelaOS"></tbody>
+  </table></div>`;
+}
+function ligarOrdens(){
+  const b = document.getElementById('buscaOS');
+  b.addEventListener('input', ()=>{ filtroOS.busca=b.value; atualizarTabelaOS(); });
+  document.getElementById('fStatusOS').addEventListener('change', e=>{ filtroOS.status=e.target.value; atualizarTabelaOS(); });
+  document.getElementById('btnNovaOS').addEventListener('click', ()=>formOrdem(null));
+  atualizarTabelaOS();
+}
+function listaOSFiltrada(){
+  const q = filtroOS.busca.trim().toLowerCase();
+  return listaOrdens().filter(o=>{
+    if(filtroOS.status!=='todos' && o.status!==filtroOS.status) return false;
+    if(!q) return true;
+    return [o.numero, o.clienteNome, nomeClienteOrdem(o), o.descricao].some(v=>String(v||'').toLowerCase().includes(q));
+  }).sort((a,b)=>String(b.criadoEm||b.data||'').localeCompare(String(a.criadoEm||a.data||'')));
+}
+function nomeClienteOrdem(o){ const c = buscarCli(o.clienteId); return c ? c.nome : (o.clienteNome||'Cliente removido'); }
+function tabelaOSHTML(){
+  const l = listaOSFiltrada();
+  if(!listaOrdens().length) return `<tr><td colspan="6"><div class="vazio"><span class="big">🛠️</span>Nenhuma ordem de serviço ainda.<br>Crie uma ou converta um orçamento aprovado.</div></td></tr>`;
+  if(!l.length) return `<tr><td colspan="6"><div class="vazio"><span class="big">🔍</span>Nenhuma ordem encontrada.</div></td></tr>`;
+  return l.map(os=>{
+    const pr = osProgresso(os);
+    return `<tr>
+      <td><div class="nm">${esc(os.numero||'—')}</div><div class="mt">${fmtData(os.data)}</div></td>
+      <td><div class="nm">${esc(nomeClienteOrdem(os))}</div><div class="mt">${esc((buscarCli(os.clienteId)||{}).empresa||'')}</div></td>
+      <td class="vl-total">${brl(os.valor)}</td>
+      <td>${pr.total?`<div style="font-size:12px;color:var(--suave)">${pr.feito}/${pr.total} · ${pr.pct}%</div><div class="meta-barra" style="width:90px"><i style="width:${pr.pct}%"></i></div>`:'<span class="mini">sem checklist</span>'}</td>
+      <td><select class="filtro" style="min-width:150px;padding:6px 8px" data-act="os-status" data-id="${os.id}">${STATUS_OS.map(s=>`<option value="${s.id}" ${os.status===s.id?'selected':''}>${s.label}</option>`).join('')}</select></td>
+      <td><div class="acoes">
+        <button class="icon-btn" title="Abrir / Imprimir" data-act="os-ver" data-id="${os.id}">👁️</button>
+        <button class="icon-btn" title="Editar" data-act="os-editar" data-id="${os.id}">✏️</button>
+        <button class="icon-btn del" title="Excluir" data-act="os-excluir" data-id="${os.id}">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function atualizarTabelaOS(){
+  const tb = document.getElementById('tabelaOS'); if(!tb) return;
+  tb.innerHTML = tabelaOSHTML();
+  const c = document.getElementById('contOS');
+  if(c) c.textContent = `${listaOSFiltrada().length} de ${listaOrdens().length} ordem(ns)`;
+}
+
+function formOrdem(id){
+  const os = id ? buscarOrdem(id) : null;
+  if(id && !os) return;
+  const v = os ? JSON.parse(JSON.stringify(os)) : {
+    id:null, numero:'', clienteId:'', clienteNome:'', orcamentoId:'', data:hojeISO(),
+    status:'aberta', valor:0, descricao:'', responsavel:'', prazo:'', obs:'', checklist:[]
+  };
+  if(!Array.isArray(v.checklist)) v.checklist = [];
+  const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const orcsAprov = listaOrcamentos().filter(o=>o.status==='aprovado');
+
+  abrirModal(`
+    <form id="fOS">
+      <div class="modal-h"><h2>${os?'✏️ Editar '+esc(os.numero):'🛠️ Nova ordem de serviço'}</h2><button type="button" class="x" data-fechar>×</button></div>
+      <div class="modal-b">
+        <div class="form-grid">
+          ${!os && orcsAprov.length?`<div class="campo full"><label>Gerar a partir de um orçamento aprovado (opcional)</label>
+            <select id="selOrcOS"><option value="">— Preencher manualmente —</option>
+              ${orcsAprov.map(o=>`<option value="${o.id}">${esc(o.numero)} · ${esc(nomeClienteOrc(o))} · ${brl(totalOrc(o))}</option>`).join('')}
+            </select></div>`:''}
+          <div class="campo full"><label>Cliente * <span class="req">*</span></label>
+            <select name="clienteId" id="selCliOS">
+              <option value="">— Selecione —</option>
+              ${clientes.map(c=>`<option value="${c.id}" ${v.clienteId===c.id?'selected':''}>${esc(c.nome)}${c.empresa?' — '+esc(c.empresa):''}</option>`).join('')}
+            </select></div>
+          <div class="campo"><label>Data de abertura</label><input type="date" name="data" value="${esc(v.data||hojeISO())}"></div>
+          <div class="campo"><label>Prazo de entrega</label><input type="date" name="prazo" value="${esc(v.prazo||'')}"></div>
+          <div class="campo"><label>Status</label>
+            <select name="status">${STATUS_OS.map(s=>`<option value="${s.id}" ${(v.status||'aberta')===s.id?'selected':''}>${s.label}</option>`).join('')}</select></div>
+          <div class="campo"><label>Valor do serviço (R$)</label><input type="number" name="valor" min="0" step="0.01" value="${Number(v.valor)||0}"></div>
+          <div class="campo full"><label>Responsável técnico</label><input name="responsavel" maxlength="80" value="${esc(v.responsavel||'')}" placeholder="Quem executa o serviço"></div>
+          <div class="campo full"><label>Descrição do serviço</label><textarea name="descricao" maxlength="800" placeholder="O que será feito...">${esc(v.descricao||'')}</textarea></div>
+
+          <div class="subtitulo">✅ Checklist de execução</div>
+          <div class="campo full">
+            <div id="listaCheck"></div>
+            <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap">
+              <input id="novoCheck" maxlength="140" placeholder="Nova tarefa do checklist..." style="flex:1;min-width:180px">
+              <button type="button" class="btn ghost sm" id="btnAddCheck">＋ Adicionar</button>
+            </div>
+          </div>
+
+          <div class="subtitulo">📝 Observações</div>
+          <div class="campo full"><textarea name="obs" maxlength="1200" placeholder="Materiais, garantia, detalhes...">${esc(v.obs||'')}</textarea></div>
+        </div>
+      </div>
+      <div class="modal-f">
+        ${os?`<button type="button" class="btn ghost" id="btnVerOS">👁️ Ver / Imprimir</button>`:''}
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">${os?'Salvar alterações':'Criar ordem de serviço'}</button>
+      </div>
+    </form>`, true);
+
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  if(os) document.getElementById('btnVerOS').onclick = ()=>{ fecharModal(); verOrdem(os.id); };
+
+  const listaCheck = document.getElementById('listaCheck');
+  function renderCheck(){
+    listaCheck.innerHTML = v.checklist.length ? v.checklist.map((c,i)=>`
+      <div class="check-linha ${c.feito?'feito':''}">
+        <input type="checkbox" data-chk="${i}" ${c.feito?'checked':''}>
+        <div class="cl-txt"><b>${esc(c.tarefa)}</b>${c.obs?`<span>${esc(c.obs)}</span>`:''}</div>
+        <button type="button" class="icon-btn del" data-chkrm="${i}">🗑</button>
+      </div>`).join('') : `<div class="mini" style="padding:4px 0">Nenhuma tarefa no checklist.</div>`;
+  }
+  renderCheck();
+  listaCheck.addEventListener('click', e=>{
+    const rm = e.target.closest('[data-chkrm]');
+    if(rm){ v.checklist.splice(Number(rm.dataset.chkrm),1); renderCheck(); return; }
+    const chk = e.target.closest('[data-chk]');
+    if(chk){ v.checklist[Number(chk.dataset.chk)].feito = chk.checked; renderCheck(); }
+  });
+  document.getElementById('btnAddCheck').onclick = ()=>{
+    const t = document.getElementById('novoCheck').value.trim();
+    if(!t) return;
+    v.checklist.push({tarefa:t, feito:false, obs:''});
+    document.getElementById('novoCheck').value='';
+    renderCheck();
+  };
+  document.getElementById('novoCheck').addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('btnAddCheck').click(); } });
+
+  /* pré-preencher a partir de um orçamento aprovado */
+  const selOrc = document.getElementById('selOrcOS');
+  if(selOrc){
+    selOrc.addEventListener('change', ()=>{
+      const o = buscarOrc(selOrc.value);
+      if(!o) return;
+      v.orcamentoId = o.id;
+      v.clienteId = o.clienteId;
+      v.valor = totalOrc(o);
+      v.descricao = (o.itens||[]).map(i=>`${i.qtd}× ${i.desc}`).join('\n');
+      v.checklist = (o.itens||[]).map(i=>({tarefa:`${i.qtd}× ${i.desc}`, feito:false, obs:''}));
+      if(o.validade) v.prazo = o.validade;
+      document.getElementById('selCliOS').value = o.clienteId;
+      modal.querySelector('[name="valor"]').value = v.valor;
+      modal.querySelector('[name="descricao"]').value = v.descricao;
+      renderCheck();
+      toast('Dados do orçamento carregados.');
+    });
+  }
+
+  document.getElementById('fOS').onsubmit = e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const clienteId = String(f.get('clienteId')||'');
+    if(!clienteId){ toast('Selecione um cliente.','erro'); return; }
+    const dados = {
+      clienteId,
+      clienteNome:(buscarCli(clienteId)||{}).nome||'',
+      data:String(f.get('data')||hojeISO()),
+      prazo:String(f.get('prazo')||''),
+      status:String(f.get('status')||'aberta'),
+      valor:Math.max(0, Number(f.get('valor'))||0),
+      responsavel:String(f.get('responsavel')||'').trim(),
+      descricao:String(f.get('descricao')||'').trim(),
+      obs:String(f.get('obs')||'').trim(),
+      checklist:v.checklist
+    };
+    if(os){ Object.assign(os, dados); toast('Ordem de serviço atualizada.'); }
+    else{
+      listaOrdens().unshift({id:uid(), criadoEm:agoraDT(), numero:novoNumeroOS(),
+        orcamentoId:v.orcamentoId||'', ...dados});
+      toast('Ordem de serviço criada!');
+    }
+    salvar(); fecharModal(); view='ordens'; render();
+  };
+}
+
+function osDocHTML(os){
+  const em = db.emissor || emissorVazio();
+  const c = buscarCli(os.clienteId);
+  const pr = osProgresso(os);
+  return `
+    <div class="topo">
+      <div class="marca-doc">
+        <img class="doc-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
+        <div class="marca-txt">
+          <div style="font-size:16.5px;font-weight:800">${em.nome?esc(em.nome):esc(MARCA_NOME)}</div>
+          ${em.telefone?`<div>${esc(em.telefone)}</div>`:''}
+          ${em.email?`<div>${esc(em.email)}</div>`:''}
+          ${em.doc?`<div>${esc(em.doc)}</div>`:''}
+        </div>
+      </div>
+      <div class="doc-titulo">
+        <div class="t">ORDEM DE SERVIÇO</div>
+        <div class="n">${esc(os.numero||'—')}</div>
+        <div style="margin-top:5px">${badgeOS(os.status)}</div>
+      </div>
+    </div>
+    <div class="doc-info">
+      <div><b>Cliente:</b> ${esc(c?c.nome:nomeClienteOrdem(os))}${c&&c.empresa?` — ${esc(c.empresa)}`:''}</div>
+      ${c&&docCliente(c)?`<div><b>${docCliente(c).rotulo}:</b> ${esc(docCliente(c).valor)}</div>`:''}
+      ${c&&c.telefone?`<div><b>Telefone:</b> ${esc(c.telefone)}</div>`:''}
+      <div><b>Abertura:</b> ${fmtData(os.data)}${os.prazo?` · <b>Prazo:</b> ${fmtData(os.prazo)}`:''}</div>
+      ${os.responsavel?`<div><b>Responsável:</b> ${esc(os.responsavel)}</div>`:''}
+    </div>
+    ${os.descricao?`<div class="obs"><b>Serviço:</b><br>${esc(os.descricao).replace(/\n/g,'<br>')}</div>`:''}
+    ${pr.total?`<div class="obs"><b>Checklist (${pr.feito}/${pr.total} — ${pr.pct}%):</b><br>
+      ${(os.checklist||[]).map(i=>`${i.feito?'☑':'☐'} ${esc(i.tarefa)}`).join('<br>')}</div>`:''}
+    ${os.obs?`<div class="obs"><b>Observações:</b><br>${esc(os.obs)}</div>`:''}
+    <div style="margin-top:9px"><div class="tot-line geral"><span>VALOR DO SERVIÇO</span><b>${brl(os.valor)}</b></div></div>
+    <div class="assinaturas">
+      <div>Assinatura do cliente</div>
+      <div>Responsável técnico</div>
+    </div>
+    <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())} · Ordem de serviço ${esc(os.numero||'')}</div></div>`;
+}
+function verOrdem(id){
+  const os = buscarOrdem(id); if(!os) return;
+  abrirModal(`
+    <div class="modal-h"><h2>🛠️ Ordem de serviço</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      <div class="orc-doc" style="border:1px solid var(--borda);border-radius:12px;padding:24px;box-shadow:var(--sombra)">${osDocHTML(os)}</div>
+    </div>
+    <div class="modal-f">
+      <button type="button" class="btn ghost" id="btnEditOS">✏️ Editar</button>
+      <button type="button" class="btn ghost" data-fechar>Fechar</button>
+      <button type="button" class="btn primary" id="btnPrintOS">🖨️ Imprimir</button>
+    </div>`, true);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  document.getElementById('btnEditOS').onclick = ()=>{ fecharModal(); formOrdem(id); };
+  document.getElementById('btnPrintOS').onclick = ()=>imprimirDoc(osDocHTML(os));
+}
+function excluirOrdem(id){
+  const os = buscarOrdem(id); if(!os) return;
+  if(!confirm(`Excluir a ordem de serviço ${os.numero}?`)) return;
+  db.ordens = listaOrdens().filter(x=>x.id!==id);
+  salvar(); render(); toast('Ordem de serviço excluída.');
+}
+
+/* Converte um orçamento aprovado em ordem de serviço */
+function converterOrcEmOS(orcId){
+  const o = buscarOrc(orcId); if(!o) return;
+  if(o.status!=='aprovado'){ toast('Só é possível gerar OS de orçamentos Aprovados.','erro'); return; }
+  const existente = osDeOrcamento(o.id);
+  if(existente){
+    if(!confirm(`Este orçamento já tem a ordem ${existente.numero}. Abrir a ordem existente?`)) return;
+    view='ordens'; render(); verOrdem(existente.id); return;
+  }
+  const os = {
+    id:uid(), criadoEm:agoraDT(), numero:novoNumeroOS(), orcamentoId:o.id,
+    clienteId:o.clienteId, clienteNome:nomeClienteOrc(o), data:hojeISO(),
+    prazo:o.validade||'', status:'aberta', valor:totalOrc(o),
+    responsavel:'', descricao:(o.itens||[]).map(i=>`${i.qtd}× ${i.desc}`).join('\n'),
+    obs:o.obs||'', checklist:(o.itens||[]).map(i=>({tarefa:`${i.qtd}× ${i.desc}`, feito:false, obs:''}))
+  };
+  listaOrdens().unshift(os);
+  salvar();
+  view='ordens'; render();
+  toast(`Ordem de serviço ${os.numero} criada a partir do orçamento.`,'ok');
+  formOrdem(os.id);
+}
+
+/* =========================================================
+   FOLLOW-UP POR WHATSAPP
+   ========================================================= */
+function telZap(tel){
+  let t = String(tel||'').replace(/\D/g,'');
+  if(!t) return '';
+  if(t.length<=11) t = '55'+t;
+  return t;
+}
+function textoFollowupCliente(c){
+  const primeiro = String(c.nome||'').trim().split(/\s+/)[0] || '';
+  const os = listaOrcamentos().filter(o=>o.clienteId===c.id);
+  const abertos = os.filter(o=>o.status==='enviado'||o.status==='rascunho');
+  const linhas = [`Olá${primeiro?', '+primeiro:''}! Tudo bem? 😊`];
+  if(c.followup && c.followup.nota) linhas.push('', `Passando para falar sobre: ${c.followup.nota}`);
+  else if(abertos.length) linhas.push('', `Passando para saber se você viu o orçamento *${abertos[0].numero}* (${brl(totalOrc(abertos[0]))}).`);
+  else linhas.push('', 'Passando para dar continuidade ao nosso contato.');
+  linhas.push('', 'Qualquer dúvida, é só me chamar! 🙂');
+  return linhas.join('\n');
+}
+function enviarClienteZap(id){
+  const c = buscarCli(id); if(!c) return;
+  const tel = telZap(c.telefone);
+  if(!tel){ toast('Este cliente não tem telefone cadastrado.','erro'); return; }
+  window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(textoFollowupCliente(c)),'_blank','noopener');
+}
+function textoFollowupOrc(o){
+  const c = buscarCli(o.clienteId);
+  const primeiro = String(c?c.nome:nomeClienteOrc(o)).trim().split(/\s+/)[0] || '';
+  const v = validadeInfo(o);
+  const linhas = [`Olá${primeiro?', '+primeiro:''}! Tudo bem? 😊`, ''];
+  if(v && v.dias<0) linhas.push(`O orçamento *${o.numero}* (${brl(totalOrc(o))}) venceu em ${fmtData(o.validade)}. Posso renovar os valores para você?`);
+  else if(v && v.dias<=5) linhas.push(`Passando para lembrar que o orçamento *${o.numero}* (${brl(totalOrc(o))}) é válido até ${fmtData(o.validade)}. Quer garantir?`);
+  else linhas.push(`Passando para saber se você viu o orçamento *${o.numero}* (${brl(totalOrc(o))}).`);
+  linhas.push('', 'Qualquer dúvida, é só me chamar! 🙂');
+  return linhas.join('\n');
+}
+function enviarFollowupZap(id, ehCliente){
+  if(ehCliente){
+    const c = buscarCli(id); if(!c) return;
+    const tel = telZap(c.telefone);
+    if(!tel){ toast('Este cliente não tem telefone cadastrado.','erro'); return; }
+    window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(textoFollowupCliente(c)),'_blank','noopener');
+    return;
+  }
+  const o = buscarOrc(id); if(!o) return;
+  const c = buscarCli(o.clienteId);
+  const tel = telZap(c&&c.telefone);
+  if(!tel){ toast('Este cliente não tem telefone cadastrado.','erro'); return; }
+  window.open('https://wa.me/'+tel+'?text='+encodeURIComponent(textoFollowupOrc(o)),'_blank','noopener');
+}
+
+/* =========================================================
+   VALIDADE DOS ORÇAMENTOS
+   ========================================================= */
+function validadeInfo(o){
+  if(!o || !o.validade) return null;
+  const d = diasAte(o.validade);
+  if(isNaN(d)) return null;
+  if(d < 0) return {tipo:'vencido', label:'Vencido', dias:d};
+  if(d === 0) return {tipo:'vence', label:'Vence hoje', dias:0};
+  if(d <= 5) return {tipo:'vence', label:`Vence em ${d}d`, dias:d};
+  return {tipo:'ok', label:`Válido (${d}d)`, dias:d};
+}
+function seloValidade(o){
+  const v = validadeInfo(o);
+  if(!v) return '';
+  if(o.status==='aprovado'||o.status==='recusado') return '';
+  return `<span class="selo ${v.tipo}">${v.label}</span>`;
+}
+function orcamentosVencendo(dias){
+  dias = dias||5;
+  return listaOrcamentos().filter(o=>{
+    if(o.status==='aprovado'||o.status==='recusado') return false;
+    const v = validadeInfo(o);
+    return v && v.dias<=dias;
+  });
+}
+
+/* =========================================================
+   FORNECEDORES E MARGEM
+   ========================================================= */
+function listaFornecedores(){ return db.fornecedores || (db.fornecedores=[]); }
+function buscarForn(id){ return listaFornecedores().find(f=>f.id===id); }
+function custoProduto(p){
+  if(!p) return 0;
+  const c = Number(p.custo)||0;
+  return c;
+}
+function margemProduto(p){
+  if(!p) return null;
+  const custo = Number(p.custo)||0;
+  const preco = Number(p.preco)||0;
+  if(!preco) return null;
+  const valor = preco - custo;
+  const pct = preco ? (valor/preco*100) : 0;
+  return {custo, preco, valor, pct};
+}
+function seloMargem(p){
+  const m = margemProduto(p);
+  if(!m || !m.custo) return '';
+  const cls = m.pct>=40?'margem-boa':(m.pct>=20?'margem-media':'margem-baixa');
+  return `<span class="selo ${cls}" title="Margem sobre o preço">margem ${m.pct.toFixed(0)}%</span>`;
+}
+
+/* =========================================================
+   CATÁLOGO (view): produtos, serviços, fornecedores e margem
+   ========================================================= */
+function htmlCatalogo(){
+  const prods = listaProdutos().slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const forns = listaFornecedores();
+  const comCusto = prods.filter(p=>Number(p.custo)>0).length;
+  return `
+  <div class="grid-stats">
+    ${stat('Itens no catálogo', prods.length, '📦')}
+    ${stat('Com custo cadastrado', comCusto, '💰')}
+    ${stat('Fornecedores', forns.length, '🚚')}
+  </div>
+
+  <div class="toolbar">
+    <div class="busca"><input id="buscaCat" placeholder="Buscar produto ou serviço..." value="${esc(filtroCat.busca)}"></div>
+    <select class="filtro" id="fCatMargem">
+      <option value="todos" ${filtroCat.margem==='todos'?'selected':''}>Todos os itens</option>
+      <option value="comCusto" ${filtroCat.margem==='comCusto'?'selected':''}>Com custo cadastrado</option>
+      <option value="semCusto" ${filtroCat.margem==='semCusto'?'selected':''}>Sem custo cadastrado</option>
+    </select>
+    <button class="btn ghost" id="btnCatModelo" title="Adiciona os itens de informática que ainda não estão no catálogo">📦 Modelo de informática</button>
+    <button class="btn primary" id="btnNovoItem">＋ Novo item</button>
+  </div>
+
+  <div class="subtitulo" style="margin:14px 0 8px">📦 Produtos e serviços</div>
+  <div class="contagem" id="contCat"></div>
+  <div class="tabela-wrap"><table>
+    <thead><tr><th>Item</th><th>Un.</th><th>Custo</th><th>Preço</th><th>Margem</th><th style="text-align:right">Ações</th></tr></thead>
+    <tbody id="tabelaCat"></tbody>
+  </table></div>
+
+  <div class="subtitulo" style="margin:22px 0 8px">🚚 Fornecedores</div>
+  <div id="listaForn"></div>
+  <div style="margin-top:10px"><button class="btn ghost sm" id="btnNovoForn">＋ Novo fornecedor</button></div>
+
+  <div class="nota-rodape" style="margin-top:20px">
+    <b>Margem:</b> cadastre o <b>custo</b> de cada item para ver sua margem real. A margem é calculada sobre o preço de venda.
+  </div>`;
+}
+function ligarCatalogo(){
+  document.getElementById('buscaCat').addEventListener('input', e=>{ filtroCat.busca=e.target.value; renderTabelaCat(); });
+  document.getElementById('fCatMargem').addEventListener('change', e=>{ filtroCat.margem=e.target.value; renderTabelaCat(); });
+  document.getElementById('btnNovoItem').addEventListener('click', ()=>formProduto(null));
+  document.getElementById('btnCatModelo').addEventListener('click', ()=>{
+    const n = carregarCatalogoInfo(); render(); toast(n?`${n} item(ns) adicionado(s) ao catálogo.`:'O modelo de informática já está completo.');
+  });
+  document.getElementById('btnNovoForn').addEventListener('click', ()=>formFornecedor(null));
+  renderTabelaCat();
+  renderFornecedores();
+}
+function listaCatFiltrada(){
+  const q = filtroCat.busca.trim().toLowerCase();
+  return listaProdutos().filter(p=>{
+    if(q && !String(p.nome||'').toLowerCase().includes(q) && !String(p.desc||'').toLowerCase().includes(q)) return false;
+    const comCusto = Number(p.custo)>0;
+    if(filtroCat.margem==='comCusto' && !comCusto) return false;
+    if(filtroCat.margem==='semCusto' && comCusto) return false;
+    return true;
+  }).sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+}
+function renderTabelaCat(){
+  const tb = document.getElementById('tabelaCat'); if(!tb) return;
+  const l = listaCatFiltrada();
+  tb.innerHTML = l.length ? l.map(p=>{
+    const m = margemProduto(p);
+    return `<tr>
+      <td><div class="nm">${esc(p.nome)}</div>${p.desc?`<div class="mt">${esc(p.desc)}</div>`:''}</td>
+      <td><span class="mini">${esc(p.un||'un')}</span></td>
+      <td>${Number(p.custo)>0?brl(p.custo):'<span class="mini">—</span>'}</td>
+      <td class="vl-total">${brl(p.preco)}</td>
+      <td>${m&&m.custo?`${seloMargem(p)}<div class="mt">${brl(m.valor)}</div>`:'<span class="mini">—</span>'}</td>
+      <td><div class="acoes">
+        <button class="icon-btn" title="Editar" data-cat-edit="${p.id}">✏️</button>
+        <button class="icon-btn del" title="Excluir" data-cat-rm="${p.id}">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('') : `<tr><td colspan="6"><div class="vazio"><span class="big">📦</span>Nenhum item encontrado.</div></td></tr>`;
+  const c = document.getElementById('contCat');
+  if(c) c.textContent = `${l.length} de ${listaProdutos().length} item(ns)`;
+  tb.querySelectorAll('[data-cat-edit]').forEach(b=>b.onclick=()=>formProduto(b.dataset.catEdit));
+  tb.querySelectorAll('[data-cat-rm]').forEach(b=>b.onclick=()=>excluirProduto(b.dataset.catRm));
+}
+function renderFornecedores(){
+  const el = document.getElementById('listaForn'); if(!el) return;
+  const l = listaFornecedores();
+  el.innerHTML = l.length ? l.map(f=>`
+    <div class="prod-item">
+      <div style="flex:1;min-width:0">
+        <b>${esc(f.nome)}</b>
+        <div style="font-size:12.3px;color:var(--suave)">${esc([f.contato, f.telefone, f.email].filter(Boolean).join(' · ')||'Sem contato')}</div>
+      </div>
+      <button class="icon-btn" data-forn-edit="${f.id}" title="Editar">✏️</button>
+      <button class="icon-btn del" data-forn-rm="${f.id}" title="Excluir">🗑️</button>
+    </div>`).join('') : `<div class="vazio" style="padding:22px"><span class="big">🚚</span>Nenhum fornecedor cadastrado.</div>`;
+  el.querySelectorAll('[data-forn-edit]').forEach(b=>b.onclick=()=>formFornecedor(b.dataset.fornEdit));
+  el.querySelectorAll('[data-forn-rm]').forEach(b=>b.onclick=()=>{
+    const f = buscarForn(b.dataset.fornRm); if(!f) return;
+    if(!confirm(`Excluir o fornecedor "${f.nome}"?`)) return;
+    db.fornecedores = listaFornecedores().filter(x=>x.id!==f.id);
+    salvar(); render(); toast('Fornecedor excluído.');
+  });
+}
+function formProduto(id){
+  const p = id ? buscarProd(id) : null;
+  const v = p || {nome:'', preco:0, custo:0, un:'un', desc:'', fornecedorId:''};
+  const UN = ['un','cx','kg','m','m²','h','hora','serviço','pacote'];
+  abrirModal(`
+    <form id="fProd2">
+      <div class="modal-h"><h2>${p?'✏️ Editar item':'＋ Novo produto / serviço'}</h2><button type="button" class="x" data-fechar>×</button></div>
+      <div class="modal-b">
+        <div class="form-grid">
+          <div class="campo full"><label>Nome * <span class="req">*</span></label><input name="nome" required maxlength="100" value="${esc(v.nome)}" placeholder="Ex.: Formatação com backup" autofocus></div>
+          <div class="campo"><label>Unidade</label><select name="un">${UN.map(u=>`<option ${v.un===u?'selected':''}>${u}</option>`).join('')}</select></div>
+          <div class="campo"><label>Fornecedor</label><select name="fornecedorId"><option value="">— Nenhum —</option>${listaFornecedores().map(f=>`<option value="${f.id}" ${v.fornecedorId===f.id?'selected':''}>${esc(f.nome)}</option>`).join('')}</select></div>
+          <div class="campo"><label>Custo (R$)</label><input name="custo" type="number" min="0" step="0.01" value="${Number(v.custo)||0}"></div>
+          <div class="campo"><label>Preço de venda (R$)</label><input name="preco" type="number" min="0" step="0.01" value="${Number(v.preco)||0}"></div>
+          <div class="campo full"><label>Descrição padrão (texto do orçamento)</label><input name="desc" maxlength="160" value="${esc(v.desc||'')}"></div>
+          <div class="campo full"><div class="info-resumo" id="resMargem"></div></div>
+        </div>
+      </div>
+      <div class="modal-f">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">${p?'Salvar alterações':'Adicionar ao catálogo'}</button>
+      </div>
+    </form>`, true);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  function calcMargem(){
+    const custo = Number(modal.querySelector('[name="custo"]').value)||0;
+    const preco = Number(modal.querySelector('[name="preco"]').value)||0;
+    const box = document.getElementById('resMargem');
+    if(!preco){ box.textContent = 'Informe o preço de venda para calcular a margem.'; return; }
+    const lucro = preco-custo;
+    const pct = preco ? (lucro/preco*100) : 0;
+    box.innerHTML = `💰 Lucro por unidade: <b>${brl(lucro)}</b> · Margem: <b>${pct.toFixed(1)}%</b>${custo>0?` <span class="selo ${pct>=40?'margem-boa':(pct>=20?'margem-media':'margem-baixa')}">${pct>=40?'boa':(pct>=20?'atenção':'baixa')}</span>`:''}`;
+  }
+  modal.querySelector('[name="custo"]').addEventListener('input', calcMargem);
+  modal.querySelector('[name="preco"]').addEventListener('input', calcMargem);
+  calcMargem();
+  document.getElementById('fProd2').onsubmit = e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const nome = String(f.get('nome')||'').trim();
+    if(!nome){ toast('Informe o nome.','erro'); return; }
+    const dados = {
+      nome,
+      un:String(f.get('un')||'un'),
+      custo:Math.max(0, Number(f.get('custo'))||0),
+      preco:Math.max(0, Number(f.get('preco'))||0),
+      desc:String(f.get('desc')||'').trim(),
+      fornecedorId:String(f.get('fornecedorId')||'')
+    };
+    if(p){ Object.assign(p, dados); toast('Item atualizado.'); }
+    else{ listaProdutos().push({id:uid(), ...dados}); toast('Item adicionado ao catálogo.'); }
+    salvar(); fecharModal(); render();
+  };
+}
+function excluirProduto(id){
+  const p = buscarProd(id); if(!p) return;
+  if(!confirm(`Excluir "${p.nome}" do catálogo?`)) return;
+  const l = listaProdutos(); l.splice(l.indexOf(p),1);
+  listaOrcamentos().forEach(o=>(o.itens||[]).forEach(i=>{ if(i.produtoId===id) i.produtoId=''; }));
+  salvar(); render(); toast('Item excluído do catálogo.');
+}
+function formFornecedor(id){
+  const f0 = id ? buscarForn(id) : null;
+  const v = f0 || {nome:'', contato:'', telefone:'', email:'', obs:''};
+  abrirModal(`
+    <form id="fForn">
+      <div class="modal-h"><h2>${f0?'✏️ Editar fornecedor':'🚚 Novo fornecedor'}</h2><button type="button" class="x" data-fechar>×</button></div>
+      <div class="modal-b"><div class="form-grid">
+        <div class="campo full"><label>Nome * <span class="req">*</span></label><input name="nome" required maxlength="100" value="${esc(v.nome)}" autofocus></div>
+        <div class="campo"><label>Pessoa de contato</label><input name="contato" maxlength="80" value="${esc(v.contato||'')}"></div>
+        <div class="campo"><label>Telefone</label><input name="telefone" maxlength="30" value="${esc(v.telefone||'')}"></div>
+        <div class="campo"><label>E-mail</label><input name="email" maxlength="90" value="${esc(v.email||'')}"></div>
+        <div class="campo full"><label>Observações</label><input name="obs" maxlength="200" value="${esc(v.obs||'')}"></div>
+      </div></div>
+      <div class="modal-f">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">${f0?'Salvar':'Adicionar'}</button>
+      </div>
+    </form>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  document.getElementById('fForn').onsubmit = e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const nome = String(f.get('nome')||'').trim();
+    if(!nome){ toast('Informe o nome.','erro'); return; }
+    const dados = {nome, contato:String(f.get('contato')||'').trim(), telefone:String(f.get('telefone')||'').trim(), email:String(f.get('email')||'').trim(), obs:String(f.get('obs')||'').trim()};
+    if(f0){ Object.assign(f0, dados); toast('Fornecedor atualizado.'); }
+    else{ listaFornecedores().push({id:uid(), ...dados}); toast('Fornecedor adicionado.'); }
+    salvar(); fecharModal(); render();
+  };
+}
+
+/* =========================================================
+   LINK PÚBLICO DO ORÇAMENTO (sem servidor)
+   ========================================================= */
+function orcParaLink(o){
+  const c = buscarCli(o.clienteId);
+  const dados = {
+    n:o.numero, em:(db.emissor||{}).nome||MARCA_NOME, et:(db.emissor||{}).telefone||'',
+    cl:(c?c.nome:(o.clienteNome||'')), dt:o.data, vd:o.validade||'',
+    it:(o.itens||[]).map(i=>({d:i.desc,q:Number(i.qtd)||0,u:Number(i.unit)||0})),
+    fr:freteOrc(o), dg:descGeralV(o), dgt:o.descGeralTipo||'R$', dgv:Number(o.desconto)||0, tt:totalOrc(o),
+    ob:o.obs||''
+  };
+  return linkBase() + '#orc=' + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(dados)))));
+}
+function linkBase(){
+  return location.origin + location.pathname;
+}
+function gerarLinkOrc(id){
+  const o = buscarOrc(id); if(!o) return '';
+  return orcParaLink(o);
+}
+function mostrarLinkOrc(id){
+  const o = buscarOrc(id); if(!o) return;
+  const link = orcParaLink(o);
+  copiarTexto(link);
+  abrirModal(`
+    <div class="modal-h"><h2>🔗 Link público do orçamento</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      <p style="font-size:13.5px;color:var(--suave);margin:0 0 8px">Envie este link ao cliente. Ele abre o orçamento em modo leitura no celular e pode <b>aceitar</b> ou <b>recusar</b> — a resposta volta para você pelo WhatsApp.</p>
+      <div class="link-box">
+        <input id="linkOrcPub" readonly value="${esc(link)}">
+        <button class="btn ghost sm" id="btnCopiarLink">📋 Copiar</button>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn ghost sm" id="btnAbrirLink">👁️ Abrir prévia</button>
+        <button class="btn ghost sm" id="btnLinkZap">💬 Enviar por WhatsApp</button>
+      </div>
+    </div>
+    <div class="modal-f"><button class="btn primary" data-fechar>Fechar</button></div>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  document.getElementById('btnCopiarLink').onclick = ()=>copiarTexto(link);
+  document.getElementById('btnAbrirLink').onclick = ()=>window.open(link,'_blank','noopener');
+  document.getElementById('btnLinkZap').onclick = ()=>{
+    const c = buscarCli(o.clienteId);
+    let tel = String((c&&c.telefone)||'').replace(/\D/g,'');
+    if(tel && tel.length<=11) tel = '55'+tel;
+    const msg = `Olá! Segue o orçamento ${o.numero} (${brl(totalOrc(o))}). Você pode ver e responder por aqui: ${link}`;
+    window.open((tel?'https://wa.me/'+tel+'?text=':'https://wa.me/?text=')+encodeURIComponent(msg), '_blank','noopener');
+  };
+}
+function decodificarOrcLink(enc){
+  try{
+    const txt = decodeURIComponent(escape(atob(decodeURIComponent(enc))));
+    return JSON.parse(txt);
+  }catch(e){ return null; }
+}
+function htmlOrcPublico(d){
+  const em = db.emissor || {};
+  const itens = (d.it||[]).map(i=>`<tr><td>${esc(i.d)}</td><td class="num">${i.q}</td><td class="num">${brl(i.u)}</td><td class="num">${brl(i.q*i.u)}</td></tr>`).join('');
+  const sub = (d.it||[]).reduce((s,i)=>s+i.q*i.u,0);
+  return `<div class="pub-wrap">
+    <div class="orc-doc" style="border:1px solid var(--borda);border-radius:14px;padding:26px;box-shadow:var(--sombra);background:#fff">
+      <div class="topo">
+        <div class="marca-doc">
+          <img class="doc-logo" src="${LOGO_DATA_URI}" alt="">
+          <div class="marca-txt">
+            <div style="font-size:16.5px;font-weight:800">${esc(em.nome||d.em||MARCA_NOME)}</div>
+            ${em.telefone||d.et?`<div>${esc(em.telefone||d.et)}</div>`:''}
+            ${em.email?`<div>${esc(em.email)}</div>`:''}
+          </div>
+        </div>
+        <div class="doc-titulo"><div class="t">ORÇAMENTO</div><div class="n">${esc(d.n||'')}</div></div>
+      </div>
+      <div class="doc-info">
+        <div><b>Cliente:</b> ${esc(d.cl||'')}</div>
+        <div><b>Data:</b> ${fmtData(d.dt)}${d.vd?` · <b>Válido até:</b> ${fmtData(d.vd)}`:''}</div>
+      </div>
+      <table><thead><tr><th>Item</th><th class="num">Qtd</th><th class="num">Valor</th><th class="num">Total</th></tr></thead><tbody>${itens}</tbody></table>
+      <div style="margin-top:9px">
+        <div class="tot-line"><span>Subtotal</span><b>${brl(sub)}</b></div>
+        ${d.fr>0?`<div class="tot-line"><span>Frete / instalação</span><b>+ ${brl(d.fr)}</b></div>`:''}
+        ${d.dg>0?`<div class="tot-line"><span>Desconto${d.dgt==='%'?` (${d.dgv}%)`:''}</span><b>− ${brl(d.dg)}</b></div>`:''}
+        <div class="tot-line geral"><span>TOTAL</span><b>${brl(d.tt)}</b></div>
+      </div>
+      ${d.ob?`<div class="obs"><b>Condições:</b><br>${esc(d.ob)}</div>`:''}
+      <div class="pub-acoes">
+        <button class="btn primary" id="pubAceitar">✅ Aceitar orçamento</button>
+        <button class="btn ghost" id="pubRecusar">✖ Não aceitar</button>
+      </div>
+      <div class="rodape-doc">Orçamento gerado em ${fmtData(hojeISO())}</div>
+    </div>
+  </div>`;
+}
+function iniciarOrcPublico(d){
+  const telEmpresa = String((db.emissor||{}).telefone||d.et||'').replace(/\D/g,'');
+  const zap = (msg)=>{
+    const t = telEmpresa ? (telEmpresa.length<=11?'55'+telEmpresa:telEmpresa) : '';
+    window.open((t?'https://wa.me/'+t+'?text=':'https://wa.me/?text=')+encodeURIComponent(msg),'_blank','noopener');
+  };
+  const b1 = document.getElementById('pubAceitar');
+  const b2 = document.getElementById('pubRecusar');
+  if(b1) b1.onclick = ()=>zap(`✅ Aceito o orçamento ${d.n} no valor de ${brl(d.tt)}.`);
+  if(b2) b2.onclick = ()=>zap(`Olá, sobre o orçamento ${d.n}: gostaria de conversar antes de fechar.`);
+}
+
+/* =========================================================
    RELATÓRIOS
    ========================================================= */
 let relFiltro = { ini:'', fim:'', status:'todos', cliente:'todos' };
@@ -2624,6 +3481,14 @@ function htmlRelatorios(){
     const lista = os.filter(o=>o.status===s.id);
     return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a+totalOrc(o),0) };
   });
+
+  /* Comissão e meta */
+  const comissaoPct = Number((db.meta||{}).comissao)||0;
+  const valorComissao = totalAprov * comissaoPct/100;
+  const metaMensal = Number((db.meta||{}).valorMensal)||0;
+  const mesAtualChave = new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
+  const faturamentoMes = listaOrcamentos().filter(o=>o.status==='aprovado' && String(o.data||'').slice(0,7)===mesAtualChave).reduce((s,o)=>s+totalOrc(o),0);
+  const metaPct = metaMensal>0 ? Math.min(100, Math.round(faturamentoMes/metaMensal*100)) : 0;
 
   const opcoesStatus = ['<option value="todos">Todos os status</option>', ...STATUS_ORC.map(s=>`<option value="${s.id}" ${relFiltro.status===s.id?'selected':''}>${s.label}</option>`)].join('');
   const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
@@ -2690,6 +3555,34 @@ function htmlRelatorios(){
     </div>
   </div>
 
+  <div class="rel-duas">
+    <div class="op-card">
+      <h4>💰 Comissão e meta</h4>
+      <div class="form-grid" style="gap:10px">
+        <div class="campo"><label>Comissão (% sobre aprovados)</label><input type="number" id="metaComissao" min="0" max="100" step="0.1" value="${comissaoPct}"></div>
+        <div class="campo"><label>Meta de faturamento do mês (R$)</label><input type="number" id="metaValor" min="0" step="0.01" value="${metaMensal}"></div>
+        <div class="campo full"><button class="btn primary sm" data-act="rel-meta" type="button">💾 Salvar comissão e meta</button></div>
+      </div>
+      <div class="rel-lista" style="margin-top:8px">
+        <div class="rel-linha"><span class="rel-nome">Comissão sobre aprovados no filtro</span><b class="rel-valor">${brl(valorComissao)}</b></div>
+        <div class="rel-linha"><span class="rel-nome">Faturamento deste mês</span><b class="rel-valor">${brl(faturamentoMes)}</b></div>
+      </div>
+      ${metaMensal>0?`<div style="font-size:12.5px;color:var(--suave);margin-top:6px">Meta: ${brl(metaMensal)} · ${metaPct}% atingido</div>
+        <div class="meta-barra"><i style="width:${metaPct}%"></i></div>`
+        :`<div style="font-size:12.5px;color:var(--suave);margin-top:6px">Defina uma meta para acompanhar o progresso do mês.</div>`}
+    </div>
+
+    <div class="op-card">
+      <h4>⏳ Orçamentos vencendo / vencidos</h4>
+      ${(()=>{ const v = orcamentosVencendo(5); return v.length ? `<div class="rel-lista">${v.slice(0,8).map(o=>`
+        <div class="rel-linha">
+          <span class="rel-nome">${esc(o.numero||'')} · ${esc(nomeClienteOrc(o))}</span>
+          ${seloValidade(o)}
+          <b class="rel-valor">${brl(totalOrc(o))}</b>
+        </div>`).join('')}</div>` : `<div class="vazio"><span class="big">✅</span>Nenhum orçamento vencendo nos próximos dias.</div>`; })()}
+    </div>
+  </div>
+
   <div class="op-card" style="margin-top:16px">
     <h4>🧾 Orçamentos do período (${os.length})</h4>
     ${os.length ? `<div class="rel-lista">${os.slice().sort((a,b)=>String(b.data).localeCompare(String(a.data))).map(o=>`
@@ -2724,6 +3617,13 @@ function ligarRelatorios(){
   };
   document.querySelector('[data-act="rel-print"]').onclick = imprimirRelatorio;
   document.querySelector('[data-act="rel-csv"]').onclick = exportarRelatorioCSV;
+  const bMeta = document.querySelector('[data-act="rel-meta"]');
+  if(bMeta) bMeta.onclick = ()=>{
+    db.meta = db.meta || {};
+    db.meta.comissao = Math.max(0, Number(document.getElementById('metaComissao').value)||0);
+    db.meta.valorMensal = Math.max(0, Number(document.getElementById('metaValor').value)||0);
+    salvar(); render(); toast('Comissão e meta salvas.','ok');
+  };
 }
 
 function resumoRelatorio(){
@@ -2767,6 +3667,7 @@ function imprimirRelatorio(){
       <div class="bloco" style="text-align:right"><h4>Valores</h4>
         <div>Total dos orçamentos: <b>${brl(total)}</b></div>
         <div>Faturamento aprovado: <b>${brl(totalAprov)}</b></div>
+        ${Number((db.meta||{}).comissao)>0?`<div>Comissão (${Number(db.meta.comissao)}%): <b>${brl(totalAprov*Number(db.meta.comissao)/100)}</b></div>`:''}
       </div>
     </div>
     <table>
@@ -2943,6 +3844,17 @@ function htmlDados(){
   </div>
 
   <div class="op-card" style="margin-bottom:16px">
+    <h4>👥 Multiusuário e permissões</h4>
+    <p>Várias pessoas podem usar o CRM com a mesma conta ou contas diferentes autorizadas. Quem for definido como <b>comum</b> não vê os dados da empresa, o catálogo com custos nem o botão de apagar tudo.</p>
+    <p style="font-size:12.5px;color:var(--suave);margin-top:6px">Seu acesso atual: <b>${souAdmin()?'Administrador':'Usuário comum'}</b></p>
+    <div class="nota-rodape" style="margin-top:10px;background:#f8fafc;border-color:#e2e8f0;color:#475569">
+      <b>Não é administrador?</b> Peça ao responsável para abrir o SQL Editor do Supabase e rodar:<br>
+      <code style="display:block;margin-top:6px;font-size:12px">alter table public.crm_members add column if not exists role text default 'admin';</code>
+      <code style="display:block;margin-top:4px;font-size:12px">update public.crm_members set role='comum' where user_id='ID_DO_USUARIO';</code>
+    </div>
+  </div>
+
+  <div class="op-card" style="margin-bottom:16px">
     <h4>🏢 Dados da empresa (cabeçalho dos orçamentos)</h4>
     <p>Aparecem no topo do orçamento impresso. Deixe em branco o que não quiser exibir.</p>
     <form id="fEmissor" class="form-grid" style="gap:12px">
@@ -2960,8 +3872,19 @@ function htmlDados(){
   <div class="opcoes-dados">
     <div class="op-card">
       <h4>⬇ Exportar backup (JSON)</h4>
-      <p>Arquivo completo com clientes, histórico, follow-ups, orçamentos e catálogo de produtos. Serve para guardar ou migrar de navegador.</p>
+      <p>Arquivo completo com clientes, histórico, follow-ups, orçamentos, ordens de serviço e catálogo de produtos. Serve para guardar ou migrar de navegador.</p>
       <button class="btn primary" data-act="export-json">Baixar JSON</button>
+    </div>
+    <div class="op-card">
+      <h4>💾 Backup automático</h4>
+      <p>O CRM lembra você de baixar uma cópia a cada ${DIAS_BACKUP} dias. Os dados também ficam na nuvem, mas um arquivo local é sua segurança extra.</p>
+      <p style="font-size:12.5px;color:var(--suave);margin-top:6px">Último backup: <b>${db.ultimoBackup ? fmtDT(db.ultimoBackup) : 'nunca'}</b>${backupVencido()?' · <span class="selo vence">pendente</span>':' · <span class="selo ok">em dia</span>'}</p>
+      <button class="btn primary" data-act="backup-agora">💾 Baixar backup agora</button>
+    </div>
+    <div class="op-card">
+      <h4>📲 Instalar como aplicativo</h4>
+      <p>Instale o CRM na tela inicial do celular ou no computador para abrir como um app, sem barra do navegador.</p>
+      <button class="btn ghost" data-act="instalar-app">📲 Instalar app</button>
     </div>
     <div class="op-card">
       <h4>⬇ Exportar planilha (CSV)</h4>
@@ -3082,17 +4005,23 @@ function importarDados(texto, nome){
       clienteId:o.clienteId||'', clienteNome:o.clienteNome||'',
       data:o.data||hojeISO(), validade:o.validade||'',
       status: STATUS_ORC.some(s=>s.id===o.status)?o.status:'rascunho',
-      desconto: Math.max(0,Number(o.desconto)||0), obs:o.obs||'',
+      desconto: Math.max(0,Number(o.desconto)||0), descGeralTipo:(o.descGeralTipo==='%'?'%':'R$'),
+      frete: Math.max(0,Number(o.frete)||0), obs:o.obs||'',
+      nf: (o.nf && typeof o.nf==='object') ? o.nf : null,
       itens: (Array.isArray(o.itens)?o.itens:[]).map(i=>({
         id:i.id||uid(), produtoId:i.produtoId||'', desc:String(i.desc||''),
-        qtd:Math.max(0,Number(i.qtd)||0), unit:Math.max(0,Number(i.unit)||0)
+        qtd:Math.max(0,Number(i.qtd)||0), unit:Math.max(0,Number(i.unit)||0),
+        descItem:Math.max(0,Number(i.descItem)||0), descTipo:(i.descTipo==='R$'?'R$':'%')
       }))
     }));
     const prodsImport = (Array.isArray(d.produtos)?d.produtos:[]).map(p=>({
       id:p.id||uid(), nome:String(p.nome||'Produto'),
-      preco:Math.max(0,Number(p.preco)||0), un:p.un||'un', desc:p.desc||''
+      preco:Math.max(0,Number(p.preco)||0), un:p.un||'un', desc:p.desc||'',
+      custo:Math.max(0,Number(p.custo)||0), fornecedorId:p.fornecedorId||''
     }));
-    db = {
+    db = normalizar({
+      ...baseVazia(),
+      ...d,
       clientes: d.clientes.map(c=>({
         id: c.id||uid(), criadoEm: c.criadoEm||agoraDT(),
         nome: c.nome||'Sem nome', empresa:c.empresa||'', telefone:c.telefone||'', email:c.email||'',
@@ -3106,7 +4035,7 @@ function importarDados(texto, nome){
       produtos: prodsImport,
       emissor: (d.emissor && typeof d.emissor==='object') ? {...emissorVazio(), ...d.emissor} : emissorVazio(),
       seqOrc: Number(d.seqOrc)||0
-    };
+    });
     salvar(); view='clientes'; render(); toast(`${db.clientes.length} cliente(s) importado(s)!`);
   }else{
     const rows = parseCSV(limpo);
@@ -3114,8 +4043,7 @@ function importarDados(texto, nome){
     if(!confirm(`Importar ${rows.length-1} cliente(s) do CSV? Os dados atuais serão substituídos.`)) return;
     const cab = rows[0].map(h=>h.trim().toLowerCase());
     const idx = n => cab.indexOf(n);
-    db = {
-      clientes: rows.slice(1).filter(r=>r.some(x=>x.trim())).map(r=>{
+    const clientesCSV = rows.slice(1).filter(r=>r.some(x=>x.trim())).map(r=>{
         const st = (r[idx('status')]||'').toLowerCase().trim();
         const stId = (STAGES.find(s=>s.label.toLowerCase()===st)||{}).id || 'novo';
         const fup = (r[idx('followup_data')]||'').trim();
@@ -3133,12 +4061,15 @@ function importarDados(texto, nome){
           contatos:[],
           followup: fup ? {data:fup.slice(0,10), prioridade:(r[idx('followup_prioridade')]||'media').trim()||'media', nota:(r[idx('followup_nota')]||'').trim()} : null
         };
-      }),
+      });
+    db = normalizar({
+      ...db,
+      clientes: clientesCSV,
       orcamentos: db.orcamentos || [],
       produtos: db.produtos || [],
       emissor: db.emissor || emissorVazio(),
       seqOrc: db.seqOrc || 0
-    };
+    });
     salvar(); view='clientes'; render(); toast(`${db.clientes.length} cliente(s) importado(s) do CSV!`);
   }
 }
@@ -3194,34 +4125,54 @@ function carregarExemplo(){
   ];
   const ano = new Date().getFullYear();
 
-  db = {
+  const forn = [
+    {id:cid(), nome:'Distribuidora Tech', contato:'João', telefone:'(71) 3000-0000', email:'vendas@distritech.com', obs:'Entrega em 3 dias'},
+    {id:cid(), nome:'Papelaria Central', contato:'', telefone:'(71) 3111-2222', email:'', obs:''}
+  ];
+
+  db = normalizar({
+    ...baseVazia(),
     clientes: cl,
-    produtos,
+    produtos: produtos.map((p,i)=>({...p, custo: [80,0.3,300,40][i]||0, fornecedorId: i===1?forn[1].id:'' })),
+    fornecedores: forn,
     orcamentos: [
       {id:cid(), criadoEm:dt(-3), numero:`ORC-${ano}-0001`, clienteId:cl[0].id, clienteNome:cl[0].nome,
-       data:dISO(-3), validade:dISO(4), status:'enviado', desconto:25,
+       data:dISO(-3), validade:dISO(4), status:'enviado', desconto:0, descGeralTipo:'R$', frete:30,
        obs:'Pagamento em 2 etapas. Prazo de entrega: 10 dias corridos após aprovação.',
        itens:[
-         {id:cid(), produtoId:produtos[1].id, desc:produtos[1].desc, qtd:120, unit:0.75},
-         {id:cid(), produtoId:'', desc:'Diagramação dos 50 convites', qtd:1, unit:180}
+         {id:cid(), produtoId:produtos[1].id, desc:produtos[1].desc, qtd:120, unit:0.75, descItem:0, descTipo:'%'},
+         {id:cid(), produtoId:'', desc:'Diagramação dos 50 convites', qtd:1, unit:180, descItem:0, descTipo:'%'}
        ]},
       {id:cid(), criadoEm:dt(-6), numero:`ORC-${ano}-0002`, clienteId:cl[3].id, clienteNome:cl[3].nome,
-       data:dISO(-6), validade:dISO(-1), status:'aprovado', desconto:0,
-       obs:'Contrato anual assinado. Início da prestação no próximo mês.',
+       data:dISO(-6), validade:dISO(-1), status:'aprovado', desconto:0, descGeralTipo:'R$', frete:0,
+       obs:'Contrato anual assinado. Início da prestação no próximo mês.', nf:{precisa:true, status:'pendente', numero:'', emitidaEm:'', obs:'', atualizadoEm:''},
        itens:[
-         {id:cid(), produtoId:produtos[2].id, desc:produtos[2].desc, qtd:12, unit:890}
+         {id:cid(), produtoId:produtos[2].id, desc:produtos[2].desc, qtd:12, unit:890, descItem:5, descTipo:'%'}
        ]},
       {id:cid(), criadoEm:dt(-1), numero:`ORC-${ano}-0003`, clienteId:cl[1].id, clienteNome:cl[1].nome,
-       data:dISO(-1), validade:dISO(9), status:'rascunho', desconto:0,
+       data:dISO(-1), validade:dISO(9), status:'rascunho', desconto:0, descGeralTipo:'R$', frete:0,
        obs:'Aguardando confirmação da quantidade de itens.',
        itens:[
-         {id:cid(), produtoId:produtos[3].id, desc:produtos[3].desc, qtd:2, unit:120},
-         {id:cid(), produtoId:produtos[0].id, desc:produtos[0].desc, qtd:3, unit:250}
+         {id:cid(), produtoId:produtos[3].id, desc:produtos[3].desc, qtd:2, unit:120, descItem:0, descTipo:'%'},
+         {id:cid(), produtoId:produtos[0].id, desc:produtos[0].desc, qtd:3, unit:250, descItem:0, descTipo:'%'}
        ]}
     ],
     seqOrc: 3,
-    emissor:{nome:'Claudio — Serviços e Projetos', telefone:'(11) 90000-0000', email:'contato@exemplo.com', endereco:'Rua das Flores, 100 — São Paulo/SP', doc:'CNPJ 00.000.000/0001-00'}
-  };
+    ordens: [
+      {id:cid(), criadoEm:dt(-5), numero:`OS-${ano}-0001`, orcamentoId:'', clienteId:cl[3].id, clienteNome:cl[3].nome,
+       data:dISO(-5), prazo:dISO(2), status:'andamento', valor:10680, responsavel:'Claudio',
+       descricao:'12× Assinatura mensal — suporte e manutenção',
+       obs:'Atendimento remoto mensal, com visita trimestral.',
+       checklist:[
+         {tarefa:'Configurar monitoramento dos servidores', feito:true, obs:''},
+         {tarefa:'Realizar backup inicial completo', feito:true, obs:''},
+         {tarefa:'Agendar visita técnica trimestral', feito:false, obs:''}
+       ]}
+    ],
+    seqOS: 1,
+    meta:{ comissao:10, valorMensal:15000 },
+    emissor: emissorPadrao()
+  });
   salvar(); view='painel'; render(); toast('Dados de exemplo carregados!');
 }
 
@@ -3290,6 +4241,27 @@ async function entrarNoApp(user){
   render();
   /* Sincroniza os dados com a nuvem (celular + computador juntos) */
   await iniciarNuvem();
+  /* Descobre o papel do usuário (admin x comum) — se a coluna não existir, assume admin */
+  try{ await carregarPapel(user); }catch(e){}
+}
+/* Lê o papel do usuário na tabela crm_members (coluna opcional "role") */
+async function carregarPapel(user){
+  if(!crmClient || !user) return;
+  try{
+    const { data, error } = await crmClient.from('crm_members').select('role').eq('user_id', user.id).maybeSingle();
+    if(error || !data) return; /* sem coluna role ou sem linha individual: mantém admin */
+    db.role = (data.role === 'comum') ? 'comum' : 'admin';
+    try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){}
+    aplicarPermissoes();
+    render();
+  }catch(e){ /* silencioso */ }
+}
+function souAdmin(){ return db.role !== 'comum'; }
+function aplicarPermissoes(){
+  const comum = !souAdmin();
+  /* Contas "comum" não veem dados da empresa, fornecedores/custos nem apagar tudo */
+  document.querySelectorAll('[data-view="dados"], [data-view="catalogo"]').forEach(b=>{ b.style.display = comum ? 'none' : ''; });
+  if(comum && (view==='dados' || view==='catalogo')) view = 'painel';
 }
 /* Valida se a conta está autorizada (public.is_crm_member) e entra */
 async function validarEEntrar(user){
@@ -3377,9 +4349,153 @@ async function initAuth(){
   }
 }
 
+/* =========================================================
+   BUSCA GLOBAL (topo)
+   ========================================================= */
+function iniciarBuscaGlobal(){
+  const inp = document.getElementById('buscaGlobal');
+  const box = document.getElementById('buscaResultados');
+  if(!inp || !box) return;
+
+  function fechar(){ box.hidden = true; box.innerHTML = ''; }
+
+  function resultados(q){
+    const t = q.trim().toLowerCase();
+    if(t.length < 2) return null;
+    const gr = [];
+    const clis = db.clientes.filter(c=>[c.nome,c.empresa,c.email,c.telefone,c.cpf,c.cnpj].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,5);
+    if(clis.length) gr.push({grupo:'Clientes', itens:clis.map(c=>({ico:'👤', titulo:c.nome, sub:c.empresa||c.telefone||'', tipo:'cli', id:c.id}))});
+    const orcs = listaOrcamentos().filter(o=>[o.numero,nomeClienteOrc(o),o.obs].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,5);
+    if(orcs.length) gr.push({grupo:'Orçamentos', itens:orcs.map(o=>({ico:'🧾', titulo:o.numero, sub:`${nomeClienteOrc(o)} · ${brl(totalOrc(o))}`, tipo:'orc', id:o.id}))});
+    const ordens = listaOrdens().filter(o=>[o.numero,nomeClienteOrdem(o),o.descricao].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,5);
+    if(ordens.length) gr.push({grupo:'Ordens de serviço', itens:ordens.map(o=>({ico:'🛠️', titulo:o.numero, sub:`${nomeClienteOrdem(o)} · ${brl(o.valor)}`, tipo:'os', id:o.id}))});
+    const prods = listaProdutos().filter(p=>[p.nome,p.desc].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,5);
+    if(prods.length) gr.push({grupo:'Catálogo', itens:prods.map(p=>({ico:'📦', titulo:p.nome, sub:brl(p.preco), tipo:'prod', id:p.id}))});
+    return gr;
+  }
+
+  function render(){
+    const gr = resultados(inp.value);
+    if(!gr){ fechar(); return; }
+    if(!gr.length){ box.innerHTML = `<div class="br-vazio">Nada encontrado para "${esc(inp.value.trim())}".</div>`; box.hidden=false; return; }
+    box.innerHTML = gr.map(g=>`
+      <div class="br-grupo">${g.grupo}</div>
+      ${g.itens.map(it=>`<div class="br-item" data-tipo="${it.tipo}" data-id="${it.id}">
+        <div class="br-ico">${it.ico}</div>
+        <div class="br-main"><b>${esc(it.titulo)}</b><span>${esc(it.sub)}</span></div>
+      </div>`).join('')}`).join('');
+    box.hidden = false;
+  }
+
+  inp.addEventListener('input', render);
+  inp.addEventListener('focus', render);
+  box.addEventListener('click', e=>{
+    const it = e.target.closest('.br-item'); if(!it) return;
+    const id = it.dataset.id;
+    fechar(); inp.value = '';
+    if(it.dataset.tipo==='cli') formCliente(id);
+    else if(it.dataset.tipo==='orc') verOrc(id);
+    else if(it.dataset.tipo==='os') verOrdem(id);
+    else if(it.dataset.tipo==='prod') formProduto(id);
+  });
+  document.addEventListener('click', e=>{ if(!e.target.closest('.busca-global')) fechar(); });
+  inp.addEventListener('keydown', e=>{ if(e.key==='Escape'){ fechar(); inp.blur(); } });
+}
+
+/* =========================================================
+   BACKUP AUTOMÁTICO (lembrete + cópia local)
+   ========================================================= */
+const DIAS_BACKUP = 7;
+function diasDesdeUltimoBackup(){
+  if(!db.ultimoBackup) return Infinity;
+  const d = Math.floor((Date.now() - new Date(db.ultimoBackup).getTime())/86400000);
+  return isNaN(d) ? Infinity : d;
+}
+function backupVencido(){ return diasDesdeUltimoBackup() >= DIAS_BACKUP; }
+function baixarBackupAgora(){
+  exportarJSON();
+  db.ultimoBackup = agoraDT();
+  salvar();
+  toast('💾 Backup baixado e registrado.', 'ok');
+  try{ render(); }catch(e){}
+}
+function talvezAvisarBackup(){
+  if(!backupVencido()) return;
+  const quando = db.ultimoBackup ? `há ${Math.floor(diasDesdeUltimoBackup())} dia(s)` : 'nunca';
+  setTimeout(()=>{
+    if(confirm(`💾 Faz ${quando} que você não baixa um backup dos seus dados.\n\nDeseja baixar uma cópia agora?`)) baixarBackupAgora();
+  }, 2600);
+  const bc = document.getElementById('btnBackupTopo');
+  if(bc) bc.classList.add('pulse');
+}
+
+/* =========================================================
+   PWA — instalável no celular
+   ========================================================= */
+let promptInstalar = null;
+function iniciarPWA(){
+  try{
+    const manifest = {
+      name:'SUPORT MAX — CRM', short_name:'SuportMax CRM', start_url:'./CRM-basico.html',
+      display:'standalone', background_color:'#0f172a', theme_color:'#2563eb',
+      icons:[{src:LOGO_DATA_URI, sizes:'512x512', type:'image/jpeg', purpose:'any'}]
+    };
+    const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
+    const link = document.createElement('link');
+    link.rel = 'manifest';
+    link.href = URL.createObjectURL(blob);
+    document.head.appendChild(link);
+    const mt = document.createElement('meta'); mt.name='theme-color'; mt.content='#2563eb'; document.head.appendChild(mt);
+    const ap = document.createElement('link'); ap.rel='apple-touch-icon'; ap.href=LOGO_DATA_URI; document.head.appendChild(ap);
+  }catch(e){}
+  window.addEventListener('beforeinstallprompt', e=>{
+    e.preventDefault(); promptInstalar = e;
+    const b = document.getElementById('btnInstalar');
+    if(b) b.hidden = false;
+  });
+}
+function instalarApp(){
+  if(!promptInstalar){
+    toast('Para instalar: abra o menu do navegador e escolha "Adicionar à tela inicial".','ok');
+    return;
+  }
+  promptInstalar.prompt();
+  promptInstalar = null;
+  const b = document.getElementById('btnInstalar');
+  if(b) b.hidden = true;
+}
+
+/* =========================================================
+   PÁGINA PÚBLICA DO ORÇAMENTO (?/#orc=...)
+   ========================================================= */
+function verificarOrcPublico(){
+  const m = (location.hash||'').match(/orc=([^&]+)/);
+  if(!m) return false;
+  const dados = decodificarOrcLink(m[1]);
+  if(!dados) return false;
+  document.getElementById('loginScreen').hidden = true;
+  document.getElementById('appCrm').hidden = true;
+  document.body.classList.add('modo-publico');
+  const host = document.getElementById('areaImpressao');
+  host.hidden = false;
+  host.innerHTML = htmlOrcPublico(dados);
+  iniciarOrcPublico(dados);
+  document.title = 'Orçamento ' + (dados.n||'') + ' — SUPORT MAX';
+  return true;
+}
+
 /* ---------- Início ---------- */
 aplicarMarca();
-initAuth();
+iniciarPWA();
+try{
+  if(!verificarOrcPublico()){
+    iniciarBuscaGlobal();
+    initAuth();
+  }else{
+    iniciarBuscaGlobal();
+  }
+}catch(e){ try{ initAuth(); }catch(_){} }
+if(backupVencido()) setTimeout(talvezAvisarBackup, 3000);
 </script>
 </body>
 </html>
