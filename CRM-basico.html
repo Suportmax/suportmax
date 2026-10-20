@@ -2789,11 +2789,13 @@ function formCliente(id, etapaPre){
       <div class="modal-b">
         <div class="form-grid">
           <div class="campo full"><label>Nome * <span class="req">*</span></label><input name="nome" required maxlength="80" value="${esc(v.nome)}" placeholder="Ex.: Maria Silva" autofocus></div>
+          <div class="campo"><label>CNPJ</label><input id="cliCnpj" name="cnpj" maxlength="20" value="${esc(v.cnpj||'')}" placeholder="00.000.000/0000-00" inputmode="numeric" data-mask="cnpj"><small style="color:var(--suave);font-size:11px">Digite o CNPJ e saia do campo para preencher automático</small></div>
           <div class="campo"><label>Empresa</label><input name="empresa" maxlength="80" value="${esc(v.empresa)}" placeholder="Ex.: Loja Central"></div>
+          <div class="campo"><label>CEP</label><input id="cliCep" name="cep" maxlength="9" value="${esc(v.cep||'')}" placeholder="00000-000" inputmode="numeric"><small style="color:var(--suave);font-size:11px">Digite o CEP e saia do campo para preencher endereço</small></div>
+          <div class="campo full"><label>Endereço</label><input name="endereco" maxlength="150" value="${esc(v.endereco||'')}" placeholder="Rua, número, bairro, cidade/UF"></div>
           <div class="campo"><label>Telefone / WhatsApp</label><input name="telefone" maxlength="30" value="${esc(v.telefone)}" placeholder="(11) 99999-0000"></div>
           <div class="campo"><label>E-mail</label><input name="email" type="email" maxlength="80" value="${esc(v.email)}" placeholder="email@exemplo.com"></div>
           <div class="campo"><label>CPF</label><input name="cpf" maxlength="18" value="${esc(v.cpf||'')}" placeholder="000.000.000-00" inputmode="numeric" data-mask="cpf"></div>
-          <div class="campo"><label>CNPJ</label><input name="cnpj" maxlength="20" value="${esc(v.cnpj||'')}" placeholder="00.000.000/0000-00" inputmode="numeric" data-mask="cnpj"></div>
           <div class="campo"><label>Origem (como chegou)</label>
             <select name="origem">
               <option value="">— Não informado —</option>
@@ -2842,6 +2844,64 @@ function formCliente(id, etapaPre){
     if(bVer) bVer.onclick = ()=>{ fecharModal(); filtroOrc = {busca:c.nome, status:'todos'}; view='orcamentos'; render(); };
   }
 
+  // Autopreenchimento por CNPJ
+  const inpCnpj = document.getElementById('cliCnpj');
+  if(inpCnpj){
+    inpCnpj.addEventListener('blur', async ()=>{
+      const cnpjLimpo = (inpCnpj.value||'').replace(/\D/g,'');
+      if(cnpjLimpo.length !== 14) return;
+      inpCnpj.disabled = true;
+      toast('Buscando dados do CNPJ...', 'ok');
+      try{
+        const resp = await fetch('https://brasilapi.com.br/api/cnpj/v1/'+cnpjLimpo);
+        if(!resp.ok) throw new Error('Não encontrado');
+        const j = await resp.json();
+        const form = document.getElementById('fCliente');
+        if(!form) return;
+        if(j.razao_social && !form.empresa.value) form.empresa.value = j.razao_social;
+        if(j.nome_fantasia && !form.nome.value) form.nome.value = j.nome_fantasia;
+        if(j.ddd_telefone_1 && !form.telefone.value) form.telefone.value = '('+j.ddd_telefone_1.slice(0,2)+') '+j.ddd_telefone_1.slice(2);
+        if(j.email && !form.email.value) form.email.value = j.email;
+        if(j.cep){
+          form.cep.value = j.cep.replace(/^(\d{5})(\d{3})$/, '$1-$2');
+        }
+        let end = '';
+        if(j.logradouro) end += j.logradouro;
+        if(j.numero) end += ', '+j.numero;
+        if(j.complemento) end += ' - '+j.complemento;
+        if(j.bairro) end += ', '+j.bairro;
+        if(j.municipio && j.uf) end += ' - '+j.municipio+'/'+j.uf;
+        if(end && !form.endereco.value) form.endereco.value = end;
+        toast('Dados do CNPJ preenchidos!', 'ok');
+      }catch(e){ toast('Não foi possível buscar CNPJ. Preencha manualmente.', 'erro'); }
+      finally{ inpCnpj.disabled = false; }
+    });
+  }
+  // Autopreenchimento por CEP
+  const inpCep = document.getElementById('cliCep');
+  if(inpCep){
+    inpCep.addEventListener('blur', async ()=>{
+      const cepLimpo = (inpCep.value||'').replace(/\D/g,'');
+      if(cepLimpo.length !== 8) return;
+      inpCep.disabled = true;
+      toast('Buscando endereço pelo CEP...', 'ok');
+      try{
+        const resp = await fetch('https://viacep.com.br/ws/'+cepLimpo+'/json/');
+        const j = await resp.json();
+        if(j.erro) throw new Error('CEP não encontrado');
+        const form = document.getElementById('fCliente');
+        if(!form) return;
+        let end = '';
+        if(j.logradouro) end += j.logradouro;
+        if(j.bairro) end += end?', '+j.bairro:j.bairro;
+        if(j.localidade && j.uf) end += (end?', ':'')+j.localidade+'/'+j.uf;
+        if(end && !form.endereco.value) form.endereco.value = end;
+        toast('Endereço preenchido pelo CEP!', 'ok');
+      }catch(e){ toast('CEP não encontrado. Preencha manualmente.', 'erro'); }
+      finally{ inpCep.disabled = false; }
+    });
+  }
+
   document.getElementById('fCliente').onsubmit = e=>{
     e.preventDefault();
     const f = new FormData(e.target);
@@ -2854,6 +2914,8 @@ function formCliente(id, etapaPre){
       email: String(f.get('email')||'').trim(),
       cpf: String(f.get('cpf')||'').trim(),
       cnpj: String(f.get('cnpj')||'').trim(),
+      cep: String(f.get('cep')||'').trim(),
+      endereco: String(f.get('endereco')||'').trim(),
       origem: String(f.get('origem')||''),
       status: String(f.get('status')||'novo'),
       notas: String(f.get('notas')||'').trim(),
