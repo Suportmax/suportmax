@@ -1631,8 +1631,28 @@ function nuvemSalvarAgendado(){
 }
 
 function salvar(){
-  try{ localStorage.setItem(KEY, JSON.stringify(db)); }
-  catch(e){ toast('Não foi possível salvar os dados (armazenamento cheio?)','erro'); }
+  try{
+    localStorage.setItem(KEY, JSON.stringify(db));
+  }catch(e){
+    try{
+      if(Array.isArray(db.backups) && db.backups.length > 6){
+        db.backups = db.backups.slice(0,6);
+        try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e3){}
+        toast('Armazenamento cheio: removi backups internos antigos para liberar espaço.','aviso');
+        if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
+        backupDiarioAuto();
+        return;
+      }
+      if(Array.isArray(db.backups) && db.backups.length){
+        db.backups = [];
+        try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e3){}
+        toast('Armazenamento cheio: limpei todos os backups internos para liberar espaço. Faça um backup JSON agora.','erro');
+        if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
+        return;
+      }
+    }catch(e2){}
+    toast('Armazenamento cheio. Exporte um backup em Dados > Exportar backup JSON e remova arquivos/fotos grandes.','erro');
+  }
   if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
   backupDiarioAuto();
 }
@@ -1640,11 +1660,13 @@ function salvar(){
 function backupDiarioAuto(){
   const hoje = hojeISO();
   if(!Array.isArray(db.backups)) db.backups = [];
+  if(db.backups.length > 10) db.backups = db.backups.slice(0,10);
   const jaTem = db.backups.some(b=>String(b.em||'').slice(0,10)===hoje && b.auto);
   if(jaTem) return;
   salvarBackupInterno('Automático');
   const ult = db.backups[0];
   if(ult) ult.auto = true;
+  if(db.backups.length > 6) db.backups = db.backups.slice(0,6);
   try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){}
   if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
 }
