@@ -779,7 +779,6 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
       <button class="nav-item active" data-view="painel"><span class="ico">📊</span><span>Painel</span></button>
       <button class="nav-item" data-view="clientes"><span class="ico">👥</span><span>Clientes</span></button>
       <button class="nav-item" data-view="funil"><span class="ico">🗂️</span><span>Funil</span></button>
-      <button class="nav-item" data-view="orcamentos"><span class="ico">🧾</span><span>Orçamentos</span></button>
       <button class="nav-item" data-view="ordens"><span class="ico">🛠️</span><span>Ordens de serviço</span><span class="pill" id="pillOS" style="display:none">0</span></button>
       <button class="nav-item" data-view="financeiro"><span class="ico">💰</span><span>Financeiro</span><span class="pill" id="pillFin" style="display:none">0</span></button>
       <button class="nav-item" data-view="contratos"><span class="ico">🔁</span><span>Contratos</span><span class="pill" id="pillContrato" style="display:none">0</span></button>
@@ -2285,6 +2284,7 @@ function render(){
   }
 
   const el = document.getElementById('view');
+  if(view==='orcamentos'){ estado.view='ordens'; view='ordens'; salvarPrefs(); }
   if(view==='painel') el.innerHTML = htmlPainel();
   else if(view==='clientes'){ el.innerHTML = htmlClientes(); ligarClientes(); }
   else if(view==='funil'){ el.innerHTML = htmlFunil(); ligarFunil(); }
@@ -8379,7 +8379,7 @@ function iniciarBuscaGlobal(){
    ========================================================= */
 const ATALHOS = [
   {tecla:'Ctrl+K', desc:'Abrir a busca global', fn:()=>{ const i=document.getElementById('buscaGlobal'); if(i){ i.focus(); i.select(); } }},
-  {tecla:'N',      desc:'Novo orçamento', fn:()=>{ view='orcamentos'; render(); formOrcamento(null); }},
+  {tecla:'N',      desc:'Nova ordem de serviço', fn:()=>{ view='ordens'; render(); formOrdem(null); }},
   {tecla:'C',      desc:'Novo cliente', fn:()=>{ view='clientes'; render(); formCliente(null); }},
   {tecla:'O',      desc:'Nova ordem de serviço', fn:()=>{ view='ordens'; render(); formOrdem(null); }},
   {tecla:'P',      desc:'Novo item no catálogo', fn:()=>{ view='catalogo'; render(); formProduto(null); }},
