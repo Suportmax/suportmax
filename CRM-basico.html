@@ -189,6 +189,27 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .agenda-item .nota{font-size:12.6px;color:var(--suave);margin-top:2px}
 .agenda-acoes{display:flex;gap:7px;flex-wrap:wrap}
 
+/* ===== Agenda melhorada ===== */
+.agenda-topo{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:14px 16px;margin-top:16px}
+.agenda-topo-info{display:flex;flex-direction:column;gap:3px;min-width:220px;flex:1}
+.agenda-topo-info b{font-size:14px}
+.agenda-topo-info span{font-size:12.6px;color:var(--suave)}
+.agenda-nome{cursor:pointer;border-bottom:1px dashed transparent}
+.agenda-nome:hover{border-bottom-color:var(--prim);color:var(--prim)}
+.agenda-nota{font-weight:600;color:#334155}
+.agenda-quando{font-weight:650}
+
+.seg{display:inline-flex;background:#eef2f7;border:1px solid var(--borda);border-radius:10px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg-item{border:0;background:transparent;padding:7px 13px;border-radius:8px;font-size:13px;font-weight:650;color:var(--suave);cursor:pointer;white-space:nowrap}
+.seg-item:hover{color:var(--texto)}
+.seg-item.active{background:#fff;color:var(--prim);box-shadow:0 1px 4px rgba(15,23,42,.12)}
+
+.menu-wrap{position:relative;display:inline-block}
+.menu-pop{position:absolute;top:calc(100% + 5px);right:0;background:#fff;border:1px solid var(--borda);border-radius:10px;box-shadow:0 14px 34px rgba(15,23,42,.18);padding:5px;z-index:50;min-width:170px}
+.menu-pop button{display:block;width:100%;text-align:left;border:0;background:transparent;padding:8px 11px;border-radius:7px;font-size:13.2px;color:var(--texto);cursor:pointer}
+.menu-pop button:hover{background:#f1f5f9}
+.secao-agenda h3 .link-btn{margin-left:auto;font-size:11.5px;text-transform:none;letter-spacing:0}
+
 /* ---------- Modal ---------- */
 .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow-y:auto}
 .overlay.open{display:flex}
@@ -694,6 +715,7 @@ let filtro = {busca:'', status:'todos', ordenar:'recentes'};
 let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos'};
 let filtroOS = {busca:'', status:'todos'};
 let filtroCat = {busca:'', margem:'todos'};
+let filtroAgenda = {busca:'', periodo:'todos', prioridade:'todas', ordenar:'data'};
 
 /* ---------- Persistência ---------- */
 function emissorVazio(){ return {nome:'', telefone:'', email:'', site:'', instagram:'', endereco:'', doc:''}; }
@@ -1347,7 +1369,10 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') fecharModal(); })
 document.querySelector('.nav').addEventListener('click', e=>{
   const b = e.target.closest('.nav-item');
   if(!b) return;
-  view = b.dataset.view;
+  const alvo = b.dataset.view;
+  /* Ao abrir a agenda pelo sino, já mostra os follow-ups de hoje */
+  if(alvo==='agenda' && view!=='agenda') filtroAgenda.periodo = 'hoje';
+  view = alvo;
   render();
 });
 document.getElementById('btnExportRapido').addEventListener('click', exportarJSON);
@@ -1389,7 +1414,7 @@ function render(){
   else if(view==='orcamentos'){ el.innerHTML = htmlOrcamentos(); ligarOrcamentos(); }
   else if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
   else if(view==='relatorios'){ el.innerHTML = htmlRelatorios(); ligarRelatorios(); }
-  else if(view==='agenda') el.innerHTML = htmlAgenda();
+  else if(view==='agenda'){ el.innerHTML = htmlAgenda(); ligarAgenda(); }
   else if(view==='catalogo'){ el.innerHTML = htmlCatalogo(); ligarCatalogo(); }
   else if(view==='dados'){ el.innerHTML = htmlDados(); ligarDados(); }
   /* mantém os indicadores de nuvem em dia após redesenhar a tela */
@@ -1657,6 +1682,10 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='os-excluir') excluirOrdem(id);
   else if(btn.dataset.act==='cli-zap') enviarClienteZap(id);
   else if(btn.dataset.act==='cli-fup-zap') enviarFollowupZap(id, true);
+  else if(btn.dataset.act==='agenda-novo') formAgendarFollowup();
+  else if(btn.dataset.act==='adiarDias') adiarFollowup(id, Number(btn.dataset.dias)||1);
+  else if(btn.dataset.act==='adiarEscolher') agendaEscolherData(id);
+  else if(btn.dataset.act==='agenda-adiar-todos') agendaAdiarTodos(btn.dataset.grupo, Number(btn.dataset.dias)||7);
   else if(btn.dataset.act==='export-json') exportarJSON();
   else if(btn.dataset.act==='export-csv') exportarCSV();
   else if(btn.dataset.act==='exemplo') carregarExemplo();
@@ -1955,41 +1984,124 @@ document.getElementById('view').addEventListener('drop', e=>{
 /* =========================================================
    AGENDA DE FOLLOW-UPS
    ========================================================= */
+function agendaPendentes(){
+  return db.clientes.filter(c=>c.followup && c.followup.data);
+}
+function agendaFiltrados(){
+  const q = filtroAgenda.busca.trim().toLowerCase();
+  return agendaPendentes().filter(c=>{
+    const d = diasAte(c.followup.data);
+    if(filtroAgenda.periodo==='atrasados' && !(d<0)) return false;
+    if(filtroAgenda.periodo==='hoje' && d!==0) return false;
+    if(filtroAgenda.periodo==='semana' && !(d>=0 && d<=7)) return false;
+    if(filtroAgenda.periodo==='futuros' && !(d>7)) return false;
+    if(filtroAgenda.prioridade!=='todas' && (c.followup.prioridade||'media')!==filtroAgenda.prioridade) return false;
+    if(q && ![c.nome, c.empresa, c.telefone, c.email, c.followup.nota].some(v=>String(v||'').toLowerCase().includes(q))) return false;
+    return true;
+  }).sort((a,b)=>{
+    if(filtroAgenda.ordenar==='prioridade'){
+      const ordem = {alta:0, media:1, baixa:2};
+      const pa = ordem[a.followup.prioridade||'media'], pb = ordem[b.followup.prioridade||'media'];
+      if(pa!==pb) return pa-pb;
+    }
+    return String(a.followup.data).localeCompare(String(b.followup.data));
+  });
+}
 function htmlAgenda(){
-  const pend = db.clientes.filter(c=>c.followup && c.followup.data)
-    .sort((a,b)=>a.followup.data.localeCompare(b.followup.data));
+  const todas = agendaPendentes();
+  const hojeN = todas.filter(c=>diasAte(c.followup.data)===0).length;
+  const atrasN = todas.filter(c=>diasAte(c.followup.data)<0).length;
+  const semN = todas.filter(c=>{ const d=diasAte(c.followup.data); return d>=0 && d<=7; }).length;
+  const lista = agendaFiltrados();
 
-  if(!pend.length){
-    return `<div class="card"><div class="vazio" style="padding:50px 20px"><span class="big">🎉</span>Nenhum follow-up pendente!<br><br>
-      Agende próximos contatos no formulário do cliente ou ao registrar um histórico.</div></div>`;
+  const stats = `<div class="grid-stats">
+    ${stat('Atrasados', atrasN, '🚨', atrasN>0)}
+    ${stat('Para hoje', hojeN, '📍')}
+    ${stat('Próximos 7 dias', semN, '📅')}
+    ${stat('Total agendado', todas.length, '⏰')}
+  </div>`;
+
+  /* Atalhos + como agendar */
+  const atalhos = `<div class="agenda-topo">
+    <div class="agenda-topo-info">
+      <b>Organize seus contatos</b>
+      <span>Use os filtros abaixo e as ações rápidas em cada cliente. Você pode agendar um follow-up pelo botão <b>＋ Agendar follow-up</b> ou ao registrar um contato no histórico.</span>
+    </div>
+    <button class="btn primary" data-act="agenda-novo">＋ Agendar follow-up</button>
+  </div>`;
+
+  const toolbar = `<div class="toolbar" style="margin-top:14px">
+    <div class="seg" id="segAgenda">
+      ${[['todos','Todos'],['atrasados','Atrasados'],['hoje','Hoje'],['semana','7 dias'],['futuros','Mais à frente']]
+        .map(([v,l])=>`<button class="seg-item${filtroAgenda.periodo===v?' active':''}" data-seg="${v}">${l}</button>`).join('')}
+    </div>
+    <div class="busca"><input id="buscaAgenda" placeholder="Buscar por nome, empresa, telefone, nota..." value="${esc(filtroAgenda.busca)}"></div>
+    <select class="filtro" id="fPrioAgenda">
+      <option value="todas" ${filtroAgenda.prioridade==='todas'?'selected':''}>Todas as prioridades</option>
+      <option value="alta" ${filtroAgenda.prioridade==='alta'?'selected':''}>🔴 Alta</option>
+      <option value="media" ${filtroAgenda.prioridade==='media'?'selected':''}>🟡 Média</option>
+      <option value="baixa" ${filtroAgenda.prioridade==='baixa'?'selected':''}>🟢 Baixa</option>
+    </select>
+    <select class="filtro" id="fOrdAgenda">
+      <option value="data" ${filtroAgenda.ordenar==='data'?'selected':''}>Ordenar por data</option>
+      <option value="prioridade" ${filtroAgenda.ordenar==='prioridade'?'selected':''}>Ordenar por prioridade</option>
+    </select>
+  </div>`;
+
+  if(!todas.length){
+    return stats + atalhos + `<div class="card" style="margin-top:16px"><div class="vazio" style="padding:46px 20px"><span class="big">🎉</span>Nenhum follow-up agendado!<br><br>
+      Clique em <b>＋ Agendar follow-up</b> para marcar um contato, ou registre um contato no histórico do cliente.</div></div>`;
+  }
+  if(!lista.length){
+    return stats + atalhos + toolbar + `<div class="card" style="margin-top:16px"><div class="vazio" style="padding:46px 20px"><span class="big">🔍</span>Nenhum follow-up para este filtro.</div></div>`;
   }
 
-  const grupos = {venc:[], hoje:[], semana:[], depois:[]};
-  pend.forEach(c=>{
+  const grupos = {venc:[], hoje:[], amanha:[], semana:[], depois:[]};
+  lista.forEach(c=>{
     const d = diasAte(c.followup.data);
     if(d<0) grupos.venc.push(c);
     else if(d===0) grupos.hoje.push(c);
+    else if(d===1) grupos.amanha.push(c);
     else if(d<=7) grupos.semana.push(c);
     else grupos.depois.push(c);
   });
 
   const bloco = (titulo, icone, arr, cls) => !arr.length ? '' : `
     <div class="secao-agenda">
-      <h3>${icone} ${titulo} <span class="cnt">${arr.length}</span></h3>
+      <h3>${icone} ${titulo} <span class="cnt">${arr.length}</span>${arr.length>1?`<button class="link-btn" data-act="agenda-adiar-todos" data-dias="7" data-grupo="${cls}">adiar todos +7d</button>`:''}</h3>
       ${arr.map(c=>{
         const d = diasAte(c.followup.data);
+        const tel = telZap(c.telefone);
+        const orcAberto = listaOrcamentos().filter(o=>o.clienteId===c.id && (o.status==='rascunho'||o.status==='enviado'))[0];
         return `<div class="agenda-item ${cls}">
           <div class="avatar">${iniciais(c.nome)}</div>
           <div class="info">
-            <div class="dt">${esc(c.nome)} ${c.empresa?`<span class="mt" style="font-weight:400;color:var(--suave)">· ${esc(c.empresa)}</span>`:''}</div>
-            <div class="nota">${c.followup.nota?esc(c.followup.nota)+' · ':''}${d<0?`<span class="atrasado">Atrasado — era ${fmtData(c.followup.data)}</span>`:fmtData(c.followup.data)+' ('+rotuloPrazo(c.followup.data)+')'}</div>
+            <div class="dt">
+              <span class="agenda-nome" data-abrir="${c.id}">${esc(c.nome)}</span>
+              ${c.empresa?`<span class="mt" style="font-weight:400;color:var(--suave)">· ${esc(c.empresa)}</span>`:''}
+              <span class="prio ${c.followup.prioridade||'media'}">${esc(c.followup.prioridade||'media')}</span>
+            </div>
+            <div class="nota">
+              ${c.followup.nota?`<span class="agenda-nota">${esc(c.followup.nota)}</span><br>`:''}
+              <span class="agenda-quando">📆 ${fmtData(c.followup.data)}</span>
+              ${d<0?`<span class="atrasado"> · atrasado ${Math.abs(d)}d</span>`:`<span class="mt"> · ${rotuloPrazo(c.followup.data)}</span>`}
+              ${orcAberto?` · <span class="selo info">🧾 ${esc(orcAberto.numero)} ${brl(totalOrc(orcAberto))}</span>`:''}
+            </div>
+            ${tel?`<div class="mt" style="margin-top:3px">📞 ${esc(c.telefone)}</div>`:''}
           </div>
-          <span class="prio ${c.followup.prioridade||'media'}">${esc(c.followup.prioridade||'media')}</span>
           <div class="agenda-acoes">
             <button class="btn sm ok" data-act="concluir" data-id="${c.id}" title="Registra o contato e limpa o follow-up">✓ Concluir</button>
             <button class="btn sm ghost" data-act="cli-fup-zap" data-id="${c.id}" title="Enviar mensagem de follow-up no WhatsApp">💬 WhatsApp</button>
-            <button class="btn sm ghost" data-act="adiar1" data-id="${c.id}" title="Adiar 1 dia">+1d</button>
-            <button class="btn sm ghost" data-act="adiar" data-id="${c.id}" title="Adiar 7 dias">+7d</button>
+            <div class="menu-wrap">
+              <button class="btn sm ghost" data-menu="${c.id}" title="Adiar">⏰ Adiar ▾</button>
+              <div class="menu-pop" data-menu-pop="${c.id}" hidden>
+                <button data-act="adiarDias" data-id="${c.id}" data-dias="1">Amanhã (+1d)</button>
+                <button data-act="adiarDias" data-id="${c.id}" data-dias="3">Em 3 dias</button>
+                <button data-act="adiarDias" data-id="${c.id}" data-dias="7">Em 1 semana</button>
+                <button data-act="adiarDias" data-id="${c.id}" data-dias="30">Em 30 dias</button>
+                <button data-act="adiarEscolher" data-id="${c.id}">Escolher data...</button>
+              </div>
+            </div>
             <button class="btn sm ghost" data-act="historico" data-id="${c.id}">🗒️ Histórico</button>
             <button class="btn sm ghost" data-act="editar" data-id="${c.id}">✏️</button>
           </div>
@@ -1997,10 +2109,128 @@ function htmlAgenda(){
       }).join('')}
     </div>`;
 
-  return bloco('Atrasados','🚨',grupos.venc,'venc')
+  return stats + atalhos + toolbar
+       + bloco('Atrasados','🚨',grupos.venc,'venc')
        + bloco('Hoje','📍',grupos.hoje,'hoje')
+       + bloco('Amanhã','🌅',grupos.amanha,'')
        + bloco('Próximos 7 dias','📅',grupos.semana,'')
        + bloco('Mais à frente','🗓️',grupos.depois,'');
+}
+
+function ligarAgenda(){
+  const b = document.getElementById('buscaAgenda');
+  if(b) b.addEventListener('input', ()=>{ filtroAgenda.busca=b.value; render(); });
+  const fp = document.getElementById('fPrioAgenda');
+  if(fp) fp.addEventListener('change', e=>{ filtroAgenda.prioridade=e.target.value; render(); });
+  const fo = document.getElementById('fOrdAgenda');
+  if(fo) fo.addEventListener('change', e=>{ filtroAgenda.ordenar=e.target.value; render(); });
+
+  const seg = document.getElementById('segAgenda');
+  if(seg) seg.addEventListener('click', e=>{
+    const si = e.target.closest('[data-seg]');
+    if(!si) return;
+    filtroAgenda.periodo = si.dataset.seg;
+    render();
+  });
+
+  /* Menu "Adiar" */
+  document.querySelectorAll('[data-menu]').forEach(btn=>{
+    btn.addEventListener('click', e=>{
+      e.stopPropagation();
+      const pop = document.querySelector(`[data-menu-pop="${btn.dataset.menu}"]`);
+      const aberto = pop && !pop.hidden;
+      document.querySelectorAll('[data-menu-pop]').forEach(p=>p.hidden=true);
+      if(pop) pop.hidden = aberto;
+    });
+  });
+  document.addEventListener('click', ()=>{ document.querySelectorAll('[data-menu-pop]').forEach(p=>p.hidden=true); });
+
+  /* Salvar busca no estado quando o usuário sai da tela */
+  window.__agendaLigada = true;
+}
+function agendaAdiarTodos(grupo, dias){
+  const alvo = agendaFiltrados().filter(c=>{
+    const d = diasAte(c.followup.data);
+    if(grupo==='venc') return d<0;
+    if(grupo==='hoje') return d===0;
+    return false;
+  });
+  if(!alvo.length) return;
+  if(!confirm(`Adiar ${alvo.length} follow-up(s) em ${dias} dia(s)?`)) return;
+  alvo.forEach(c=>adiarFollowupSilencioso(c, dias));
+  salvar(); render();
+  toast(`${alvo.length} follow-up(s) adiado(s).`);
+}
+function adiarFollowupSilencioso(c, dias){
+  const d = new Date(c.followup.data+'T00:00:00');
+  const base = (diasAte(c.followup.data) < 0) ? new Date() : d;
+  base.setDate(base.getDate()+dias);
+  c.followup.data = `${base.getFullYear()}-${String(base.getMonth()+1).padStart(2,'0')}-${String(base.getDate()).padStart(2,'0')}`;
+}
+function agendaEscolherData(id){
+  const c = buscarCli(id); if(!c || !c.followup) return;
+  abrirModal(`
+    <form id="fAdiar">
+      <div class="modal-h"><h2>⏰ Adiar follow-up</h2><button type="button" class="x" data-fechar>×</button></div>
+      <div class="modal-b">
+        <p style="margin-top:0;font-size:13.5px;color:var(--suave)">Cliente: <b>${esc(c.nome)}</b></p>
+        <div class="campo"><label>Nova data</label><input type="date" name="novaData" required value="${esc(c.followup.data||hojeISO())}"></div>
+        <div class="campo" style="margin-top:10px"><label>Motivo / observação (opcional)</label><input name="motivo" maxlength="160" value="${esc(c.followup.nota||'')}"></div>
+      </div>
+      <div class="modal-f">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">Salvar nova data</button>
+      </div>
+    </form>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  document.getElementById('fAdiar').onsubmit = e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const nova = String(f.get('novaData')||'');
+    if(!nova){ toast('Escolha uma data.','erro'); return; }
+    c.followup.data = nova;
+    c.followup.nota = String(f.get('motivo')||'').trim();
+    salvar(); fecharModal(); render();
+    toast(`Follow-up reagendado para ${fmtData(nova)}.`);
+  };
+}
+function formAgendarFollowup(){
+  const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  if(!clientes.length){ toast('Cadastre um cliente primeiro.','erro'); return; }
+  abrirModal(`
+    <form id="fAgendar">
+      <div class="modal-h"><h2>⏰ Agendar follow-up</h2><button type="button" class="x" data-fechar>×</button></div>
+      <div class="modal-b"><div class="form-grid">
+        <div class="campo full"><label>Cliente * <span class="req">*</span></label>
+          <select name="clienteId" required>
+            <option value="">— Selecione —</option>
+            ${clientes.map(c=>`<option value="${c.id}">${esc(c.nome)}${c.empresa?' — '+esc(c.empresa):''}</option>`).join('')}
+          </select></div>
+        <div class="campo"><label>Data</label><input type="date" name="data" value="${proximos7dias()}" required></div>
+        <div class="campo"><label>Prioridade</label>
+          <select name="prioridade">
+            <option value="alta">🔴 Alta</option>
+            <option value="media" selected>🟡 Média</option>
+            <option value="baixa">🟢 Baixa</option>
+          </select></div>
+        <div class="campo full"><label>Nota do follow-up</label><input name="nota" maxlength="160" placeholder="Ex.: retornar ligação sobre o orçamento"></div>
+      </div></div>
+      <div class="modal-f">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">Agendar</button>
+      </div>
+    </form>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  document.getElementById('fAgendar').onsubmit = e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const c = buscarCli(String(f.get('clienteId')||''));
+    const data = String(f.get('data')||'');
+    if(!c || !data){ toast('Preencha cliente e data.','erro'); return; }
+    c.followup = { data, prioridade:String(f.get('prioridade')||'media'), nota:String(f.get('nota')||'').trim() };
+    salvar(); fecharModal(); render();
+    toast(`Follow-up agendado para ${fmtData(data)}.`);
+  };
 }
 
 function concluirFollowup(id){
