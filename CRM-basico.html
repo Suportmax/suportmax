@@ -1466,8 +1466,10 @@ function formLancamento(id, tipoPadrao){
     Object.assign(novo, {
       tipo: tipoAtual, descricao:String(d.descricao||'').trim(), valor: val,
       data: d.data||hojeISO(), categoria: d.categoria||'', forma: d.forma||'',
-      obs: String(d.obs||'').trim(), atualizadoEm: agoraDT()
+      obs: String(d.obs||'').trim(), atualizadoEm: agoraDT(),
+      pago: !!(d.pago === 'on' || d.pago === true)
     });
+    if(novo.pago && !novo.recebidoEm) novo.recebidoEm = novo.data || hojeISO();
     if(!id) listaLancamentos().unshift(novo);
     auditar('financeiro', `${id?'Lançamento editado':'Lançamento criado'}: ${tipoAtual==='receita'?'receita':'despesa'} ${brl(val)} — ${novo.descricao}`);
     salvar(); fecharModal(); render();
