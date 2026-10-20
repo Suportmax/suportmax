@@ -5339,10 +5339,14 @@ function formOrdem(id){
               ${orcsAprov.map(o=>`<option value="${o.id}">${esc(o.numero)} · ${esc(nomeClienteOrc(o))} · ${brl(totalOrc(o))}</option>`).join('')}
             </select></div>`:''}
           <div class="campo full"><label>Cliente * <span class="req">*</span></label>
-            <select name="clienteId" id="selCliOS">
-              <option value="">— Selecione —</option>
-              ${clientes.map(c=>`<option value="${c.id}" ${v.clienteId===c.id?'selected':''}>${esc(c.nome)}${c.empresa?' — '+esc(c.empresa):''}</option>`).join('')}
-            </select></div>
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <input id="buscaCliOS" type="search" autocomplete="off" placeholder="Digite para buscar cliente por nome ou empresa..." value="${v.clienteId ? esc((clientes.find(x=>x.id===v.clienteId)||{}).nome || '') : ''}">
+              <select name="clienteId" id="selCliOS">
+                <option value="">— Selecione ou pesquise acima —</option>
+                ${clientes.map(c=>`<option value="${c.id}" ${v.clienteId===c.id?'selected':''}>${esc(c.nome)}${c.empresa?' — '+esc(c.empresa):''}</option>`).join('')}
+              </select>
+              <div class="mini">Digite no campo acima para filtrar a lista de clientes.</div>
+            </div></div>
           <div class="campo"><label>Data de abertura</label><input type="date" name="data" value="${esc(v.data||hojeISO())}"></div>
           <div class="campo"><label>Prazo de entrega</label><input type="date" name="prazo" value="${esc(v.prazo||'')}"></div>
           <div class="campo"><label>Status</label>
@@ -5582,6 +5586,19 @@ function formOrdem(id){
       renderCheck();
       repintarItensOS();
       toast('Itens do orçamento carregados na ordem.');
+    });
+  }
+
+  const inpBuscaCliOS = document.getElementById('buscaCliOS');
+  const selCliOS = document.getElementById('selCliOS');
+  if(inpBuscaCliOS && selCliOS){
+    inpBuscaCliOS.addEventListener('input', ()=>{
+      const t = inpBuscaCliOS.value.trim().toLowerCase();
+      Array.from(selCliOS.options).forEach(opt=>{
+        if(opt.value==='') return;
+        const txt = opt.textContent.toLowerCase();
+        opt.hidden = t && !txt.includes(t);
+      });
     });
   }
 
