@@ -1635,23 +1635,27 @@ function salvar(){
     localStorage.setItem(KEY, JSON.stringify(db));
   }catch(e){
     try{
-      if(Array.isArray(db.backups) && db.backups.length > 6){
-        db.backups = db.backups.slice(0,6);
-        try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e3){}
-        toast('Armazenamento cheio: removi backups internos antigos para liberar espaço.','aviso');
-        if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
-        backupDiarioAuto();
-        return;
-      }
       if(Array.isArray(db.backups) && db.backups.length){
         db.backups = [];
         try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e3){}
-        toast('Armazenamento cheio: limpei todos os backups internos para liberar espaço. Faça um backup JSON agora.','erro');
-        if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
-        return;
+        toast('Armazenamento cheio: limpei todos os backups internos para liberar espaço.','aviso');
       }
     }catch(e2){}
-    toast('Armazenamento cheio. Exporte um backup em Dados > Exportar backup JSON e remova arquivos/fotos grandes.','erro');
+    try{
+      if(db.produtos){
+        db.produtos = db.produtos.map(p=>{
+          if(p.foto && typeof p.foto === 'string' && p.foto.length > 200000){
+            const {foto,...rest} = p;
+            return rest;
+          }
+          return p;
+        });
+      }
+      try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e3){}
+      toast('Armazenamento cheio: removi fotos muito pesadas para liberar espaço. Exporte backup JSON agora.','erro');
+    }catch(e2){}
+    if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
+    return;
   }
   if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
   backupDiarioAuto();
