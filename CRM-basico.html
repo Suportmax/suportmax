@@ -5272,6 +5272,10 @@ function htmlDados(){
       <p>Restaura um backup JSON ou importa um CSV de clientes. <b>Os dados atuais serão substituídos.</b></p>
       <input type="file" id="arquivoImport" accept=".json,.csv" style="display:none">
       <button class="btn ghost" id="btnImportar">Escolher arquivo (JSON/CSV)</button>
+      <hr style="margin:12px 0;border:none;border-top:1px solid var(--borda)">
+      <p style="font-size:12.5px;color:var(--suave);margin-bottom:8px">Ou <b>adicione sem apagar nada</b>: os clientes do arquivo entram junto com os que já existem. Quem tiver o mesmo CNPJ/CPF ou e-mail é atualizado, não duplicado.</p>
+      <input type="file" id="arquivoSomar" accept=".json,.csv" style="display:none">
+      <button class="btn primary" id="btnSomar">➕ Adicionar clientes (somar)</button>
     </div>
     <div class="op-card">
       <h4>💲 Atualizar preços do catálogo (CSV)</h4>
@@ -5307,6 +5311,18 @@ function ligarDados(){
     leitor.onload = ()=>{ importarDados(String(leitor.result), arq.name); e.target.value=''; };
     leitor.readAsText(arq, 'utf-8');
   });
+  const inputSomar = document.getElementById('arquivoSomar');
+  const btnSomar = document.getElementById('btnSomar');
+  if(btnSomar && inputSomar){
+    btnSomar.addEventListener('click', ()=>inputSomar.click());
+    inputSomar.addEventListener('change', e=>{
+      const arq = e.target.files[0];
+      if(!arq) return;
+      const leitor = new FileReader();
+      leitor.onload = ()=>{ importarSomando(String(leitor.result), arq.name); e.target.value=''; };
+      leitor.readAsText(arq, 'utf-8');
+    });
+  }
   document.getElementById('fEmissor').addEventListener('submit', e=>{
     e.preventDefault();
     const f = new FormData(e.target);
@@ -5480,6 +5496,75 @@ function importarDados(texto, nome){
     });
     salvar(); view='clientes'; render(); toast(`${db.clientes.length} cliente(s) importado(s) do CSV!`);
   }
+}
+
+/* ---------- Importar SOMANDO (mescla, sem apagar o que já existe) ---------- */
+function normalizaDoc(v){ return String(v||'').replace(/\D/g,''); }
+function importarSomando(texto, nome){
+  const limpo = texto.replace(/^\ufeff/,'').trim();
+  let novos = [];
+  if(/\.json$/i.test(nome)){
+    let d;
+    try{ d = JSON.parse(limpo); }catch(e){ toast('Arquivo JSON inválido.','erro'); return; }
+    if(!d || !Array.isArray(d.clientes)){ toast('O JSON não parece um backup deste CRM.','erro'); return; }
+    novos = d.clientes;
+  }else{
+    const rows = parseCSV(limpo);
+    if(rows.length<2){ toast('CSV vazio ou sem dados.','erro'); return; }
+    const cab = rows[0].map(h=>h.trim().toLowerCase());
+    const idx = n => cab.indexOf(n);
+    novos = rows.slice(1).filter(r=>r.some(x=>x.trim())).map(r=>{
+      const st = (r[idx('status')]||'').toLowerCase().trim();
+      const stId = (STAGES.find(s=>s.label.toLowerCase()===st)||{}).id || 'novo';
+      return {
+        nome:(r[idx('nome')]||'').trim()||'Sem nome',
+        empresa:(r[idx('empresa')]||'').trim(),
+        cpf:(r[idx('cpf')]||'').trim(),
+        cnpj:(r[idx('cnpj')]||'').trim(),
+        telefone:(r[idx('telefone')]||'').trim(),
+        email:(r[idx('email')]||'').trim(),
+        endereco:(r[idx('endereco')]||'').trim(),
+        status: stId, origem:(r[idx('origem')]||'').trim(), notas:(r[idx('notas')]||'').trim()
+      };
+    });
+  }
+  if(!novos.length){ toast('Nenhum cliente encontrado no arquivo.','erro'); return; }
+  if(!confirm(`Adicionar ${novos.length} cliente(s) SEM apagar os ${db.clientes.length} já existentes?\n\nClientes com o mesmo CNPJ/CPF ou e-mail serão atualizados em vez de duplicados.`)) return;
+
+  let add = 0, atual = 0;
+  novos.forEach(c=>{
+    const doc = normalizaDoc(c.cnpj) || normalizaDoc(c.cpf);
+    const mail = String(c.email||'').trim().toLowerCase();
+    const existente = db.clientes.find(x=>{
+      const dx = normalizaDoc(x.cnpj) || normalizaDoc(x.cpf);
+      if(doc && dx && doc===dx) return true;
+      if(mail && String(x.email||'').trim().toLowerCase()===mail) return true;
+      return false;
+    });
+    if(existente){
+      /* completa apenas os campos vazios, sem sobrescrever o que você já digitou */
+      ['empresa','telefone','email','cpf','cnpj','endereco','notas','origem'].forEach(k=>{
+        if(!existente[k] && c[k]) existente[k] = c[k];
+      });
+      atual++;
+    }else{
+      db.clientes.push({
+        id: c.id && !db.clientes.some(x=>x.id===c.id) ? c.id : uid(),
+        criadoEm: c.criadoEm || agoraDT(),
+        nome: c.nome||'Sem nome', empresa:c.empresa||'', telefone:c.telefone||'',
+        email:c.email||'', cpf:c.cpf||'', cnpj:c.cnpj||'',
+        endereco: c.endereco||'',
+        status: STAGES.some(s=>s.id===c.status)?c.status:'novo',
+        origem:c.origem||'', notas:c.notas||'',
+        contatos: Array.isArray(c.contatos)?c.contatos:[],
+        followup: c.followup && c.followup.data ? c.followup : null
+      });
+      add++;
+    }
+  });
+  auditar('importacao', `Importação somando: ${add} novo(s), ${atual} atualizado(s)`);
+  salvar(); view='clientes'; render();
+  toast(`✅ ${add} cliente(s) adicionado(s)${atual?`, ${atual} atualizado(s)`:''}. Nada foi apagado.`, 'ok');
 }
 
 function parseCSV(texto){
