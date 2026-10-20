@@ -378,7 +378,11 @@ body.tema-escuro .ff-etapa{background:#0d1728}
 /* ---------- Funil: filtros ---------- */
 .funil-filtros{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 .funil-resumo{font-size:12.8px;color:#475569;margin-bottom:11px}
-.funil-resumo b{color:var(--texto)}
+/* Resumo enxuto do funil (barra única) */
+.funil-resumo-enxuto{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;padding:11px 14px;background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra)}
+.funil-resumo-enxuto .fr-item{font-size:12.8px;color:#334155;background:#f1f5f9;border-radius:20px;padding:4px 12px;white-space:nowrap}
+.funil-resumo-enxuto .fr-item b{color:var(--texto)}
+.funil-analise-wrap{margin-top:18px;padding-top:14px;border-top:1px dashed var(--borda)}
 
 /* ---------- Funil: colunas ---------- */
 .col{background:#e8edf5}
@@ -840,12 +844,16 @@ const MARCA_NOME = 'SUPORT MAX | Tecnologia da Informação';
 const EMISSOR_PADRAO = {nome:'SUPORT MAX | Tecnologia da Informação', telefone:'(71) 98158-9773', email:'suportmaxba@gmail.com', site:'suportmax.github.io/suportmax', instagram:'instagram.com/suportmaxba', endereco:'Rua Rio das Graças, 15 — Recreio Ipitanga, Lauro de Freitas/BA', doc:'CNPJ 64.103.177/0001-04'};
 
 const STAGES = [
-  {id:'novo',     label:'Novo',        cor:'#3b82f6'},
-  {id:'contato',  label:'Em contato',  cor:'#f59e0b'},
-  {id:'proposta', label:'Proposta',    cor:'#8b5cf6'},
-  {id:'fechado',  label:'Fechado',     cor:'#10b981'},
-  {id:'perdido',  label:'Perdido',     cor:'#ef4444'}
+  {id:'novo',      label:'Novo contato',    cor:'#3b82f6', icone:'✨'},
+  {id:'visita',    label:'Visita agendada', cor:'#0891b2', icone:'📍'},
+  {id:'orcamento', label:'Orçamento feito', cor:'#8b5cf6', icone:'🧾'},
+  {id:'negociando',label:'Negociando',      cor:'#f59e0b', icone:'🤝'},
+  {id:'fechado',   label:'Ganho',           cor:'#10b981', icone:'✅'},
+  {id:'perdido',   label:'Perdido',         cor:'#ef4444', icone:'❌'}
 ];
+/* Compatibilidade: etapas antigas do funil mapeadas para as novas */
+const STAGE_APELIDOS = {contato:'negociando', proposta:'orcamento'};
+function stageNormal(id){ return STAGE_APELIDOS[id] || id; }
 
 const TITULOS = {
   painel:['Painel','Visão geral do seu negócio'],
@@ -2000,7 +2008,7 @@ document.addEventListener('input', e=>{
   if(campo) aplicarMascaraInline(campo);
 });
 
-function stage(id){ return STAGES.find(s=>s.id===id) || STAGES[0]; }function badgeStatus(id){ const s=stage(id); return `<span class="badge" style="--c:${s.cor}">${s.label}</span>`; }
+function stage(id){ const nid = stageNormal(id); return STAGES.find(s=>s.id===nid) || STAGES[0]; }function badgeStatus(id){ const s=stage(id); return `<span class="badge" style="--c:${s.cor}">${s.label}</span>`; }
 function iniciais(nome){
   const p = String(nome||'?').trim().split(/\s+/);
   return ((p[0]||'?')[0] + (p.length>1 ? p[p.length-1][0] : '')).toUpperCase();
@@ -2312,7 +2320,7 @@ function render(){
 function htmlPainel(){
   const t = db.clientes.length;
   const novos = db.clientes.filter(c=>c.status==='novo').length;
-  const negoc = db.clientes.filter(c=>c.status==='contato'||c.status==='proposta').length;
+  const negoc = db.clientes.filter(c=>['negociando','orcamento','visita'].includes(stageNormal(c.status))).length;
   const fechados = db.clientes.filter(c=>c.status==='fechado').length;
   const vencidos = db.clientes.filter(c=>c.followup && c.followup.data && diasAte(c.followup.data)<0).length;
   const fups = db.clientes.filter(c=>c.followup && c.followup.data)
@@ -2677,6 +2685,8 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='funil-registrar') formHistorico(id);
   else if(btn.dataset.act==='funil-agenda'){ view='agenda'; render(); }
   else if(btn.dataset.act==='funil-esfriando'){ filtroFunil.esfriando = !filtroFunil.esfriando; render(); }
+  else if(btn.dataset.act==='funil-analise'){ filtroFunil.analise = !filtroFunil.analise; render(); }
+  else if(btn.dataset.act==='funil-filtros'){ filtroFunil.filtrosAbertos = !filtroFunil.filtrosAbertos; render(); }
   else if(btn.dataset.act==='funil-limpar-etapa'){ filtroFunil.etapa=''; render(); }
   else if(btn.dataset.act==='funil-meta-editar'){ filtroFunil.metaEditar=true; render(); }
   else if(btn.dataset.act==='funil-meta-cancelar'){ filtroFunil.metaEditar=false; render(); }
@@ -3215,7 +3225,7 @@ const MOTIVOS_PERDA = [
   'Preço alto','Escolheu outro fornecedor','Não era o momento','Sem resposta / não respondeu',
   'Sem verba no momento','Já tinha fornecedor','Produto indisponível','Outro motivo'
 ];
-const FUNIL_ABERTOS = ['novo','contato','proposta'];
+const FUNIL_ABERTOS = ['novo','visita','orcamento','negociando'];
 
 /* "Agora" com a data de referência escolhida no funil (simulação de data) */
 function funilAgora(){
@@ -3337,15 +3347,20 @@ function htmlFunil(){
   const esfriando = db.clientes.filter(funilEsfriando).length;
   const r = funilResumoComercial();
 
+  const analiseOn = !!filtroFunil.analise;
+  const filtrosOn = !!filtroFunil.filtrosAbertos;
+
   /* ---- Cabeçalho ---- */
   const topo = `<div class="funil-topo">
     <div class="funil-topo-info">
       <b>🎯 Funil de vendas</b>
-      <span>Arraste os cards entre as colunas para mudar a etapa. Use o <b>＋ Registrar</b> abaixo dos cards para anotar um contato e agendar o próximo sem sair da tela.</span>
+      <span>Arraste os cards entre as colunas para mudar a etapa. Clique no card para abrir o cliente.</span>
     </div>
     <div class="funil-acoes">
-      <button class="btn primary" data-act="funil-novo">＋ Novo cliente no funil</button>
-      <button class="btn ghost" data-act="funil-agenda">📅 Ver agenda de follow-ups</button>
+      <button class="btn primary" data-act="funil-novo">＋ Novo cliente</button>
+      <button class="btn ghost" data-act="funil-agenda">📅 Agenda</button>
+      <button class="btn ghost${filtrosOn?' primary':''}" data-act="funil-filtros">🔍 Filtros</button>
+      <button class="btn ghost${analiseOn?' primary':''}" data-act="funil-analise">📊 Análise</button>
     </div>
   </div>`;
 
@@ -3416,8 +3431,8 @@ function htmlFunil(){
     <div class="fm-sub"><b>${r.abertos.filter(funilSemFollowup).length}</b> em aberto sem follow-up agendado</div>
   </div>`;
 
-  /* ---- Filtros ---- */
-  const filtros = `<div class="funil-filtros">
+  /* ---- Filtros (escondidos atrás do botão 🔍 Filtros) ---- */
+  const filtros = !filtrosOn ? '' : `<div class="funil-filtros">
     <div class="busca"><input id="funilBusca" placeholder="Buscar por nome, empresa, telefone, origem..." value="${esc(filtroFunil.busca)}"></div>
     <select class="filtro" id="funilOrigem" title="Origem do contato" aria-label="Filtrar por origem">
       <option value="todas">Todas as origens</option>
@@ -3446,16 +3461,32 @@ function htmlFunil(){
     <button class="btn ghost sm ${filtroFunil.etapa?'primary':''}" data-act="funil-limpar-etapa" title="Mostrar todas as etapas">🧹 Etapa: ${filtroFunil.etapa?esc(stage(filtroFunil.etapa).label):'todas'}</button>
   </div>`;
 
+  /* ---- Resumo enxuto ---- */
   const nCards = ordenados.length;
   const valorVis = ordenados.reduce((s,x)=>s+funilValorCliente(x),0);
-  const resumo = `<div class="funil-resumo">Mostrando <b>${nCards}</b> de <b>${db.clientes.length}</b> cliente(s)${nCards?` · valor em negociação <b>${brl(valorVis)}</b>`:''} — referência <b>${mesRef}/${anoRef}</b>.</div>`;
+  const resumoBar = `<div class="funil-resumo-enxuto">
+    <span class="fr-item">📥 <b>${r.abertos.length}</b> em aberto</span>
+    <span class="fr-item">💼 <b>${brl(r.valorPipeline)}</b> em negociação</span>
+    <span class="fr-item">🤒 <b>${esfriando}</b> esfriando</span>
+    <span class="fr-item">✅ <b>${r.fech.length}</b> ganhos · <b>${r.conv}%</b> conversão</span>
+    ${nCards!==db.clientes.length?`<span class="fr-item">🔍 mostrando <b>${nCards}</b> de <b>${db.clientes.length}</b></span>`:''}
+  </div>`;
+
+  /* ---- Análise (atrás do botão 📊) ---- */
+  const analise = !analiseOn ? '' : `<div class="funil-analise-wrap">
+    <div class="funil-metas">${cardMeta}${cardConv}${cardPipe}${cardAlerta}</div>
+    ${funilBarra}
+    ${filtros}
+    <div class="funil-resumo">Mostrando <b>${nCards}</b> de <b>${db.clientes.length}</b> cliente(s)${nCards?` · valor em negociação <b>${brl(valorVis)}</b>`:''} — referência <b>${mesRef}/${anoRef}</b>.</div>
+    ${funilAcompanhamentoHTML()}
+  </div>`;
 
   /* ---- Sem clientes ---- */
   if(!db.clientes.length){
     return topo + `<div class="ff-empty">
       <span class="big-ico">🎯</span>
       <h3>Seu funil está vazio</h3>
-      <p>Cadastre os clientes e leads que você está negociando. Cada um entra na etapa <b>Novo</b> e vai avançando conforme o contato acontece.</p>
+      <p>Cadastre os clientes e leads que você está negociando. Cada um entra na etapa <b>Novo contato</b> e vai avançando conforme o contato acontece.</p>
       <p class="mini" style="display:inline-block">💡 Dica: registre um contato pelo histórico do cliente e o CRM agenda o próximo follow-up automaticamente.</p>
       <div class="funil-acoes">
         <button class="btn primary" data-act="funil-novo">＋ Cadastrar primeiro cliente</button>
@@ -3466,7 +3497,7 @@ function htmlFunil(){
 
   /* ---- Colunas ---- */
   const colunas = STAGES.map(s=>{
-    const arr = ordenados.filter(x=>x.status===s.id);
+    const arr = ordenados.filter(x=>stageNormal(x.status)===s.id);
     const valor = arr.reduce((sum,x)=>sum+funilValorCliente(x),0);
     return `<div class="col" data-stage="${s.id}" aria-label="Etapa ${s.label}">
       <div class="col-h">
@@ -3481,6 +3512,7 @@ function htmlFunil(){
           const val = funilValorCliente(c);
           const esf = funilEsfriando(c);
           const de = diasNaEtapa(c);
+          const tel = telZap(c.telefone);
           return `<div class="card-cli" draggable="true" data-id="${c.id}" data-abrir="${c.id}" title="Clique para editar · arraste para mudar de etapa">
             ${esf?`<span class="stale" title="Sem contato desde ${de} dias">🤒 ${de}d</span>`:''}
             <div class="nm">${esc(c.nome)}</div>
@@ -3492,8 +3524,9 @@ function htmlFunil(){
               ${c.origem?`<span class="mini">${esc(c.origem)}</span>`:''}
             </div>
             <div class="card-acoes">
-              <button class="btn sm ghost mini-btn" data-act="funil-registrar" data-id="${c.id}" title="Registrar contato e agendar o próximo">🗒️ Registrar</button>
-              ${c.telefone?`<button class="btn sm ghost mini-btn" data-act="cli-zap" data-id="${c.id}" title="Falar no WhatsApp">💬</button>`:''}
+              ${tel?`<a class="btn sm ghost mini-btn" href="https://wa.me/${tel}" target="_blank" rel="noopener" title="Falar no WhatsApp" onclick="event.stopPropagation()">💬</a>`:''}
+              <button class="btn sm ghost mini-btn" data-act="visita-agendar" data-id="${c.id}" title="Agendar visita">📍</button>
+              <button class="btn sm ghost mini-btn" data-act="funil-registrar" data-id="${c.id}" title="Registrar contato e agendar o próximo">🗒️</button>
               ${fu?`<button class="btn sm ghost mini-btn" data-act="concluir" data-id="${c.id}" title="Concluir o follow-up atual">✓</button>`:''}
             </div>
           </div>`;
@@ -3502,14 +3535,9 @@ function htmlFunil(){
     </div>`;
   }).join('');
 
-  /* ---- Acompanhamento detalhado ---- */
-  const acompanhamento = funilAcompanhamentoHTML();
-
-  return topo + `<div class="funil-metas">${cardMeta}${cardConv}${cardPipe}${cardAlerta}</div>`
-    + funilBarra + filtros + resumo
+  return topo + resumoBar
     + `<div class="kanban">${colunas}</div>`
-    + `<div style="margin-top:2px;font-size:12.5px;color:#475569">💡 Clique no card para abrir o cliente, ou arraste-o entre as colunas para mudar a etapa.</div>`
-    + acompanhamento;
+    + analise;
 }
 
 /* ---------- Acompanhamento: grupos e tabela ---------- */
