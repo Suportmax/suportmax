@@ -1294,10 +1294,26 @@ function emissorPadrao(){ return {...EMISSOR_PADRAO}; }
 function uidM(){ return 'm'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 function mensagemPadrao(){
   return [
-    {id:uidM(), nome:'Orçamento enviado', tag:'orcamento', texto:'Olá {cliente}! Segue o orçamento {numero} no valor de {total}. Ele é válido até {validade}. Qualquer dúvida estou à disposição. — {empresa}'}, 
-    {id:uidM(), nome:'Cobrança amigável', tag:'cobranca', texto:'Oi {cliente}, tudo bem? Passando para lembrar do orçamento {numero} ({total}), que está em aberto. Posso ajudar com algo? — {empresa}'}, 
-    {id:uidM(), nome:'Pós-venda', tag:'posvenda', texto:'Olá {cliente}! Espero que esteja tudo funcionando bem com o serviço {numero}. Se precisar de qualquer coisa, é só chamar. — {empresa}'}, 
-    {id:uidM(), nome:'Retorno de contato', tag:'followup', texto:'Oi {cliente}, retomando nosso contato sobre {assunto}. Ainda tem interesse em seguir? — {empresa}'}
+    {id:uidM(), nome:'Orçamento enviado', tag:'orcamento', texto:'Olá {cliente}! Segue o orçamento {numero} no valor de {total}. Ele é válido até {validade}. Qualquer dúvida estou à disposição. — {empresa}'},
+    {id:uidM(), nome:'Orçamento por WhatsApp', tag:'orcamento', texto:'Olá {cliente}, tudo bem?\n\nSegue em anexo o orçamento {numero} no valor de {total}, válido até {validade}.\n\nSe tiver alguma dúvida ou quiser ajustar algo, é só me falar!\n\n{empresa} | {telefone}'},
+    {id:uidM(), nome:'Lembrete orçamento', tag:'orcamento', texto:'Oi {cliente}, tudo bem?\n\nPassando pra lembrar que o orçamento {numero} ({total}) ainda está disponível. Ele vence em {validade}.\n\nGostaria de dar andamento ou tirar alguma dúvida?\n\n{empresa}'},
+    {id:uidM(), nome:'Aprovação aguardando', tag:'orcamento', texto:'Olá {cliente}!\n\nO orçamento {numero} foi enviado anteriormente. Conseguiu avaliar?\n\nSe aprovar, te envio a Ordem de Serviço para execução!\n\n{empresa}'},
+    {id:uidM(), nome:'Cobrança amigável', tag:'cobranca', texto:'Oi {cliente}, tudo bem? Passando para lembrar do orçamento {numero} ({total}), que está em aberto. Posso ajudar com algo? — {empresa}'},
+    {id:uidM(), nome:'Cobrança com vencimento', tag:'cobranca', texto:'Olá {cliente}, tudo bem?\n\nLembrando que o valor {total} referente ao {numero} vence hoje. Caso já tenha efetuado o pagamento, desconsidere.\n\nDados para pagamento: {empresa} | {telefone}'},
+    {id:uidM(), nome:'Pagamento recebido', tag:'cobranca', texto:'Olá {cliente}!\n\nRecebemos o pagamento referente a {numero} no valor de {total}.\n\nMuito obrigado pela confiança!\n\n{empresa}'},
+    {id:uidM(), nome:'OS criada / agendada', tag:'os', texto:'Olá {cliente}!\n\nSua Ordem de Serviço {numero} foi aberta com sucesso.\n\nEm breve entraremos em contato para agendar a execução.\n\nQualquer dúvida, estou à disposição!\n\n{empresa}'},
+    {id:uidM(), nome:'OS em execução', tag:'os', texto:'Olá {cliente}!\n\nA Ordem de Serviço {numero} já está em andamento.\n\nAssim que finalizarmos, te avisamos para retirada/entrega.\n\n{empresa}'},
+    {id:uidM(), nome:'OS pronta para retirada/entrega', tag:'os', texto:'Olá {cliente}, tudo bem?\n\nSua OS {numero} já está pronta!\n\nPode vir retirar ou agendamos a entrega?\n\n{empresa} | {telefone}'},
+    {id:uidM(), nome:'Serviço finalizado', tag:'os', texto:'Olá {cliente}!\n\nO serviço da OS {numero} foi finalizado com sucesso.\n\nCaso precise de alguma coisa, estamos à disposição!\n\nObrigado pela confiança!\n\n{empresa}'},
+    {id:uidM(), nome:'Pós-venda', tag:'posvenda', texto:'Olá {cliente}! Espero que esteja tudo funcionando bem com o serviço {numero}. Se precisar de qualquer coisa, é só chamar. — {empresa}'},
+    {id:uidM(), nome:'Pesquisa satisfação', tag:'posvenda', texto:'Olá {cliente}, tudo bem?\n\nGostaríamos de saber sua opinião sobre o serviço {numero}.\n\nO que achou? Sua avaliação nos ajuda muito!\n\n{empresa}'},
+    {id:uidM(), nome:'Agendar visita', tag:'visita', texto:'Olá {cliente}!\n\nTudo bem? Podemos agendar uma visita para avaliarmos o serviço?\n\nMe fala qual melhor dia/horário que te retorno para confirmar.\n\n{empresa} | {telefone}'},
+    {id:uidM(), nome:'Visita confirmada', tag:'visita', texto:'Olá {cliente}!\n\nVisita confirmada para o dia {data}.\n\nQualquer mudança, é só avisar!\n\n{empresa} | {telefone}'},
+    {id:uidM(), nome:'Lembrete visita', tag:'visita', texto:'Olá {cliente}, tudo bem?\n\nLembrando da nossa visita amanhã ({data}).\n\nTe aguardo lá ou te aviso antes de sair?\n\n{empresa}'},
+    {id:uidM(), nome:'Retorno de contato', tag:'followup', texto:'Oi {cliente}, retomando nosso contato sobre {assunto}. Ainda tem interesse em seguir? — {empresa}'},
+    {id:uidM(), nome:'Contato sem resposta', tag:'followup', texto:'Olá {cliente}!\n\nTentei entrar em contato anteriormente, mas não tive retorno.\n\nAinda tem interesse em fechar esse orçamento/serviço?\n\nCaso não tenha mais interesse, posso entender e encerrar por aqui.\n\n{empresa}'},
+    {id:uidM(), nome:'Promoção / retorno', tag:'followup', texto:'Olá {cliente}!\n\nPassando pra te lembrar que ainda podemos fechar seu projeto com condições especiais!\n\nQuer que eu refaça o orçamento sem compromisso?\n\n{empresa} | {telefone}'},
+    {id:uidM(), nome:'Agradecimento', tag:'geral', texto:'Muito obrigado pela confiança, {cliente}!\n\nFoi um prazer atendê-lo(a).\n\nSempre à disposição!\n\n{empresa}'}
   ];
 }
 function normalizar(d){
