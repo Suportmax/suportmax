@@ -155,6 +155,82 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .meta-barra{height:12px;border-radius:99px;background:#e2e8f0;overflow:hidden;margin-top:8px}
 .meta-barra > i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#2563eb,#10b981)}
 
+/* ===== Resumo mensal / fluxo de caixa / mensagens ===== */
+.grid-4{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.mini-stat{background:#f8fafc;border:1px solid var(--borda);border-radius:11px;padding:11px 13px}
+.mini-stat .ml{font-size:11.6px;color:var(--suave);font-weight:600;margin-bottom:4px}
+.mini-stat .mv{font-size:17px;font-weight:800;letter-spacing:-.3px}
+.mini-stat .mv.ok{color:var(--ok)}
+.mini-stat .mv.erro{color:var(--erro)}
+.msg-texto{white-space:pre-wrap;font-size:13.5px;line-height:1.55;color:#334155;background:#f8fafc;border:1px solid var(--borda);border-radius:9px;padding:11px 13px}
+.resumo-mini{font-size:12.8px;color:var(--suave);margin-top:6px}
+.info-orc{font-size:13.5px;font-weight:700;color:var(--texto)}
+.checks-painel{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.chk{display:flex;align-items:center;gap:8px;font-size:13.3px;padding:7px 10px;background:#f8fafc;border:1px solid var(--borda);border-radius:9px;cursor:pointer}
+.chk input{width:16px;height:16px;accent-color:var(--prim)}
+.auditoria-lista{max-height:320px;overflow:auto;margin-top:8px;border:1px solid var(--borda);border-radius:9px;padding:6px 10px}
+.auditoria-lista .linha-lista{padding:7px 0}
+.auditoria-lista .end{text-align:right;font-size:11.5px;color:var(--suave)}
+/* Semana (agenda) */
+.semana{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:14px}
+.sem-col{background:var(--painel);border:1px solid var(--borda);border-radius:10px;min-height:170px;display:flex;flex-direction:column;overflow:hidden}
+.sem-col.hoje{border-color:var(--prim);box-shadow:inset 0 0 0 1px var(--prim)}
+.sem-h{padding:8px 8px 6px;text-align:center;border-bottom:1px solid var(--borda);background:#f8fafc}
+.sem-h .dow{font-size:11px;font-weight:750;color:var(--suave);text-transform:uppercase}
+.sem-h .num{font-size:17px;font-weight:800}
+.sem-col.hoje .sem-h .num{color:var(--prim)}
+.sem-body{padding:6px;display:flex;flex-direction:column;gap:5px;overflow:auto;flex:1}
+.sem-item{border-radius:7px;padding:5px 7px;font-size:11.6px;cursor:pointer;border-left:3px solid}
+.sem-item.alta{background:#fef2f2;border-color:#dc2626}
+.sem-item.media{background:#fffbeb;border-color:#d97706}
+.sem-item.baixa{background:#f0fdf4;border-color:#16a34a}
+.sem-item .sn{font-weight:700}
+.sem-item .st{font-size:10.5px;color:var(--suave)}
+@media print{
+  .etiquetas{display:grid;grid-template-columns:repeat(2,1fr);gap:6mm}
+  .etiqueta{border:1px dashed #94a3b8;border-radius:6px;padding:4mm;min-height:28mm;page-break-inside:avoid}
+  .et-nome{font-size:13px;font-weight:800}
+  .et-emp{font-size:11.5px;color:#475569;margin-bottom:2mm}
+  .et-lin{font-size:11px;color:#334155}
+  .et-rod{margin-top:3mm;font-size:9.5px;color:#94a3b8;border-top:1px solid #e2e8f0;padding-top:1.5mm}
+  .lista-print h1{font-size:18px;margin-bottom:2mm}
+  .lp-sub{font-size:11px;color:#64748b;margin-bottom:3mm}
+  .lp-tab{width:100%;border-collapse:collapse;font-size:11px}
+  .lp-tab th,.lp-tab td{border:1px solid #cbd5e1;padding:3px 5px;text-align:left}
+  .lp-tab th{background:#f1f5f9}
+}
+/* Recibo */
+.recibo{font-size:13.5px;line-height:1.6;color:#0f172a}
+.rc-topo{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #0f172a;padding-bottom:10px;margin-bottom:18px}
+.rc-emp{font-size:16px;font-weight:800}
+.rc-emp-info{font-size:11.5px;color:#64748b;margin-top:3px}
+.rc-valor{text-align:right}
+.rc-lbl{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:#64748b;font-weight:700}
+.rc-num{font-size:22px;font-weight:800;color:#0f172a}
+.rc-titulo{font-size:17px;font-weight:800;letter-spacing:1px;margin:6px 0 14px;text-align:center}
+.rc-txt{margin-bottom:12px;text-align:justify}
+.rc-local{margin-top:26px;text-align:right}
+.rc-assin{margin-top:46px;display:flex;justify-content:center}
+.rc-assin > div{border-top:1px solid #0f172a;padding-top:6px;min-width:280px;text-align:center;font-size:12.5px;color:#334155}
+/* Indicador offline */
+.offline-banner{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:11px;background:#fffbeb;border:1px solid #fcd34d;color:#92400e;font-size:13px;margin-bottom:14px}
+.offline-banner b{font-weight:800}
+
+/* ===== Tema escuro ===== */
+body.tema-escuro{--bg:#0b1220;--painel:#111c2e;--texto:#e2e8f0;--suave:#94a3b8;--borda:#243148;--prim:#3b82f6;--prim-cl:#16233a}
+body.tema-escuro .sidebar{background:#070d18}
+body.tema-escuro .card,body.tema-escuro .stat,body.tema-escuro .cal,body.tema-escuro .mini-stat{background:var(--painel);border-color:var(--borda)}
+body.tema-escuro .linha-lista{border-color:var(--borda)}
+body.tema-escuro .msg-texto,body.tema-escuro .mini-stat,body.tema-escuro .link-box input,body.tema-escuro .orc-doc .obs{background:#0d1728;color:#cbd5e1}
+body.tema-escuro .toolbar input,body.tema-escuro .busca,body.tema-escuro .busca input,body.tema-escuro select.filtro,body.tema-escuro .campo input,body.tema-escuro .campo select,body.tema-escuro .campo textarea{background:#0d1728;border-color:var(--borda);color:#e2e8f0}
+body.tema-escuro .cal-dia{background:#0d1728;border-color:var(--borda)}
+body.tema-escuro .cal-dia .cal-num{color:#cbd5e1}
+body.tema-escuro .col{background:#0d1728}
+body.tema-escuro table td,body.tema-escuro table th{border-color:var(--borda)}
+body.tema-escuro .fup-pill.sem{background:#16233a;color:#93c5fd}
+body.tema-escuro .fup-pill.hoje{background:#2a2410;color:#fcd34d}
+body.tema-escuro .fup-pill.venc{background:#2a1215;color:#fca5a5}
+
 /* ===== PWA / instalar ===== */
 .pwa-dica{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;font-size:13px;margin-bottom:14px}
 .contagem{font-size:13px;color:var(--suave);margin:0 0 10px 2px}
@@ -472,6 +548,9 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
       <button class="nav-item" data-view="funil"><span class="ico">🗂️</span><span>Funil</span></button>
       <button class="nav-item" data-view="orcamentos"><span class="ico">🧾</span><span>Orçamentos</span></button>
       <button class="nav-item" data-view="ordens"><span class="ico">🛠️</span><span>Ordens de serviço</span><span class="pill" id="pillOS" style="display:none">0</span></button>
+      <button class="nav-item" data-view="financeiro"><span class="ico">💰</span><span>Financeiro</span><span class="pill" id="pillFin" style="display:none">0</span></button>
+      <button class="nav-item" data-view="contratos"><span class="ico">🔁</span><span>Contratos</span><span class="pill" id="pillContrato" style="display:none">0</span></button>
+      <button class="nav-item" data-view="mensagens"><span class="ico">💬</span><span>Mensagens</span></button>
       <button class="nav-item" data-view="relatorios"><span class="ico">📈</span><span>Relatórios</span></button>
       <button class="nav-item" data-view="agenda"><span class="ico">⏰</span><span>Agenda</span><span class="pill" id="pillAgenda" style="display:none">0</span></button>
       <button class="nav-item" data-view="catalogo"><span class="ico">📦</span><span>Catálogo</span></button>
@@ -497,6 +576,7 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
           <input id="buscaGlobal" placeholder="Buscar cliente, orçamento, produto..." autocomplete="off">
           <div class="busca-resultados" id="buscaResultados" hidden></div>
         </div>
+        <button class="btn ghost" id="btnTema" title="Alternar tema claro/escuro">🌙</button>
         <button class="btn ghost" id="btnInstalar" hidden title="Instalar o CRM no seu aparelho">📲 Instalar app</button>
         <button class="btn ghost" id="btnBackupTopo" title="Baixar uma cópia de segurança dos seus dados">💾 Backup</button>
         <button class="btn ghost" id="btnExportRapido" title="Exportar backup JSON">⬇ Exportar</button>
@@ -539,9 +619,12 @@ const TITULOS = {
   funil:['Funil de vendas','Arraste os clientes entre as etapas'],
   orcamentos:['Orçamentos','Crie orçamentos com produtos, totais e impressão'],
   ordens:['Ordens de serviço','Acompanhe a execução dos serviços aprovados'],
+  financeiro:['Financeiro','Contas a receber, pagamentos e fluxo de caixa'],
+  contratos:['Contratos e recorrência','Mensalidades, renovações e contratos ativos'],
+  mensagens:['Mensagens','Modelos de texto prontos para WhatsApp e e-mail'],
   relatorios:['Relatórios','Faturamento, comissões, orçamentos e ranking de itens'],
   agenda:['Agenda de follow-ups','Contatos que precisam da sua atenção'],
-  catalogo:['Catálogo','Produtos, serviços, fornecedores e margem'],
+  catalogo:['Catálogo','Produtos, serviços, fornecedores, estoque e margem'],
   dados:['Dados','Backup, importação e configurações']
 };
 
@@ -763,12 +846,25 @@ let calRef = null; /* mês exibido na visão de calendário (Date do 1º dia do 
 /* ---------- Persistência ---------- */
 function emissorVazio(){ return {nome:'', telefone:'', email:'', site:'', instagram:'', endereco:'', doc:''}; }
 function emissorPadrao(){ return {...EMISSOR_PADRAO}; }
+function uidM(){ return 'm'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function mensagemPadrao(){
+  return [
+    {id:uidM(), nome:'Orçamento enviado', tag:'orcamento', texto:'Olá {cliente}! Segue o orçamento {numero} no valor de {total}. Ele é válido até {validade}. Qualquer dúvida estou à disposição. — {empresa}'}, 
+    {id:uidM(), nome:'Cobrança amigável', tag:'cobranca', texto:'Oi {cliente}, tudo bem? Passando para lembrar do orçamento {numero} ({total}), que está em aberto. Posso ajudar com algo? — {empresa}'}, 
+    {id:uidM(), nome:'Pós-venda', tag:'posvenda', texto:'Olá {cliente}! Espero que esteja tudo funcionando bem com o serviço {numero}. Se precisar de qualquer coisa, é só chamar. — {empresa}'}, 
+    {id:uidM(), nome:'Retorno de contato', tag:'followup', texto:'Oi {cliente}, retomando nosso contato sobre {assunto}. Ainda tem interesse em seguir? — {empresa}'}
+  ];
+}
 function normalizar(d){
   if(!d || typeof d!=='object' || !Array.isArray(d.clientes)) return null;
   if(!Array.isArray(d.orcamentos)) d.orcamentos = [];
   if(!Array.isArray(d.produtos)) d.produtos = [];
   if(!Array.isArray(d.fornecedores)) d.fornecedores = [];
   if(!Array.isArray(d.ordens)) d.ordens = [];
+  if(!Array.isArray(d.mensagens)) d.mensagens = [];
+  if(!Array.isArray(d.contratos)) d.contratos = [];
+  if(!Array.isArray(d.backups)) d.backups = [];
+  if(!Array.isArray(d.auditoria)) d.auditoria = [];
   if(!d.emissor || typeof d.emissor!=='object') d.emissor = emissorVazio();
   else { if(typeof d.emissor.site!=='string') d.emissor.site = ''; if(typeof d.emissor.instagram!=='string') d.emissor.instagram = ''; }
   if(typeof d.seqOrc!=='number') d.seqOrc = 0;
@@ -778,9 +874,118 @@ function normalizar(d){
   if(typeof d.meta.valorMensal!=='number') d.meta.valorMensal = 0;
   if(typeof d.role!=='string') d.role = 'admin';
   if(typeof d.ultimoBackup!=='string') d.ultimoBackup = '';
+  if(!d.prefs || typeof d.prefs!=='object') d.prefs = {};
+  if(typeof d.prefs.tema!=='string') d.prefs.tema = 'claro';
+  if(typeof d.prefs.cartoes!=='object' || !d.prefs.cartoes) d.prefs.cartoes = {stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true};
+  if(typeof d.prefs.densidade!=='string') d.prefs.densidade = 'normal';
   return d;
 }
-function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:''}; }
+function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], mensagens:mensagemPadrao(), contratos:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
+function prefs(){ if(!db.prefs) db.prefs = baseVazia().prefs; if(!db.prefs.cartoes) db.prefs.cartoes = baseVazia().prefs.cartoes; return db.prefs; }
+
+/* ---------- Financeiro: pagamentos e contas a receber ---------- */
+/* Cada orçamento aprovado/entregue tem o valor total (totalOrc) que pode ser
+   quitado em parcelas. O valor restante é o que está em aberto. */
+function pagamentosDe(o){ return Array.isArray(o.pagamentos) ? o.pagamentos : []; }
+function pagoOrc(o){ return pagamentosDe(o).reduce((s,p)=>s+(Number(p.valor)||0),0); }
+function abertoOrc(o){ return Math.max(0, +(totalOrc(o) - pagoOrc(o)).toFixed(2)); }
+function orcQuitado(o){ return totalOrc(o) > 0 && pagoOrc(o) >= totalOrc(o) - 0.005; }
+function statusFin(o){
+  if(o.status!=='aprovado' && o.status!=='entregue') return 'na';
+  if(orcQuitado(o)) return 'pago';
+  if(pagoOrc(o) > 0) return 'parcial';
+  return 'aberto';
+}
+function vencidoOrc(o){
+  const st = statusFin(o);
+  if(st==='pago' || st==='na') return false;
+  const v = o.vencimento || o.validade || '';
+  return v && diasAte(v) < 0;
+}
+function contasReceber(){
+  return listaOrcamentos()
+    .filter(o=>statusFin(o)!=='na' && statusFin(o)!=='pago')
+    .map(o=>({o, aberto:abertoOrc(o), vencido:vencidoOrc(o), venc:o.vencimento||o.validade||''}))
+    .sort((a,b)=>String(a.venc).localeCompare(String(b.venc)));
+}
+function resumoCaixa(){
+  const orcs = listaOrcamentos().filter(o=>o.status==='aprovado'||o.status==='entregue');
+  const recebido = orcs.reduce((s,o)=>s+pagoOrc(o),0);
+  const aberto = orcs.reduce((s,o)=>s+abertoOrc(o),0);
+  const vencido = contasReceber().filter(c=>c.vencido).reduce((s,c)=>s+c.aberto,0);
+  const mesAtual = hojeISO().slice(0,7);
+  const recebMes = orcs.reduce((s,o)=>s+pagamentosDe(o).filter(p=>String(p.data||'').slice(0,7)===mesAtual).reduce((a,p)=>a+(Number(p.valor)||0),0),0);
+  return {recebido, aberto, vencido, recebMes};
+}
+function addPagamento(orcId, valor, data, forma){
+  const o = db.orcamentos.find(x=>x.id===orcId); if(!o) return;
+  if(!Array.isArray(o.pagamentos)) o.pagamentos = [];
+  o.pagamentos.push({id:uid(), valor:Number(valor)||0, data:data||hojeISO(), forma:forma||'Pix'});
+  o.atualizadoEm = agoraDT();
+  auditar('pagamento', `Pagamento de ${brl(valor)} no orçamento ${o.numero||''}`);
+}
+function rmPagamento(orcId, pagId){
+  const o = db.orcamentos.find(x=>x.id===orcId); if(!o) return;
+  o.pagamentos = pagamentosDe(o).filter(p=>p.id!==pagId);
+  o.atualizadoEm = agoraDT();
+  auditar('pagamento', `Pagamento removido do orçamento ${o.numero||''}`);
+}
+const FORMAS_PGTO = ['Pix','Dinheiro','Cartão de crédito','Cartão de débito','Boleto','Transferência'];
+
+/* ---------- Estoque ---------- */
+function estoqueDe(p){ return p.estoque==null ? null : Number(p.estoque); }
+function estoqueBaixo(p){ const e=estoqueDe(p); return e!=null && e<=0 ? false : (e!=null && e<= Number(p.estoqueMin||0)); }
+function zerado(p){ const e=estoqueDe(p); return e!=null && e<=0; }
+function baixarEstoque(itens){
+  /* Baixa estoque dos produtos do catálogo ao aprovar/entregar um orçamento */
+  (itens||[]).forEach(it=>{
+    if(!it || it.tipo==='servico') return;
+    const p = buscarProd(it.produtoId);
+    if(p && p.estoque!=null) p.estoque = Math.max(0, Number(p.estoque) - (Number(it.qtd)||0));
+  });
+}
+function reporEstoque(itens){
+  (itens||[]).forEach(it=>{
+    if(!it || it.tipo==='servico') return;
+    const p = buscarProd(it.produtoId);
+    if(p && p.estoque!=null) p.estoque = Number(p.estoque) + (Number(it.qtd)||0);
+  });
+}
+
+/* ---------- Contratos / recorrência ---------- */
+function valorMensalContrato(c){ return Number(String(c.valor||'').replace(',','.'))||0; }
+function contratoAtivo(c){ return c.status==='ativo'; }
+function contratoVence(c){
+  if(!c.proximoVenc) return null;
+  return diasAte(c.proximoVenc);
+}
+function contratosAtivos(){ return db.contratos.filter(contratoAtivo); }
+function mrr(){ return contratosAtivos().reduce((s,c)=>s+valorMensalContrato(c),0); }
+function contratosVencendo(dias){
+  const n = dias==null?15:dias;
+  return contratosAtivos().filter(c=>{ const d=contratoVence(c); return d!=null && d<=n; })
+    .sort((a,b)=>String(a.proximoVenc).localeCompare(String(b.proximoVenc)));
+}
+function renovarContrato(c, meses){
+  const base = c.proximoVenc ? new Date(c.proximoVenc+'T12:00:00') : new Date();
+  if(isNaN(base.getTime())) base.setTime(Date.now());
+  const m = meses==null?1:meses;
+  const d = new Date(base.getFullYear(), base.getMonth()+m, base.getDate());
+  c.proximoVenc = isoDeData(d);
+  c.atualizadoEm = agoraDT();
+  auditar('contrato', `Contrato de ${c.clienteNome||''} renovado até ${fmtData(c.proximoVenc)}`);
+}
+
+/* ---------- Auditoria (quem alterou o quê) ---------- */
+function auditar(acao, detalhe){
+  if(!Array.isArray(db.auditoria)) db.auditoria = [];
+  db.auditoria.unshift({id:uid(), em:agoraDT(), usuario:(db.usuarioEmail||db.emissor&&db.emissor.email||'local'), acao, detalhe});
+  if(db.auditoria.length>300) db.auditoria.length = 300; /* mantém as 300 últimas */
+}
+function auditarTexto(){
+  if(!db.auditoria || !db.auditoria.length) return 'Sem registros ainda.';
+  return db.auditoria.map(a=>`${a.em} · ${a.acao} · ${a.detalhe||''}`).join('\n');
+}
 function prepararPrimeiroUso(nova){
   /* Primeira abertura (ou catálogo vazio): carrega o modelo de informática, uma única vez */
   if(!nova.catalogoInfoCarregado){
@@ -875,6 +1080,19 @@ function nuvemSalvarAgendado(){
 function salvar(){
   try{ localStorage.setItem(KEY, JSON.stringify(db)); }
   catch(e){ toast('Não foi possível salvar os dados (armazenamento cheio?)','erro'); }
+  if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
+  backupDiarioAuto();
+}
+/* Guarda automaticamente uma cópia interna por dia (sem baixar arquivo) */
+function backupDiarioAuto(){
+  const hoje = hojeISO();
+  if(!Array.isArray(db.backups)) db.backups = [];
+  const jaTem = db.backups.some(b=>String(b.em||'').slice(0,10)===hoje && b.auto);
+  if(jaTem) return;
+  salvarBackupInterno('Automático');
+  const ult = db.backups[0];
+  if(ult) ult.auto = true;
+  try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){}
   if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
 }
 
@@ -1421,6 +1639,21 @@ document.querySelector('.nav').addEventListener('click', e=>{
 document.getElementById('btnExportRapido').addEventListener('click', exportarJSON);
 document.getElementById('btnInstalar').addEventListener('click', instalarApp);
 document.getElementById('btnBackupTopo').addEventListener('click', baixarBackupAgora);
+(function(){
+  const b = document.getElementById('btnTema');
+  if(b) b.addEventListener('click', alternarTema);
+})();
+function aplicarTema(){
+  const escuro = prefs().tema==='escuro';
+  document.body.classList.toggle('tema-escuro', escuro);
+  const b = document.getElementById('btnTema');
+  if(b){ b.textContent = escuro?'☀️':'🌙'; b.title = escuro?'Tema claro':'Tema escuro'; }
+}
+function alternarTema(){
+  prefs().tema = prefs().tema==='escuro' ? 'claro' : 'escuro';
+  aplicarTema(); salvar();
+  toast('Tema ' + (prefs().tema==='escuro'?'escuro':'claro') + ' ativado.');
+}
 
 function render(){
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
@@ -1435,6 +1668,14 @@ function render(){
   const pillOS = document.getElementById('pillOS');
   if(pillOS){ pillOS.style.display = osAbertas ? '' : 'none'; pillOS.textContent = osAbertas; }
 
+  const nVenc = contasReceber().filter(c=>c.vencido).length;
+  const pillFin = document.getElementById('pillFin');
+  if(pillFin){ pillFin.style.display = nVenc ? '' : 'none'; pillFin.textContent = nVenc; }
+
+  const nCont = contratosVencendo(15).length;
+  const pillContrato = document.getElementById('pillContrato');
+  if(pillContrato){ pillContrato.style.display = nCont ? '' : 'none'; pillContrato.textContent = nCont; }
+
   const btnNovo = document.getElementById('btnNovo');
   if(view==='orcamentos'){
     btnNovo.textContent = '＋ Novo orçamento';
@@ -1445,6 +1686,12 @@ function render(){
   }else if(view==='catalogo'){
     btnNovo.textContent = '＋ Novo item';
     btnNovo.onclick = ()=>formProduto(null);
+  }else if(view==='contratos'){
+    btnNovo.textContent = '＋ Novo contrato';
+    btnNovo.onclick = ()=>formContrato(null);
+  }else if(view==='mensagens'){
+    btnNovo.textContent = '＋ Nova mensagem';
+    btnNovo.onclick = ()=>formMensagem(null);
   }else{
     btnNovo.textContent = '＋ Novo cliente';
     btnNovo.onclick = ()=>formCliente(null);
@@ -1456,12 +1703,20 @@ function render(){
   else if(view==='funil') el.innerHTML = htmlFunil();
   else if(view==='orcamentos'){ el.innerHTML = htmlOrcamentos(); ligarOrcamentos(); }
   else if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
+  else if(view==='financeiro'){ el.innerHTML = htmlFinanceiro(); ligarFinanceiro(); }
+  else if(view==='contratos'){ el.innerHTML = htmlContratos(); ligarContratos(); }
+  else if(view==='mensagens'){ el.innerHTML = htmlMensagens(); ligarMensagens(); }
   else if(view==='relatorios'){ el.innerHTML = htmlRelatorios(); ligarRelatorios(); }
   else if(view==='agenda'){ el.innerHTML = htmlAgenda(); ligarAgenda(); }
   else if(view==='catalogo'){ el.innerHTML = htmlCatalogo(); ligarCatalogo(); }
   else if(view==='dados'){ el.innerHTML = htmlDados(); ligarDados(); }
   /* mantém os indicadores de nuvem em dia após redesenhar a tela */
   try{ setNuvemStatus(nuvemStatus); }catch(e){}
+  /* aviso de offline (os dados continuam salvos localmente e sincronizam depois) */
+  if(!navigator.onLine){
+    const el2 = document.getElementById('view');
+    el2.insertAdjacentHTML('afterbegin', `<div class="offline-banner">📴 <div><b>Você está sem conexão.</b> Pode continuar trabalhando — tudo fica salvo neste aparelho e sobe para a nuvem quando a internet voltar.</div></div>`);
+  }
 }
 
 /* =========================================================
@@ -1512,11 +1767,15 @@ function htmlPainel(){
     ${stat('Vencendo / vencidos', orcamentosVencendo(5).length, '⏳', orcamentosVencendo(5).length>0)}
   </div>
 
+  ${cartaoLigado('resumo')?resumoMensalCard():''}
+  ${cartaoLigado('caixa')?caixaCard():''}
+
   ${(()=>{
     const venc = orcamentosVencendo(5);
     const nfp = listaOrcamentos().filter(nfPendente);
     const osab = listaOrdens().filter(o=>o.status!=='concluida'&&o.status!=='cancelada');
     if(!venc.length && !nfp.length && !osab.length) return '';
+    if(!cartaoLigado('atencao')) return '';
     return `<div class="card" style="margin-bottom:18px;border-color:#fde68a">
       <div class="card-h"><h3>⚠️ Precisa da sua atenção</h3></div>
       <div class="card-b" style="display:grid;gap:10px">
@@ -1538,7 +1797,7 @@ function htmlPainel(){
   })()}
 
   <div class="cols">
-    <div class="card">
+    ${cartaoLigado('followups')?`<div class="card">
       <div class="card-h"><h3>⏰ Follow-ups próximos</h3><button class="link" data-go="agenda">Ver agenda →</button></div>
       <div class="card-b">
         ${(()=>{
@@ -1561,9 +1820,9 @@ function htmlPainel(){
           }).join('') : `<div class="vazio"><span class="big">🎉</span>Nenhum follow-up pendente.</div>`);
         })()}
       </div>
-    </div>
+    </div>`:''}
 
-    <div class="card">
+    ${cartaoLigado('recentes')?`<div class="card">
       <div class="card-h"><h3>🕓 Últimos clientes cadastrados</h3><button class="link" data-go="clientes">Ver todos →</button></div>
       <div class="card-b">
         ${recentes.map(c=>`<div class="linha-lista" data-abrir="${c.id}">
@@ -1572,10 +1831,10 @@ function htmlPainel(){
           <div class="end">${badgeStatus(c.status)}</div>
         </div>`).join('')}
       </div>
-    </div>
+    </div>`:''}
   </div>
 
-  <div class="card" style="margin-top:18px">
+  ${cartaoLigado('orcamentos')?`<div class="card" style="margin-top:18px">
     <div class="card-h"><h3>🧾 Últimos orçamentos</h3><button class="link" data-go="orcamentos">Ver todos →</button></div>
     <div class="card-b">
       ${ultOrc.length ? ultOrc.map(o=>`<div class="linha-lista">
@@ -1588,9 +1847,9 @@ function htmlPainel(){
         </div>
       </div>`).join('') : `<div class="vazio"><span class="big">🧾</span>Nenhum orçamento criado ainda.</div>`}
     </div>
-  </div>
+  </div>`:''}
 
-  <div class="card" style="margin-top:18px">
+  ${cartaoLigado('atividade')?`<div class="card" style="margin-top:18px">
     <div class="card-h"><h3>🗒️ Atividade recente</h3></div>
     <div class="card-b">
       ${atividade.length ? atividade.map(t=>`<div class="linha-lista" data-abrir="${t.cliente.id}">
@@ -1599,10 +1858,66 @@ function htmlPainel(){
         <div class="end"><span class="mt">${fmtDT(t.data)}</span></div>
       </div>`).join('') : `<div class="vazio"><span class="big">📭</span>Nenhum contato registrado ainda.</div>`}
     </div>
-  </div>`;
+  </div>`:''}`;
 }
 function stat(lbl,val,ico,aviso){
   return `<div class="stat ${aviso?'aviso':''}"><span class="ico">${ico}</span><div class="lbl">${lbl}</div><div class="val">${val}</div></div>`;
+}
+function cartaoLigado(nome){
+  const c = prefs().cartoes;
+  return c[nome]!==false;
+}
+function resumoMensalCard(){
+  const mes = hojeISO().slice(0,7);
+  const orcs = listaOrcamentos();
+  const doMes = orcs.filter(o=>String(o.data||'').slice(0,7)===mes);
+  const aprovMes = doMes.filter(o=>o.status==='aprovado'||o.status==='entregue');
+  const fatMes = aprovMes.reduce((s,o)=>s+totalOrc(o),0);
+  const meta = Number(db.meta&&db.meta.valorMensal)||0;
+  const pct = meta>0 ? Math.min(100, Math.round(fatMes/meta*100)) : 0;
+  const fupMes = agendaPendentes().filter(c=>String(c.followup.data).slice(0,7)===mes).length;
+  const osMes = listaOrdens().filter(o=>String(o.criadoEm||o.data||'').slice(0,7)===mes).length;
+  const mrrV = mrr();
+  return `<div class="card" style="margin-bottom:18px">
+    <div class="card-h"><h3>📆 Resumo de ${new Date().toLocaleDateString('pt-BR',{month:'long', year:'numeric'})}</h3>
+      <button class="link" data-go="relatorios">Relatórios →</button></div>
+    <div class="card-b">
+      <div class="grid-4">
+        <div class="mini-stat"><div class="ml">Faturamento aprovado</div><div class="mv">${brl(fatMes)}</div></div>
+        <div class="mini-stat"><div class="ml">Orçamentos criados</div><div class="mv">${doMes.length}</div></div>
+        <div class="mini-stat"><div class="ml">Aprovados</div><div class="mv">${aprovMes.length}</div></div>
+        <div class="mini-stat"><div class="ml">Follow-ups no mês</div><div class="mv">${fupMes}</div></div>
+        <div class="mini-stat"><div class="ml">Ordens abertas no mês</div><div class="mv">${osMes}</div></div>
+        <div class="mini-stat"><div class="ml">Receita recorrente (MRR)</div><div class="mv">${brl(mrrV)}</div></div>
+      </div>
+      ${meta>0?`<div style="margin-top:14px">
+        <div style="display:flex;justify-content:space-between;font-size:12.6px;margin-bottom:5px">
+          <span>Meta do mês: <b>${brl(meta)}</b></span><span>${pct}% atingido</span></div>
+        <div class="meta-barra"><i style="width:${pct}%"></i></div>
+      </div>`:`<div class="mini" style="margin-top:12px">Dica: defina uma meta mensal em <b>Dados → Metas</b>.</div>`}
+    </div>
+  </div>`;
+}
+function caixaCard(){
+  const r = resumoCaixa();
+  const cr = contasReceber();
+  const venc = cr.filter(c=>c.vencido);
+  return `<div class="card" style="margin-bottom:18px">
+    <div class="card-h"><h3>💰 Fluxo de caixa</h3><button class="link" data-go="financeiro">Financeiro →</button></div>
+    <div class="card-b">
+      <div class="grid-4">
+        <div class="mini-stat"><div class="ml">Recebido no mês</div><div class="mv ok">${brl(r.recebMes)}</div></div>
+        <div class="mini-stat"><div class="ml">Recebido (total)</div><div class="mv">${brl(r.recebido)}</div></div>
+        <div class="mini-stat"><div class="ml">A receber</div><div class="mv">${brl(r.aberto)}</div></div>
+        <div class="mini-stat"><div class="ml">Vencido</div><div class="mv ${r.vencido>0?'erro':''}">${brl(r.vencido)}</div></div>
+      </div>
+      ${venc.length?`<div style="margin-top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <span class="selo venc">🚨 ${venc.length} título(s) vencido(s)</span>
+        <span class="mini">${venc.slice(0,3).map(c=>esc(c.o.numero||'')).join(' · ')}</span>
+        <button class="link-btn" data-go="financeiro">Cobrar →</button>
+      </div>`:`<div class="mini" style="margin-top:12px">${cr.length?cr.length+' título(s) em aberto, nenhum vencido. 👍':'Nenhum valor em aberto. 👍'}</div>`}
+    </div>
+  </div>`;
 }
 
 /* =========================================================
@@ -1679,6 +1994,7 @@ function tabelaHTML(){
       <td>
         <div class="acoes">
           <button class="icon-btn" title="Falar no WhatsApp" data-act="cli-zap" data-id="${c.id}">💬</button>
+          <button class="icon-btn" title="Usar modelo de mensagem" data-act="cli-modelo" data-id="${c.id}">📝</button>
           <button class="icon-btn" title="Registrar contato" data-act="historico" data-id="${c.id}">🗒️</button>
           <button class="icon-btn" title="Editar" data-act="editar" data-id="${c.id}">✏️</button>
           <button class="icon-btn del" title="Excluir" data-act="excluir" data-id="${c.id}">🗑️</button>
@@ -1749,6 +2065,26 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='instalar-app') instalarApp();
   else if(btn.dataset.act==='nuvem-agora'){ /* tratado em ligarDados */ }
   else if(btn.dataset.act==='limpar') limparDados();
+  /* Financeiro */
+  else if(btn.dataset.act==='fin-pagar') formPagamento(id);
+  else if(btn.dataset.act==='fin-ver') verPagamentos(id);
+  else if(btn.dataset.act==='fin-rm'){ rmPagamento(id, btn.dataset.pag); salvar(); verPagamentos(id); render(); toast('Pagamento removido.'); }
+  else if(btn.dataset.act==='orc-abrir'){ verOrc(id); }
+  /* Contratos */
+  else if(btn.dataset.act==='cont-editar') formContrato(id);
+  else if(btn.dataset.act==='cont-excluir') excluirContrato(id);
+  else if(btn.dataset.act==='cont-renovar'){ const c=(db.contratos||[]).find(x=>x.id===id); if(c){ renovarContrato(c,1); salvar(); render(); toast('Contrato renovado por mais 1 mês.'); } }
+  /* Mensagens */
+  else if(btn.dataset.act==='msg-editar') formMensagem(id);
+  else if(btn.dataset.act==='msg-excluir') excluirMensagem(id);
+  else if(btn.dataset.act==='msg-copiar'){ const m=(db.mensagens||[]).find(x=>x.id===id); if(m) copiarTexto(aplicarVariaveis(m.texto,{})); }
+  else if(btn.dataset.act==='orc-modelo') menuMensagens({numero:buscarOrc(id)&&buscarOrc(id).numero, total:brl(totalOrc(buscarOrc(id)||{})), validade:(buscarOrc(id)||{}).validade, cliente:nomeClienteOrc(buscarOrc(id)||{}), whats:()=>telZap((buscarCli((buscarOrc(id)||{}).clienteId)||{}).telefone)});
+  else if(btn.dataset.act==='cli-modelo'){ const c=buscarCli(id)||{}; menuMensagens({cliente:c.nome, whats:()=>telZap(c.telefone)}); }
+  /* Dados: backup interno, etiquetas, auditoria */
+  else if(btn.dataset.act==='backup-restaurar') restaurarBackup(id);
+  else if(btn.dataset.act==='imprimir-etiquetas') imprimirEtiquetas();
+  else if(btn.dataset.act==='imprimir-lista') imprimirListaClientes();
+  else if(btn.dataset.act==='auditar-copiar') copiarTexto(auditarTexto());
 });
 
 /* Mudança de status de orçamento direto na tabela */
@@ -1757,9 +2093,19 @@ document.getElementById('view').addEventListener('change', e=>{
   if(selOrdem){
     const os = buscarOrdem(selOrdem.dataset.id);
     if(!os) return;
+    const antes = os.status;
     os.status = selOrdem.value;
+    os.atualizadoEm = agoraDT();
+    if(os.status==='concluida' && antes!=='concluida') posVendaOS(os);
+    auditar('ordem', `Ordem ${os.numero} → ${statusOS(os.status).label}`);
     salvar(); render();
     toast(`Ordem ${os.numero} agora está "${statusOS(os.status).label}".`);
+    return;
+  }
+  const selContrato = e.target.closest('select[data-act="cont-status"]');
+  if(selContrato){
+    const c = (db.contratos||[]).find(x=>x.id===selContrato.dataset.id);
+    if(c){ c.status = selContrato.value; salvar(); render(); toast('Status do contrato atualizado.'); }
     return;
   }
   const sel = e.target.closest('select[data-act="orc-status"]');
@@ -2167,6 +2513,69 @@ function ligarCalendario(){
     if(novo){ formAgendarFollowup(novo.dataset.calNovo); }
   });
 }
+/* ---------- Visão de semana da agenda ---------- */
+function semanaInicio(){
+  const h = new Date();
+  const d = new Date(h.getFullYear(), h.getMonth(), h.getDate());
+  d.setDate(d.getDate() - d.getDay()); /* domingo */
+  const off = Number(sessionStorage.getItem('crm_sem_off')||0);
+  d.setDate(d.getDate() + off);
+  return d;
+}
+function htmlSemana(){
+  const ini = semanaInicio();
+  const hojeKey = hojeISO();
+  const map = followupsPorDia();
+  const colunas = [];
+  for(let i=0;i<7;i++){
+    const d = new Date(ini.getFullYear(), ini.getMonth(), ini.getDate()+i);
+    const key = isoDeData(d);
+    const lista = (map[key]||[]).slice().sort((a,b)=>{ const o={alta:0,media:1,baixa:2}; return o[a.followup.prioridade||'media']-o[b.followup.prioridade||'media']; });
+    colunas.push({d, key, lista});
+  }
+  const total = colunas.reduce((s,c)=>s+c.lista.length,0);
+  const dow = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+  return `
+  <div class="card" style="margin-top:14px">
+    <div class="card-h">
+      <button class="cal-nav" data-sem="prev" title="Semana anterior">‹</button>
+      <h3 style="margin:0 6px">${fmtData(isoDeData(ini))} — ${fmtData(isoDeData(colunas[6].d))}</h3>
+      <button class="cal-nav" data-sem="next" title="Próxima semana">›</button>
+      <button class="btn ghost sm" data-sem="hoje" style="margin-left:6px">Hoje</button>
+      <span class="cal-info" style="margin-left:auto">${total} follow-up(s) na semana</span>
+    </div>
+    <div class="card-b">
+      <div class="semana">
+        ${colunas.map(c=>`
+          <div class="sem-col ${c.key===hojeKey?'hoje':''}">
+            <div class="sem-h"><div class="dow">${dow[c.d.getDay()]}</div><div class="num">${c.d.getDate()}</div></div>
+            <div class="sem-body">
+              ${c.lista.length ? c.lista.map(cl=>`<div class="sem-item ${cl.followup.prioridade||'media'}" data-abrir="${cl.id}" title="${esc(cl.followup.nota||cl.nome)}">
+                <div class="sn">${esc(String(cl.nome).split(' ')[0])}</div>
+                <div class="st">${esc(cl.followup.nota||cl.empresa||'')}</div>
+              </div>`).join('') : `<div class="mini" style="text-align:center;opacity:.6">—</div>`}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+function ligarSemana(){
+  const card = document.querySelector('.semana')?.closest('.card');
+  if(!card) return;
+  card.addEventListener('click', e=>{
+    const b = e.target.closest('[data-sem]');
+    if(b){
+      /* navega de 7 em 7 dias usando uma âncora guardada em sessionStorage */
+      let off = Number(sessionStorage.getItem('crm_sem_off')||0);
+      if(b.dataset.sem==='prev') off -= 7;
+      else if(b.dataset.sem==='next') off += 7;
+      else off = 0;
+      sessionStorage.setItem('crm_sem_off', String(off));
+      render(); return;
+    }
+  });
+}
 function agendaFiltrados(){
   const q = filtroAgenda.busca.trim().toLowerCase();
   return agendaPendentes().filter(c=>{
@@ -2217,7 +2626,8 @@ function htmlAgenda(){
     </div>
     <div class="seg" id="segModoAgenda" title="Como visualizar">
       <button class="seg-item${filtroAgenda.modo==='lista'?' active':''}" data-modo="lista">☰ Lista</button>
-      <button class="seg-item${filtroAgenda.modo==='calendario'?' active':''}" data-modo="calendario">📅 Calendário</button>
+      <button class="seg-item${filtroAgenda.modo==='semana'?' active':''}" data-modo="semana">🗓️ Semana</button>
+      <button class="seg-item${filtroAgenda.modo==='calendario'?' active':''}" data-modo="calendario">📅 Mês</button>
     </div>
     <div class="busca"><input id="buscaAgenda" placeholder="Buscar por nome, empresa, telefone, nota..." value="${esc(filtroAgenda.busca)}"></div>
     <select class="filtro" id="fPrioAgenda">
@@ -2235,6 +2645,10 @@ function htmlAgenda(){
   /* Visão de calendário */
   if(filtroAgenda.modo==='calendario'){
     return stats + atalhos + toolbar + htmlCalendario();
+  }
+  /* Visão de semana */
+  if(filtroAgenda.modo==='semana'){
+    return stats + atalhos + toolbar + htmlSemana();
   }
 
   if(!todas.length){
@@ -2332,6 +2746,10 @@ function ligarAgenda(){
 
   if(filtroAgenda.modo==='calendario'){
     ligarCalendario();
+    return;
+  }
+  if(filtroAgenda.modo==='semana'){
+    ligarSemana();
     return;
   }
 
@@ -2557,6 +2975,7 @@ function tabelaOrcHTML(){
         <button class="icon-btn${nfPendente(o)?' nf-on':''}" title="${podeMarcarNF(o)?'Nota fiscal (controle)':(precisaNF(o)?'Nota fiscal (controle)':'Só em orçamentos aprovados')}" data-act="orc-nf" data-id="${o.id}" style="${podeMarcarNF(o)||precisaNF(o)?'':'opacity:.35'}">📄</button>
         <button class="icon-btn" title="Duplicar" data-act="orc-duplicar" data-id="${o.id}">📋</button>
         <button class="icon-btn" title="Enviar por WhatsApp" data-act="orc-zap" data-id="${o.id}">💬</button>
+        <button class="icon-btn" title="Usar modelo de mensagem" data-act="orc-modelo" data-id="${o.id}">📝</button>
         <button class="icon-btn" title="Editar" data-act="orc-editar" data-id="${o.id}">✏️</button>
         <button class="icon-btn del" title="Excluir" data-act="orc-excluir" data-id="${o.id}">🗑️</button>
       </div>
@@ -3015,6 +3434,7 @@ function verOrc(id){
       <button type="button" class="btn ghost" data-fechar>Fechar</button>
       <button type="button" class="btn ghost" id="btnEditFromView">✏️ Editar</button>
       <button type="button" class="btn ghost" data-act="orc-copiar" data-id="${o.id}">📋 Copiar texto</button>
+      ${(o.status==='aprovado'||o.status==='entregue')?`<button type="button" class="btn ghost" id="btnRecibo">🧾 Recibo</button>`:''}
       <button type="button" class="btn ok" data-act="orc-mail" data-id="${o.id}">✉️ E-mail</button>
       <button type="button" class="btn ok" data-act="orc-zap" data-id="${o.id}">💬 WhatsApp</button>
       <button type="button" class="btn primary" id="btnImprimir">🖨️ Imprimir / PDF</button>
@@ -3022,9 +3442,86 @@ function verOrc(id){
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
   document.getElementById('btnEditFromView').onclick = ()=>{ fecharModal(); formOrcamento(o.id); };
   document.getElementById('btnImprimir').onclick = ()=>imprimirOrc(o);
+  const br = document.getElementById('btnRecibo'); if(br) br.onclick = ()=>imprimirRecibo(o.id);
   modal.querySelector('[data-act="orc-copiar"]').onclick = ()=>copiarOrc(o.id);
   modal.querySelector('[data-act="orc-mail"]').onclick = ()=>enviarMail(o.id);
   modal.querySelector('[data-act="orc-zap"]').onclick = ()=>enviarZap(o.id);
+}
+
+/* =========================================================
+   RECIBO DE PAGAMENTO (comprovante simples)
+   ========================================================= */
+function reciboHTML(o){
+  const em = db.emissor || {};
+  const nome = nomeClienteOrc(o);
+  const total = totalOrc(o);
+  const pg = pagamentosDe(o);
+  const linhasPg = pg.length ? pg.map(p=>`${fmtData(p.data)} — ${brl(p.valor)} (${esc(p.forma||'')})`).join(' · ') : 'Pagamento à vista';
+  const valorTxt = valorEmTexto(total);
+  return `
+  <div class="recibo">
+    <div class="rc-topo">
+      <div><div class="rc-emp">${esc(em.nome||MARCA_NOME)}</div>
+        <div class="rc-emp-info">${[em.doc,em.telefone,em.email].filter(Boolean).map(esc).join(' · ')}</div></div>
+      <div class="rc-valor"><div class="rc-lbl">Valor</div><div class="rc-num">${brl(total)}</div></div>
+    </div>
+    <h1 class="rc-titulo">RECIBO Nº ${esc(o.numero||'—')}</h1>
+    <p class="rc-txt">Recebi(emos) de <b>${esc(nome)}</b> a importância de <b>${brl(total)}</b> (${esc(valorTxt)}) referente a
+      ${esc((o.itens||[]).map(i=>i.desc).filter(Boolean).slice(0,4).join(', ')||'prestação de serviços')}, conforme orçamento ${esc(o.numero||'')}.
+    </p>
+    <p class="rc-txt"><b>Forma de pagamento:</b> ${linhasPg}</p>
+    ${o.obs?`<p class="rc-txt"><b>Observações:</b> ${esc(o.obs)}</p>`:''}
+    <p class="rc-local">${new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'})}</p>
+    <div class="rc-assin"><div>${esc(em.nome||MARCA_NOME)}</div></div>
+  </div>`;
+}
+function imprimirRecibo(id){
+  const o = buscarOrc(id); if(!o) return;
+  imprimirDoc(reciboHTML(o));
+}
+/* Converte um número em reais para texto (suporta até milhões) */
+function valorEmTexto(v){
+  const n = Math.round((Number(v)||0)*100)/100;
+  if(n===0) return 'zero reais';
+  const inteiro = Math.floor(n);
+  const cent = Math.round((n-inteiro)*100);
+  const u = ['','um','dois','três','quatro','cinco','seis','sete','oito','nove','dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'];
+  const dez = ['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'];
+  const cem = ['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
+  function ate999(x){
+    if(x===100) return 'cem';
+    const c = Math.floor(x/100), r = x%100;
+    let s = cem[c]||'';
+    if(r){
+      if(s) s+=' e ';
+      if(r<20) s+=u[r];
+      else { const d=Math.floor(r/10), un=r%10; s+=dez[d]; if(un) s+=' e '+u[un]; }
+    }
+    return s;
+  }
+  function porExtenso(x){
+    if(x===0) return '';
+    if(x<1000) return ate999(x);
+    if(x<1000000){
+      const mil = Math.floor(x/1000), resto = x%1000;
+      let s = (mil===1?'mil':ate999(mil)+' mil');
+      if(resto){ s += (resto<100?' e ':' ') + ate999(resto); }
+      return s;
+    }
+    const mi = Math.floor(x/1000000), resto = x%1000000;
+    let s = (mi===1?'um milhão':ate999(mi)+' milhões');
+    if(resto){
+      s += (resto<100?' e ':' ');
+      s += porExtenso(resto);
+    }
+    return s;
+  }
+  let txt = inteiro>0 ? (porExtenso(inteiro) + (inteiro===1?' real':' reais')) : '';
+  if(cent){
+    if(txt) txt += ' e ';
+    txt += porExtenso(cent) + (cent===1?' centavo':' centavos');
+  }
+  return txt || 'zero reais';
 }
 
 function imprimirDoc(html){
@@ -3870,6 +4367,412 @@ function relOrcamentosFiltrados(){
     return true;
   });
 }
+/* =========================================================
+   FINANCEIRO — contas a receber, pagamentos e fluxo de caixa
+   ========================================================= */
+let filtroFin = {busca:'', status:'todos', periodo:'todos'};
+function htmlFinanceiro(){
+  const r = resumoCaixa();
+  const mesAtual = hojeISO().slice(0,7);
+  /* entradas do mês agrupadas por forma */
+  const porForma = {};
+  listaOrcamentos().forEach(o=>pagamentosDe(o).forEach(p=>{
+    if(String(p.data||'').slice(0,7)!==mesAtual) return;
+    porForma[p.forma||'Outro'] = (porForma[p.forma||'Outro']||0) + (Number(p.valor)||0);
+  }));
+  return `
+  <div class="grid-stats">
+    ${stat('Recebido (total)', brl(r.recebido), '💵')}
+    ${stat('Recebido no mês', brl(r.recebMes), '📅')}
+    ${stat('Em aberto', brl(r.aberto), '⏳', r.aberto>0)}
+    ${stat('Vencido', brl(r.vencido), '🚨', r.vencido>0)}
+  </div>
+  <div class="card">
+    <div class="card-h"><h3>📊 Recebido neste mês por forma de pagamento</h3></div>
+    <div class="card-b">
+      ${Object.keys(porForma).length ? Object.entries(porForma).sort((a,b)=>b[1]-a[1]).map(([f,v])=>`
+        <div class="linha-lista"><div class="nm">${esc(f)}</div><div class="end vl-total">${brl(v)}</div></div>`).join('')
+      : `<div class="vazio"><span class="big">💳</span>Nenhum pagamento registrado neste mês.</div>`}
+    </div>
+  </div>
+  <div class="toolbar" style="margin-top:16px">
+    <div class="busca"><input id="buscaFin" placeholder="Buscar por número, cliente..." value="${esc(filtroFin.busca)}"></div>
+    <select class="filtro" id="fStatusFin">
+      <option value="todos">Todos</option>
+      <option value="aberto" ${filtroFin.status==='aberto'?'selected':''}>Em aberto</option>
+      <option value="parcial" ${filtroFin.status==='parcial'?'selected':''}>Parcial</option>
+      <option value="vencido" ${filtroFin.status==='vencido'?'selected':''}>Vencidos</option>
+      <option value="pago" ${filtroFin.status==='pago'?'selected':''}>Quitados</option>
+    </select>
+  </div>
+  <div class="contagem" id="contFin"></div>
+  <div class="tabela-wrap"><table>
+    <thead><tr><th>Orçamento</th><th>Cliente</th><th>Total</th><th>Recebido</th><th>Em aberto</th><th>Situação</th><th style="text-align:right">Ações</th></tr></thead>
+    <tbody id="tabelaFin"></tbody>
+  </table></div>`;
+}
+function ligarFinanceiro(){
+  const b = document.getElementById('buscaFin');
+  if(b) b.addEventListener('input', ()=>{ filtroFin.busca=b.value; atualizarTabelaFin(); });
+  const f = document.getElementById('fStatusFin');
+  if(f) f.addEventListener('change', e=>{ filtroFin.status=e.target.value; atualizarTabelaFin(); });
+  atualizarTabelaFin();
+}
+function listaFinFiltrada(){
+  const q = filtroFin.busca.trim().toLowerCase();
+  return listaOrcamentos().filter(o=>{
+    const st = statusFin(o);
+    if(st==='na') return false;
+    if(filtroFin.status==='vencido'){ if(!vencidoOrc(o)) return false; }
+    else if(filtroFin.status==='aberto'){ if(st!=='aberto') return false; }
+    else if(filtroFin.status==='parcial'){ if(st!=='parcial') return false; }
+    else if(filtroFin.status==='pago'){ if(st!=='pago') return false; }
+    if(!q) return true;
+    return [o.numero, nomeClienteOrc(o)].some(v=>String(v||'').toLowerCase().includes(q));
+  }).sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
+}
+function tabelaFinHTML(){
+  const l = listaFinFiltrada();
+  const totalGeral = l.reduce((s,o)=>s+totalOrc(o),0);
+  if(!listaOrcamentos().filter(o=>statusFin(o)!=='na').length)
+    return `<tr><td colspan="7"><div class="vazio"><span class="big">💰</span>Nenhum orçamento aprovado ainda.<br>Aprove um orçamento para acompanhar o recebimento.</div></td></tr>`;
+  if(!l.length) return `<tr><td colspan="7"><div class="vazio"><span class="big">🔍</span>Nenhum título encontrado.</div></td></tr>`;
+  return l.map(o=>{
+    const st = statusFin(o), ab = abertoOrc(o), pg = pagoOrc(o), tot = totalOrc(o);
+    const venc = vencidoOrc(o);
+    const rot = st==='pago'?'✅ Quitado':(st==='parcial'?'🟡 Parcial':'🔵 Em aberto');
+    return `<tr>
+      <td><div class="nm">${esc(o.numero||'—')}</div><div class="mt">${esc(nomeClienteOrc(o))}</div></td>
+      <td>${esc(o.vencimento||o.validade?fmtData(o.vencimento||o.validade):'—')} ${venc?'<span class="selo venc">vencido</span>':''}</td>
+      <td class="vl-total">${brl(tot)}</td>
+      <td>${brl(pg)}</td>
+      <td style="font-weight:700;color:${ab>0?'var(--erro)':'var(--ok)'}">${brl(ab)}</td>
+      <td><span class="mini">${rot}</span></td>
+      <td><div class="acoes">
+        ${st!=='pago'?`<button class="icon-btn" title="Registrar pagamento" data-act="fin-pagar" data-id="${o.id}">💵</button>`:''}
+        <button class="icon-btn" title="Ver pagamentos" data-act="fin-ver" data-id="${o.id}">👁️</button>
+        <button class="icon-btn" title="Abrir orçamento" data-act="orc-abrir" data-id="${o.id}">🧾</button>
+      </div></td>
+    </tr>`;
+  }).join('') + `<tr><td colspan="2" style="font-weight:700">Total filtrado</td><td colspan="3" style="font-weight:700">${brl(totalGeral)}</td><td colspan="2"></td></tr>`;
+}
+function atualizarTabelaFin(){
+  const tb = document.getElementById('tabelaFin'); if(!tb) return;
+  tb.innerHTML = tabelaFinHTML();
+  const c = document.getElementById('contFin');
+  if(c) c.textContent = `${listaFinFiltrada().length} título(s)`;
+}
+function formPagamento(orcId){
+  const o = buscarOrc(orcId); if(!o) return;
+  const ab = abertoOrc(o);
+  abrirModal(`
+  <div class="modal-h"><h2>💵 Registrar pagamento</h2><button type="button" class="x" data-fechar>×</button></div>
+  <div class="modal-b">
+    <div class="info-orc">${esc(o.numero||'—')} · ${esc(nomeClienteOrc(o))}</div>
+    <div class="resumo-mini">Total ${brl(totalOrc(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(ab)}</b></div>
+    <form id="fPgto">
+      <div class="linha-campos">
+        <div class="campo"><label>Valor (R$)</label><input type="number" step="0.01" min="0" name="valor" value="${ab.toFixed(2)}" required></div>
+        <div class="campo"><label>Data</label><input type="date" name="data" value="${hojeISO()}" required></div>
+        <div class="campo"><label>Forma</label><select name="forma">${FORMAS_PGTO.map(f=>`<option>${f}</option>`).join('')}</select></div>
+      </div>
+      <div class="btn-linha" style="justify-content:flex-end;margin-top:16px">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">Registrar</button>
+      </div>
+    </form>
+  </div>`);
+  document.getElementById('fPgto').addEventListener('submit', e=>{
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target).entries());
+    const v = Number(d.valor);
+    if(!(v>0)) return toast('Informe um valor maior que zero.', 'erro');
+    addPagamento(o.id, v, d.data, d.forma);
+    salvar(); fecharModal(); render();
+    toast(`Pagamento de ${brl(v)} registrado.`);
+  });
+}
+function verPagamentos(orcId){
+  const o = buscarOrc(orcId); if(!o) return;
+  const pgs = pagamentosDe(o);
+  abrirModal(`
+  <div class="modal-h"><h2>💵 Pagamentos</h2><button type="button" class="x" data-fechar>×</button></div>
+  <div class="modal-b">
+    <div class="info-orc">${esc(o.numero||'—')} · ${esc(nomeClienteOrc(o))}</div>
+    <div class="resumo-mini">Total ${brl(totalOrc(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(abertoOrc(o))}</b></div>
+    <div style="margin-top:12px">
+    ${pgs.length ? pgs.map(p=>`<div class="linha-lista">
+        <div><div class="nm">${brl(p.valor)}</div><div class="mt">${fmtData(p.data)} · ${esc(p.forma||'')}</div></div>
+        <div class="end"><button class="icon-btn del" data-act="fin-rm" data-id="${o.id}" data-pag="${p.id}" title="Remover">🗑️</button></div>
+      </div>`).join('') : `<div class="vazio"><span class="big">💳</span>Nenhum pagamento registrado.</div>`}
+    </div>
+    <div class="btn-linha" style="justify-content:flex-end;margin-top:16px">
+      <button type="button" class="btn ghost" data-fechar>Fechar</button>
+      ${abertoOrc(o)>0?`<button type="button" class="btn primary" data-act="fin-pagar" data-id="${o.id}">＋ Pagamento</button>`:''}
+    </div>
+  </div>`);
+}
+
+/* =========================================================
+   CONTRATOS / RECORRÊNCIA
+   ========================================================= */
+let filtroContrato = {busca:'', status:'todos'};
+function htmlContratos(){
+  const ativos = contratosAtivos();
+  const venc = contratosVencendo(15);
+  return `
+  <div class="grid-stats">
+    ${stat('Contratos ativos', ativos.length, '🔁')}
+    ${stat('Receita mensal (MRR)', brl(mrr()), '💵')}
+    ${stat('Receita anual est.', brl(mrr()*12), '📈')}
+    ${stat('Vencendo em 15 dias', venc.length, '⏳', venc.length>0)}
+  </div>
+  ${venc.length ? `<div class="card" style="margin-bottom:16px">
+    <div class="card-h"><h3>⚠️ Contratos a renovar</h3></div>
+    <div class="card-b">${venc.map(c=>`
+      <div class="linha-lista">
+        <div><div class="nm">${esc(c.clienteNome||nomeClienteOrc(c)||'—')}</div><div class="mt">${esc(c.descricao||'')} · vence ${fmtData(c.proximoVenc)}</div></div>
+        <div class="end"><span class="vl-total">${brl(valorMensalContrato(c))}/mês</span>
+        <button class="btn ghost sm" data-act="cont-renovar" data-id="${c.id}">Renovar +1 mês</button></div>
+      </div>`).join('')}</div>
+  </div>`:''}
+  <div class="toolbar">
+    <div class="busca"><input id="buscaContrato" placeholder="Buscar por cliente ou descrição..." value="${esc(filtroContrato.busca)}"></div>
+    <select class="filtro" id="fStatusContrato">
+      <option value="todos">Todos os status</option>
+      <option value="ativo" ${filtroContrato.status==='ativo'?'selected':''}>Ativos</option>
+      <option value="pausado" ${filtroContrato.status==='pausado'?'selected':''}>Pausados</option>
+      <option value="encerrado" ${filtroContrato.status==='encerrado'?'selected':''}>Encerrados</option>
+    </select>
+  </div>
+  <div class="contagem" id="contContrato"></div>
+  <div class="tabela-wrap"><table>
+    <thead><tr><th>Cliente</th><th>Descrição</th><th>Valor</th><th>Início</th><th>Próximo venc.</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead>
+    <tbody id="tabelaContrato"></tbody>
+  </table></div>`;
+}
+function ligarContratos(){
+  const b = document.getElementById('buscaContrato');
+  if(b) b.addEventListener('input', ()=>{ filtroContrato.busca=b.value; atualizarTabelaContrato(); });
+  const f = document.getElementById('fStatusContrato');
+  if(f) f.addEventListener('change', e=>{ filtroContrato.status=e.target.value; atualizarTabelaContrato(); });
+  atualizarTabelaContrato();
+}
+function listaContratoFiltrada(){
+  const q = filtroContrato.busca.trim().toLowerCase();
+  return (db.contratos||[]).filter(c=>{
+    if(filtroContrato.status!=='todos' && c.status!==filtroContrato.status) return false;
+    if(!q) return true;
+    return [c.clienteNome, c.descricao].some(v=>String(v||'').toLowerCase().includes(q));
+  }).sort((a,b)=>String(a.proximoVenc||'9999').localeCompare(String(b.proximoVenc||'9999')));
+}
+const STATUS_CONTRATO = [['ativo','🟢 Ativo'],['pausado','🟡 Pausado'],['encerrado','⚪ Encerrado']];
+function tabelaContratoHTML(){
+  const l = listaContratoFiltrada();
+  if(!(db.contratos||[]).length)
+    return `<tr><td colspan="7"><div class="vazio"><span class="big">🔁</span>Nenhum contrato ainda.<br>Cadastre clientes com mensalidade ou manutenção recorrente.</div></td></tr>`;
+  if(!l.length) return `<tr><td colspan="7"><div class="vazio"><span class="big">🔍</span>Nenhum contrato encontrado.</div></td></tr>`;
+  return l.map(c=>{
+    const d = contratoVence(c);
+    const alerta = contratoAtivo(c) && d!=null && d<=15;
+    return `<tr>
+      <td><div class="nm">${esc(c.clienteNome||nomeClienteOrc(c)||'—')}</div></td>
+      <td><div class="mt">${esc(c.descricao||'—')}</div></td>
+      <td class="vl-total">${brl(valorMensalContrato(c))}</td>
+      <td>${c.inicio?fmtData(c.inicio):'—'}</td>
+      <td>${c.proximoVenc?`${fmtData(c.proximoVenc)} ${alerta?'<span class="selo venc">'+(d<0?'vencido':'em '+d+'d')+'</span>':''}`:'—'}</td>
+      <td><select class="filtro" style="min-width:130px;padding:6px 8px" data-act="cont-status" data-id="${c.id}">${STATUS_CONTRATO.map(([v,r])=>`<option value="${v}" ${c.status===v?'selected':''}>${r}</option>`).join('')}</select></td>
+      <td><div class="acoes">
+        <button class="icon-btn" title="Renovar +1 mês" data-act="cont-renovar" data-id="${c.id}">🔄</button>
+        <button class="icon-btn" title="Editar" data-act="cont-editar" data-id="${c.id}">✏️</button>
+        <button class="icon-btn del" title="Excluir" data-act="cont-excluir" data-id="${c.id}">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function atualizarTabelaContrato(){
+  const tb = document.getElementById('tabelaContrato'); if(!tb) return;
+  tb.innerHTML = tabelaContratoHTML();
+  const c = document.getElementById('contContrato');
+  if(c) c.textContent = `${listaContratoFiltrada().length} de ${(db.contratos||[]).length} contrato(s)`;
+}
+function formContrato(id){
+  const c = id ? (db.contratos||[]).find(x=>x.id===id) : null;
+  if(id && !c) return;
+  const v = c ? JSON.parse(JSON.stringify(c)) : {id:null, clienteId:'', clienteNome:'', descricao:'Manutenção mensal', valor:'', inicio:hojeISO(), proximoVenc:proximos7dias(), status:'ativo', obs:''};
+  abrirModal(`
+  <div class="modal-h"><h2>${id?'✏️ Editar contrato':'🔁 Novo contrato'}</h2><button type="button" class="x" data-fechar>×</button></div>
+  <div class="modal-b">
+    <form id="fContrato">
+      <div class="linha-campos">
+        <div class="campo"><label>Cliente</label>
+          <select name="clienteId" required>
+            <option value="">Selecione...</option>
+            ${db.clientes.map(cl=>`<option value="${cl.id}" ${v.clienteId===cl.id?'selected':''}>${esc(cl.nome)}${cl.empresa?' — '+esc(cl.empresa):''}</option>`).join('')}
+          </select>
+        </div>
+        <div class="campo"><label>Valor mensal (R$)</label><input type="number" step="0.01" min="0" name="valor" value="${esc(String(v.valor))}" required></div>
+      </div>
+      <div class="campo"><label>Descrição</label><input name="descricao" value="${esc(v.descricao||'')}" placeholder="Ex.: Manutenção preventiva mensal"></div>
+      <div class="linha-campos">
+        <div class="campo"><label>Início</label><input type="date" name="inicio" value="${v.inicio||hojeISO()}"></div>
+        <div class="campo"><label>Próximo vencimento</label><input type="date" name="proximoVenc" value="${v.proximoVenc||''}"></div>
+        <div class="campo"><label>Status</label><select name="status">${STATUS_CONTRATO.map(([val,r])=>`<option value="${val}" ${v.status===val?'selected':''}>${r}</option>`).join('')}</select></div>
+      </div>
+      <div class="campo"><label>Observações</label><textarea name="obs" rows="2">${esc(v.obs||'')}</textarea></div>
+      <div class="btn-linha" style="justify-content:flex-end;margin-top:16px">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">Salvar</button>
+      </div>
+    </form>
+  </div>`);
+  document.getElementById('fContrato').addEventListener('submit', e=>{
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target).entries());
+    const cl = buscarCli(d.clienteId);
+    if(!cl) return toast('Selecione um cliente.', 'erro');
+    const novo = id ? c : {id:uid(), criadoEm:agoraDT()};
+    Object.assign(novo, {
+      clienteId:cl.id, clienteNome:cl.nome, descricao:d.descricao, valor:d.valor,
+      inicio:d.inicio, proximoVenc:d.proximoVenc, status:d.status, obs:d.obs, atualizadoEm:agoraDT()
+    });
+    if(!id) db.contratos.unshift(novo);
+    auditar('contrato', `${id?'Contrato editado':'Contrato criado'} de ${cl.nome}`);
+    salvar(); fecharModal(); render();
+    toast(id?'Contrato atualizado.':'Contrato criado.');
+  });
+}
+function excluirContrato(id){
+  const c = (db.contratos||[]).find(x=>x.id===id); if(!c) return;
+  if(!confirm(`Excluir o contrato de ${c.clienteNome||''}?`)) return;
+  db.contratos = db.contratos.filter(x=>x.id!==id);
+  auditar('contrato', `Contrato excluído de ${c.clienteNome||''}`);
+  salvar(); render(); toast('Contrato excluído.');
+}
+
+/* =========================================================
+   MENSAGENS — modelos prontos para WhatsApp / e-mail
+   ========================================================= */
+let filtroMsg = {busca:'', tag:'todas'};
+const TAGS_MSG = [['orcamento','🧾 Orçamento'],['cobranca','💰 Cobrança'],['posvenda','🎉 Pós-venda'],['followup','⏰ Follow-up'],['geral','💬 Geral']];
+function htmlMensagens(){
+  return `
+  <div class="card">
+    <div class="card-h"><h3>💬 Modelos de mensagem</h3><span class="mini" style="margin-left:auto">Use as variáveis: {cliente} {numero} {total} {validade} {empresa} {assunto}</span></div>
+    <div class="card-b">
+      <p class="mini" style="margin-bottom:12px">Salve textos prontos e insira no WhatsApp com um clique, direto do cliente ou do orçamento.</p>
+      <div class="toolbar">
+        <div class="busca"><input id="buscaMsg" placeholder="Buscar modelo..." value="${esc(filtroMsg.busca)}"></div>
+        <select class="filtro" id="fTagMsg">
+          <option value="todas">Todas as categorias</option>
+          ${TAGS_MSG.map(([v,l])=>`<option value="${v}" ${filtroMsg.tag===v?'selected':''}>${l}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="listaMsg" style="margin-top:16px"></div>`;
+}
+function ligarMensagens(){
+  const b = document.getElementById('buscaMsg');
+  if(b) b.addEventListener('input', ()=>{ filtroMsg.busca=b.value; atualizarListaMsg(); });
+  const f = document.getElementById('fTagMsg');
+  if(f) f.addEventListener('change', e=>{ filtroMsg.tag=e.target.value; atualizarListaMsg(); });
+  atualizarListaMsg();
+}
+function atualizarListaMsg(){
+  const el = document.getElementById('listaMsg'); if(!el) return;
+  const q = filtroMsg.busca.trim().toLowerCase();
+  const l = (db.mensagens||[]).filter(m=>{
+    if(filtroMsg.tag!=='todas' && m.tag!==filtroMsg.tag) return false;
+    if(!q) return true;
+    return [m.nome, m.texto].some(v=>String(v||'').toLowerCase().includes(q));
+  });
+  if(!l.length){ el.innerHTML = `<div class="card"><div class="vazio"><span class="big">💬</span>Nenhum modelo encontrado.</div></div>`; return; }
+  el.innerHTML = l.map(m=>{
+    const tag = TAGS_MSG.find(t=>t[0]===m.tag);
+    return `<div class="card" style="margin-bottom:12px">
+      <div class="card-h"><h3>${esc(m.nome)}</h3><span class="mini" style="margin-left:8px">${tag?tag[1]:''}</span>
+        <div style="margin-left:auto" class="acoes">
+          <button class="icon-btn" title="Copiar" data-act="msg-copiar" data-id="${m.id}">📋</button>
+          <button class="icon-btn" title="Editar" data-act="msg-editar" data-id="${m.id}">✏️</button>
+          <button class="icon-btn del" title="Excluir" data-act="msg-excluir" data-id="${m.id}">🗑️</button>
+        </div>
+      </div>
+      <div class="card-b"><div class="msg-texto">${esc(m.texto)}</div></div>
+    </div>`;
+  }).join('');
+}
+function formMensagem(id){
+  const m = id ? (db.mensagens||[]).find(x=>x.id===id) : null;
+  if(id && !m) return;
+  const v = m ? JSON.parse(JSON.stringify(m)) : {id:null, nome:'', tag:'geral', texto:''};
+  abrirModal(`
+  <div class="modal-h"><h2>${id?'✏️ Editar modelo':'💬 Novo modelo'}</h2><button type="button" class="x" data-fechar>×</button></div>
+  <div class="modal-b">
+    <form id="fMsg">
+      <div class="linha-campos">
+        <div class="campo"><label>Nome do modelo</label><input name="nome" value="${esc(v.nome)}" placeholder="Ex.: Orçamento enviado" required></div>
+        <div class="campo"><label>Categoria</label><select name="tag">${TAGS_MSG.map(([val,l])=>`<option value="${val}" ${v.tag===val?'selected':''}>${l}</option>`).join('')}</select></div>
+      </div>
+      <div class="campo"><label>Texto</label><textarea name="texto" rows="5" required placeholder="Olá {cliente}! Segue o orçamento {numero}...">${esc(v.texto)}</textarea></div>
+      <p class="mini">Variáveis: <code>{cliente}</code> <code>{numero}</code> <code>{total}</code> <code>{validade}</code> <code>{empresa}</code> <code>{assunto}</code></p>
+      <div class="btn-linha" style="justify-content:flex-end;margin-top:16px">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">Salvar</button>
+      </div>
+    </form>
+  </div>`);
+  document.getElementById('fMsg').addEventListener('submit', e=>{
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target).entries());
+    const novo = id ? m : {id:uidM()};
+    Object.assign(novo, {nome:d.nome, tag:d.tag, texto:d.texto});
+    if(!id) db.mensagens.unshift(novo);
+    salvar(); fecharModal(); render();
+    toast(id?'Modelo atualizado.':'Modelo criado.');
+  });
+}
+function excluirMensagem(id){
+  const m = (db.mensagens||[]).find(x=>x.id===id); if(!m) return;
+  if(!confirm(`Excluir o modelo "${m.nome}"?`)) return;
+  db.mensagens = db.mensagens.filter(x=>x.id!==id);
+  salvar(); atualizarListaMsg(); toast('Modelo excluído.');
+}
+function aplicarVariaveis(texto, ctx){
+  const emp = (db.emissor&&db.emissor.nome)||MARCA_NOME;
+  return String(texto||'')
+    .replace(/\{cliente\}/g, ctx.cliente||'')
+    .replace(/\{numero\}/g, ctx.numero||'')
+    .replace(/\{total\}/g, ctx.total||'')
+    .replace(/\{validade\}/g, ctx.validade||'')
+    .replace(/\{empresa\}/g, emp)
+    .replace(/\{assunto\}/g, ctx.assunto||'');
+}
+function menuMensagens(ctx){
+  /* Abre um menu para escolher o modelo e enviar via WhatsApp (ctx.whats) ou só copiar */
+  const ms = db.mensagens||[];
+  if(!ms.length){ toast('Nenhum modelo salvo. Crie em Mensagens.','erro'); return; }
+  abrirModal(`
+  <div class="modal-h"><h2>💬 Escolher modelo</h2><button type="button" class="x" data-fechar>×</button></div>
+  <div class="modal-b">
+    ${ms.map(m=>`<div class="linha-lista" data-msg-escolher="${m.id}">
+      <div><div class="nm">${esc(m.nome)}</div><div class="mt">${esc(String(m.texto).slice(0,70))}${String(m.texto).length>70?'…':''}</div></div>
+      <div class="end"><button class="btn ghost sm" data-msg-usar="${m.id}">Usar</button></div>
+    </div>`).join('')}
+  </div>`);
+  modal.querySelectorAll('[data-msg-usar]').forEach(b=>b.addEventListener('click', ()=>{
+    const m = ms.find(x=>x.id===b.dataset.msgUsar);
+    const txt = aplicarVariaveis(m.texto, ctx);
+    fecharModal();
+    if(ctx.whats && ctx.whats()){
+      const num = ctx.whats();
+      window.open(`https://wa.me/${num}?text=${encodeURIComponent(txt)}`, '_blank');
+    }else{
+      copiarTexto(txt);
+    }
+  }));
+}
+
 function htmlRelatorios(){
   const os = relOrcamentosFiltrados();
   const todos = listaOrcamentos();
@@ -4299,6 +5202,34 @@ function htmlDados(){
     </form>
   </div>
 
+  <div class="op-card" style="margin-bottom:16px">
+    <h4>🎯 Metas e comissão</h4>
+    <p>A meta mensal aparece no resumo do painel. A comissão é usada no relatório de comissões.</p>
+    <form id="fMeta" class="form-grid" style="gap:12px">
+      <div class="campo"><label>Meta de faturamento mensal (R$)</label><input type="number" step="0.01" min="0" name="valorMensal" value="${esc(String(db.meta&&db.meta.valorMensal||0))}"></div>
+      <div class="campo"><label>Comissão (%)</label><input type="number" step="0.1" min="0" max="100" name="comissao" value="${esc(String(db.meta&&db.meta.comissao||10))}"></div>
+      <div class="campo full"><div><button class="btn primary" type="submit">💾 Salvar metas</button></div></div>
+    </form>
+  </div>
+
+  <div class="op-card" style="margin-bottom:16px">
+    <h4>📊 Personalizar o painel</h4>
+    <p>Escolha quais cartões aparecem no Painel.</p>
+    <div class="checks-painel">
+      ${[['resumo','Resumo do mês'],['caixa','Fluxo de caixa'],['atencao','Precisa de atenção'],['followups','Follow-ups próximos'],['recentes','Últimos clientes'],['orcamentos','Últimos orçamentos'],['atividade','Atividade recente']]
+        .map(([k,l])=>`<label class="chk"><input type="checkbox" data-cartao="${k}" ${prefs().cartoes[k]!==false?'checked':''}> ${l}</label>`).join('')}
+    </div>
+    <p style="font-size:12.5px;color:var(--suave);margin-top:8px">Sempre visíveis: os indicadores do topo (clientes, orçamentos, valor aprovado).</p>
+  </div>
+
+  <div class="op-card" style="margin-bottom:16px">
+    <h4>🔒 Trilha de auditoria</h4>
+    <p>Últimas ações registradas (${(db.auditoria||[]).length} de 300). Mostra quem alterou o quê, quando o CRM está em uso por mais de uma pessoa.</p>
+    <div class="auditoria-lista">${(db.auditoria||[]).length ? (db.auditoria.slice(0,30).map(a=>`
+      <div class="linha-lista"><div><div class="nm">${esc(a.acao)}</div><div class="mt">${esc(a.detalhe||'')}</div></div><div class="end mini">${esc(a.em)}<br>${esc(a.usuario||'')}</div></div>`).join('')) : '<div class="vazio"><span class="big">📋</span>Sem registros ainda.</div>'}</div>
+    <div style="margin-top:10px"><button class="btn ghost sm" data-act="auditar-copiar">📋 Copiar histórico</button></div>
+  </div>
+
   <div class="opcoes-dados">
     <div class="op-card">
       <h4>⬇ Exportar backup (JSON)</h4>
@@ -4312,6 +5243,13 @@ function htmlDados(){
       <button class="btn primary" data-act="backup-agora">💾 Baixar backup agora</button>
     </div>
     <div class="op-card">
+      <h4>🗂️ Histórico de backups</h4>
+      <p>Guarda as últimas cópias internas (${(db.backups||[]).length}/${BACKUPS_MAX}) com data. Você pode restaurar escolhendo o dia.</p>
+      ${(db.backups||[]).length ? (db.backups.slice(0,6).map(b=>`
+        <div class="linha-lista"><div><div class="nm">${esc(b.rotulo||'Backup')}</div><div class="mt">${esc(b.em)} · ${esc(b.resumo||'')}</div></div>
+          <div class="end"><button class="btn ghost sm" data-act="backup-restaurar" data-id="${b.id}">Restaurar</button></div></div>`).join('')) : '<p class="mini">Nenhum backup interno ainda. Clique em "Backup agora".</p>'}
+    </div>
+    <div class="op-card">
       <h4>📲 Instalar como aplicativo</h4>
       <p>Instale o CRM na tela inicial do celular ou no computador para abrir como um app, sem barra do navegador.</p>
       <button class="btn ghost" data-act="instalar-app">📲 Instalar app</button>
@@ -4322,10 +5260,24 @@ function htmlDados(){
       <button class="btn ghost" data-act="export-csv">Baixar CSV</button>
     </div>
     <div class="op-card">
+      <h4>🏷️ Etiquetas e listas para impressão</h4>
+      <p>Imprima etiquetas de endereço/contato dos clientes ou uma lista de separação.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn ghost" data-act="imprimir-etiquetas">🏷️ Etiquetas</button>
+        <button class="btn ghost" data-act="imprimir-lista">📋 Lista de clientes</button>
+      </div>
+    </div>
+    <div class="op-card">
       <h4>⬆ Importar dados</h4>
       <p>Restaura um backup JSON ou importa um CSV de clientes. <b>Os dados atuais serão substituídos.</b></p>
       <input type="file" id="arquivoImport" accept=".json,.csv" style="display:none">
       <button class="btn ghost" id="btnImportar">Escolher arquivo (JSON/CSV)</button>
+    </div>
+    <div class="op-card">
+      <h4>💲 Atualizar preços do catálogo (CSV)</h4>
+      <p>Suba um CSV com as colunas <code>nome;preco;custo</code> para atualizar preços e custos de uma vez, sem trocar o restante do catálogo.</p>
+      <input type="file" id="arquivoPrecos" accept=".csv" style="display:none">
+      <button class="btn ghost" id="btnPrecos">Escolher CSV de preços</button>
     </div>
     <div class="op-card">
       <h4>✨ Dados de exemplo</h4>
@@ -4369,6 +5321,32 @@ function ligarDados(){
     };
     salvar(); toast('Dados da empresa salvos!');
   });
+  const fMeta = document.getElementById('fMeta');
+  if(fMeta) fMeta.addEventListener('submit', e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    db.meta = {valorMensal: Math.max(0,Number(f.get('valorMensal'))||0), comissao: Math.max(0,Number(f.get('comissao'))||0)};
+    auditar('config', `Metas atualizadas (meta ${brl(db.meta.valorMensal)}, comissão ${db.meta.comissao}%)`);
+    salvar(); toast('Metas salvas!');
+  });
+  document.querySelectorAll('[data-cartao]').forEach(chk=>{
+    chk.addEventListener('change', ()=>{
+      prefs().cartoes[chk.dataset.cartao] = chk.checked;
+      salvar(); toast(chk.checked?'Cartão exibido no painel.':'Cartão ocultado no painel.');
+    });
+  });
+  const arqPrecos = document.getElementById('arquivoPrecos');
+  const btnPrecos = document.getElementById('btnPrecos');
+  if(btnPrecos && arqPrecos){
+    btnPrecos.addEventListener('click', ()=>arqPrecos.click());
+    arqPrecos.addEventListener('change', e=>{
+      const arq = e.target.files[0];
+      if(!arq) return;
+      const leitor = new FileReader();
+      leitor.onload = ()=>{ atualizarPrecosCSV(String(leitor.result)); e.target.value=''; };
+      leitor.readAsText(arq, 'utf-8');
+    });
+  }
   const btnNuvem = document.querySelector('[data-act="nuvem-agora"]');
   if(btnNuvem){
     btnNuvem.addEventListener('click', async ()=>{
@@ -4668,6 +5646,7 @@ async function entrarNoApp(user){
   if(sidebarUser) sidebarUser.hidden = false;
   if(userEmail) userEmail.textContent = (user && user.email) ? user.email : '';
   aplicarMarca();
+  aplicarTema();
   render();
   /* Sincroniza os dados com a nuvem (celular + computador juntos) */
   await iniciarNuvem();
@@ -4836,18 +5815,39 @@ function iniciarBuscaGlobal(){
    BACKUP AUTOMÁTICO (lembrete + cópia local)
    ========================================================= */
 const DIAS_BACKUP = 7;
+const BACKUPS_MAX = 10;
 function diasDesdeUltimoBackup(){
   if(!db.ultimoBackup) return Infinity;
   const d = Math.floor((Date.now() - new Date(db.ultimoBackup).getTime())/86400000);
   return isNaN(d) ? Infinity : d;
 }
 function backupVencido(){ return diasDesdeUltimoBackup() >= DIAS_BACKUP; }
+function salvarBackupInterno(rotulo){
+  if(!Array.isArray(db.backups)) db.backups = [];
+  const copia = JSON.parse(JSON.stringify({...db, backups:[]}));
+  const resumo = `${db.clientes.length} cliente(s) · ${listaOrcamentos().length} orçamento(s) · ${listaProdutos().length} item(ns)`;
+  db.backups.unshift({id:uid(), em:agoraDT(), rotulo: rotulo||('Backup '+fmtData(hojeISO())), resumo, dados:copia});
+  if(db.backups.length > BACKUPS_MAX) db.backups.length = BACKUPS_MAX;
+}
 function baixarBackupAgora(){
   exportarJSON();
+  salvarBackupInterno('Manual');
   db.ultimoBackup = agoraDT();
+  auditar('backup', 'Backup manual baixado');
   salvar();
-  toast('💾 Backup baixado e registrado.', 'ok');
+  toast('💾 Backup baixado e guardado no histórico.', 'ok');
   try{ render(); }catch(e){}
+}
+function restaurarBackup(id){
+  const b = (db.backups||[]).find(x=>x.id===id);
+  if(!b || !b.dados){ toast('Backup não encontrado.','erro'); return; }
+  if(!confirm(`Restaurar o backup de ${b.em}? Os dados atuais serão substituídos.`)) return;
+  const backups = db.backups; /* preserva o histórico */
+  db = normalizar(JSON.parse(JSON.stringify(b.dados))) || baseVazia();
+  db.backups = backups;
+  db.ultimoBackup = agoraDT();
+  salvar(); aplicarTema(); aplicarMarca(); render();
+  toast('♻️ Backup restaurado.', 'ok');
 }
 function talvezAvisarBackup(){
   if(!backupVencido()) return;
@@ -4857,6 +5857,78 @@ function talvezAvisarBackup(){
   }, 2600);
   const bc = document.getElementById('btnBackupTopo');
   if(bc) bc.classList.add('pulse');
+}
+
+/* =========================================================
+   IMPRESSÃO: etiquetas e lista de clientes
+   ========================================================= */
+function imprimirEtiquetas(){
+  if(!db.clientes.length){ toast('Nenhum cliente para imprimir.','erro'); return; }
+  const em = db.emissor || {};
+  const html = `<div class="etiquetas">${db.clientes.map(c=>`
+    <div class="etiqueta">
+      <div class="et-nome">${esc(c.nome)}</div>
+      ${c.empresa?`<div class="et-emp">${esc(c.empresa)}</div>`:''}
+      ${c.telefone?`<div class="et-lin">📞 ${esc(c.telefone)}</div>`:''}
+      ${c.email?`<div class="et-lin">✉️ ${esc(c.email)}</div>`:''}
+      ${(c.telefone||'')?'':''}
+      <div class="et-rod">${esc(em.nome||MARCA_NOME)}</div>
+    </div>`).join('')}</div>`;
+  imprimirDoc(html);
+}
+function imprimirListaClientes(){
+  if(!db.clientes.length){ toast('Nenhum cliente para imprimir.','erro'); return; }
+  const linhas = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const html = `<div class="lista-print">
+    <h1>Lista de clientes</h1>
+    <div class="lp-sub">${linhas.length} cliente(s) · emitido em ${fmtDT(agoraDT())}</div>
+    <table class="lp-tab">
+      <thead><tr><th>#</th><th>Nome</th><th>Empresa</th><th>Telefone</th><th>E-mail</th><th>Status</th><th>Follow-up</th></tr></thead>
+      <tbody>${linhas.map((c,i)=>`<tr>
+        <td>${i+1}</td><td>${esc(c.nome)}</td><td>${esc(c.empresa||'')}</td>
+        <td>${esc(c.telefone||'')}</td><td>${esc(c.email||'')}</td>
+        <td>${esc(stage(c.status).label)}</td>
+        <td>${c.followup&&c.followup.data?fmtData(c.followup.data):''}</td>
+      </tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+  imprimirDoc(html);
+}
+/* Pós-venda: ao concluir uma OS, agenda um follow-up de satisfação */
+function posVendaOS(os, dias){
+  const cl = buscarCli(os.clienteId);
+  if(!cl) return;
+  const n = dias==null?7:dias;
+  if(cl.followup && cl.followup.data && diasAte(cl.followup.data)>0 && /satisfa/i.test(cl.followup.nota||'')) return;
+  const d = new Date(); d.setDate(d.getDate()+n);
+  cl.followup = {data:isoDeData(d), prioridade:'baixa', nota:`Pós-venda: confirmar satisfação da OS ${os.numero||''}`};
+  auditar('posvenda', `Follow-up de pós-venda agendado para ${cl.nome} em ${n} dias`);
+}
+function atualizarPrecosCSV(texto){
+  const limpo = texto.replace(/^\ufeff/,'').trim();
+  const linhas = limpo.split(/\r?\n/).filter(l=>l.trim());
+  if(!linhas.length){ toast('CSV vazio.','erro'); return; }
+  let cab = linhas[0].split(/[;\t,]/).map(s=>s.trim().toLowerCase());
+  let ini = 0;
+  const iNome = cab.indexOf('nome');
+  if(iNome>=0) ini = 1; else cab = ['nome','preco','custo'];
+  const iPreco = cab.indexOf('preco')>=0?cab.indexOf('preco'):cab.indexOf('preço');
+  const iCusto = cab.indexOf('custo');
+  if(iNome<0 && ini===1){ toast('O CSV precisa ter a coluna "nome".','erro'); return; }
+  let ok = 0, faltou = 0;
+  for(let k=ini;k<linhas.length;k++){
+    const cols = linhas[k].split(/[;\t,]/).map(s=>s.trim().replace(/^"|"$/g,''));
+    const nome = cols[iNome];
+    if(!nome) continue;
+    const p = listaProdutos().find(x=>String(x.nome).toLowerCase()===nome.toLowerCase());
+    if(!p){ faltou++; continue; }
+    if(iPreco>=0 && cols[iPreco]!=='') p.preco = Number(String(cols[iPreco]).replace(',','.'))||p.preco;
+    if(iCusto>=0 && cols[iCusto]!=='') p.custo = Number(String(cols[iCusto]).replace(',','.'))||p.custo;
+    ok++;
+  }
+  auditar('catalogo', `Preços atualizados por CSV (${ok} item(ns))`);
+  salvar(); render();
+  toast(`💲 ${ok} item(ns) atualizados${faltou?`, ${faltou} não encontrado(s)`:''}.`, ok?'ok':'erro');
 }
 
 /* =========================================================
@@ -4916,6 +5988,7 @@ function verificarOrcPublico(){
 
 /* ---------- Início ---------- */
 aplicarMarca();
+aplicarTema();
 iniciarPWA();
 try{
   if(!verificarOrcPublico()){
@@ -4926,6 +5999,15 @@ try{
   }
 }catch(e){ try{ initAuth(); }catch(_){} }
 if(backupVencido()) setTimeout(talvezAvisarBackup, 3000);
+/* Avisa quando a conexão cai/volta e tenta sincronizar na volta */
+window.addEventListener('offline', ()=>{ try{ setNuvemStatus('erro'); render(); }catch(e){} });
+window.addEventListener('online', ()=>{
+  try{
+    toast('🌐 Conexão restabelecida.', 'ok');
+    render();
+    if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
+  }catch(e){}
+});
 </script>
 </body>
 </html>
