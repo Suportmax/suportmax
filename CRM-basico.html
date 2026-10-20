@@ -891,7 +891,7 @@ let db = carregar();
 let view = 'painel';
 let filtro = {busca:'', status:'todos', ordenar:'recentes'};
 let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos'};
-let filtroOS = {busca:'', status:'todos'};
+let filtroOS = {busca:'', status:'todos', fornecedor:''};
 let filtroCat = {busca:'', margem:'todos'};
 let filtroAgenda = {busca:'', periodo:'todos', prioridade:'todas', ordenar:'data', modo:'lista'};
 let calRef = null; /* mês exibido na visão de calendário (Date do 1º dia do mês) */
@@ -3847,6 +3847,10 @@ function htmlOrdens(){
       <option value="todos">Todos os status</option>
       ${STATUS_OS.map(s=>`<option value="${s.id}" ${filtroOS.status===s.id?'selected':''}>${s.label}</option>`).join('')}
     </select>
+    ${listaFornecedores().length?`<select class="filtro" id="fFornOS" title="Filtrar por fornecedor">
+      <option value="">Fornecedor: todos</option>
+      ${listaFornecedores().slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR')).map(f=>`<option value="${f.id}" ${filtroOS.fornecedor===f.id?'selected':''}>🚚 ${esc(f.nome)}</option>`).join('')}
+    </select>`:''}
     <button class="btn primary" id="btnNovaOS">＋ Nova ordem de serviço</button>
   </div>
   <div class="contagem" id="contOS"></div>
@@ -3859,6 +3863,8 @@ function ligarOrdens(){
   const b = document.getElementById('buscaOS');
   b.addEventListener('input', ()=>{ filtroOS.busca=b.value; atualizarTabelaOS(); });
   document.getElementById('fStatusOS').addEventListener('change', e=>{ filtroOS.status=e.target.value; atualizarTabelaOS(); });
+  const selFornOS = document.getElementById('fFornOS');
+  if(selFornOS) selFornOS.addEventListener('change', e=>{ filtroOS.fornecedor=e.target.value; atualizarTabelaOS(); });
   document.getElementById('btnNovaOS').addEventListener('click', ()=>formOrdem(null));
   atualizarTabelaOS();
 }
@@ -3866,8 +3872,10 @@ function listaOSFiltrada(){
   const q = filtroOS.busca.trim().toLowerCase();
   return listaOrdens().filter(o=>{
     if(filtroOS.status!=='todos' && o.status!==filtroOS.status) return false;
+    if(filtroOS.fornecedor && o.fornecedorId!==filtroOS.fornecedor) return false;
     if(!q) return true;
-    return [o.numero, o.clienteNome, nomeClienteOrdem(o), o.descricao].some(v=>String(v||'').toLowerCase().includes(q));
+    const forn = o.fornecedorId ? buscarForn(o.fornecedorId) : null;
+    return [o.numero, o.clienteNome, nomeClienteOrdem(o), o.descricao, o.responsavel, forn&&forn.nome].some(v=>String(v||'').toLowerCase().includes(q));
   }).sort((a,b)=>String(b.criadoEm||b.data||'').localeCompare(String(a.criadoEm||a.data||'')));
 }
 function nomeClienteOrdem(o){ const c = buscarCli(o.clienteId); return c ? c.nome : (o.clienteNome||'Cliente removido'); }
@@ -3879,7 +3887,7 @@ function tabelaOSHTML(){
     const pr = osProgresso(os);
     return `<tr>
       <td><div class="nm">${esc(os.numero||'—')}</div><div class="mt">${fmtData(os.data)}</div></td>
-      <td><div class="nm">${esc(nomeClienteOrdem(os))}</div><div class="mt">${esc((buscarCli(os.clienteId)||{}).empresa||'')}</div></td>
+      <td><div class="nm">${esc(nomeClienteOrdem(os))}</div><div class="mt">${esc((buscarCli(os.clienteId)||{}).empresa||'')}</div>${os.fornecedorId&&buscarForn(os.fornecedorId)?`<div style="margin-top:4px"><span class="selo info" title="Fornecedor">🚚 ${esc(buscarForn(os.fornecedorId).nome)}</span></div>`:''}</td>
       <td class="vl-total">${brl(os.valor)}</td>
       <td>${pr.total?`<div style="font-size:12px;color:var(--suave)">${pr.feito}/${pr.total} · ${pr.pct}%</div><div class="meta-barra" style="width:90px"><i style="width:${pr.pct}%"></i></div>`:'<span class="mini">sem checklist</span>'}</td>
       <td><select class="filtro" style="min-width:150px;padding:6px 8px" data-act="os-status" data-id="${os.id}">${STATUS_OS.map(s=>`<option value="${s.id}" ${os.status===s.id?'selected':''}>${s.label}</option>`).join('')}</select></td>
@@ -3903,7 +3911,7 @@ function formOrdem(id){
   if(id && !os) return;
   const v = os ? JSON.parse(JSON.stringify(os)) : {
     id:null, numero:'', clienteId:'', clienteNome:'', orcamentoId:'', data:hojeISO(),
-    status:'aberta', valor:0, descricao:'', responsavel:'', prazo:'', obs:'', checklist:[]
+    status:'aberta', valor:0, descricao:'', responsavel:'', fornecedorId:'', prazo:'', obs:'', checklist:[]
   };
   if(!Array.isArray(v.checklist)) v.checklist = [];
   const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
@@ -3929,6 +3937,9 @@ function formOrdem(id){
             <select name="status">${STATUS_OS.map(s=>`<option value="${s.id}" ${(v.status||'aberta')===s.id?'selected':''}>${s.label}</option>`).join('')}</select></div>
           <div class="campo"><label>Valor do serviço (R$)</label><input type="number" name="valor" min="0" step="0.01" value="${Number(v.valor)||0}"></div>
           <div class="campo full"><label>Responsável técnico</label><input name="responsavel" maxlength="80" value="${esc(v.responsavel||'')}" placeholder="Quem executa o serviço"></div>
+          <div class="campo full"><label>Fornecedor (opcional)</label>
+            <select name="fornecedorId"><option value="">— Nenhum —</option>${listaFornecedores().slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR')).map(f=>`<option value="${f.id}" ${v.fornecedorId===f.id?'selected':''}>${esc(f.nome)}${f.contato?' — '+esc(f.contato):''}</option>`).join('')}</select>
+            <div class="mini" style="margin-top:4px">Fornecedor que atende esta OS (materiais/peças). Cadastre novos fornecedores no <b>📦 Catálogo</b>.</div></div>
           <div class="campo full"><label>Descrição do serviço</label><textarea name="descricao" maxlength="800" placeholder="O que será feito...">${esc(v.descricao||'')}</textarea></div>
 
           <div class="subtitulo">✅ Checklist de execução</div>
@@ -4012,6 +4023,7 @@ function formOrdem(id){
       status:String(f.get('status')||'aberta'),
       valor:Math.max(0, Number(f.get('valor'))||0),
       responsavel:String(f.get('responsavel')||'').trim(),
+      fornecedorId:String(f.get('fornecedorId')||''),
       descricao:String(f.get('descricao')||'').trim(),
       obs:String(f.get('obs')||'').trim(),
       checklist:v.checklist
@@ -4053,6 +4065,7 @@ function osDocHTML(os){
       ${c&&c.telefone?`<div><b>Telefone:</b> ${esc(c.telefone)}</div>`:''}
       <div><b>Abertura:</b> ${fmtData(os.data)}${os.prazo?` · <b>Prazo:</b> ${fmtData(os.prazo)}`:''}</div>
       ${os.responsavel?`<div><b>Responsável:</b> ${esc(os.responsavel)}</div>`:''}
+      ${(()=>{ const f=os.fornecedorId?buscarForn(os.fornecedorId):null; if(!f) return ''; return `<div><b>Fornecedor:</b> ${esc(f.nome)}${f.telefone?` · ${esc(f.telefone)}`:''}${f.contato?` · ${esc(f.contato)}`:''}</div>`; })()}
     </div>
     ${os.descricao?`<div class="obs"><b>Serviço:</b><br>${esc(os.descricao).replace(/\n/g,'<br>')}</div>`:''}
     ${pr.total?`<div class="obs"><b>Checklist (${pr.feito}/${pr.total} — ${pr.pct}%):</b><br>
@@ -4097,11 +4110,13 @@ function converterOrcEmOS(orcId){
     if(!confirm(`Este orçamento já tem a ordem ${existente.numero}. Abrir a ordem existente?`)) return;
     view='ordens'; render(); verOrdem(existente.id); return;
   }
+  const fornDoOrc = (o.itens||[]).map(i=>i.produtoId?buscarProd(i.produtoId):null).find(p=>p&&p.fornecedorId);
   const os = {
     id:uid(), criadoEm:agoraDT(), numero:novoNumeroOS(), orcamentoId:o.id,
     clienteId:o.clienteId, clienteNome:nomeClienteOrc(o), data:hojeISO(),
     prazo:o.validade||'', status:'aberta', valor:totalOrc(o),
-    responsavel:'', descricao:(o.itens||[]).map(i=>`${i.qtd}× ${i.desc}`).join('\n'),
+    responsavel:'', fornecedorId:fornDoOrc?fornDoOrc.fornecedorId:'',
+    descricao:(o.itens||[]).map(i=>`${i.qtd}× ${i.desc}`).join('\n'),
     obs:o.obs||'', checklist:(o.itens||[]).map(i=>({tarefa:`${i.qtd}× ${i.desc}`, feito:false, obs:''}))
   };
   listaOrdens().unshift(os);
