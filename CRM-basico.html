@@ -153,6 +153,32 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .alerta-card .card-h{background:#fef2f2;border-radius:var(--radius) var(--radius) 0 0}
 body.tema-escuro .contr-card{background:#0d1728}
 body.tema-escuro .alerta-card .card-h{background:#2a1414}
+/* ---------- Financeiro: lançamentos manuais ---------- */
+.resumo-lanc{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.rl-item{background:#f8fafc;border:1px solid var(--borda);border-radius:10px;padding:10px 12px;display:flex;flex-direction:column;gap:3px}
+.rl-lbl{font-size:11.5px;color:var(--suave);font-weight:600}
+.rl-val{font-size:16px;font-weight:800}
+.rl-val.ok{color:#15803d}
+.rl-val.erro{color:#b91c1c}
+.lanc-lista{display:flex;flex-direction:column;gap:7px}
+.lanc-linha{display:flex;align-items:center;gap:11px;border:1px solid var(--borda);border-radius:10px;padding:9px 12px;background:var(--painel)}
+.lanc-linha.rec{border-left:4px solid #22c55e}
+.lanc-linha.desp{border-left:4px solid #ef4444}
+.lanc-sinal{font-size:15px;flex:0 0 auto}
+.lanc-info{flex:1;min-width:0}
+.lanc-info .nm{font-weight:600;font-size:13.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lanc-info .mt{font-size:11.8px;color:var(--suave);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lanc-val{font-weight:800;font-size:14.5px;white-space:nowrap;flex:0 0 auto}
+.lanc-linha.rec .lanc-val{color:#15803d}
+.lanc-linha.desp .lanc-val{color:#b91c1c}
+.lanc-acoes{display:flex;gap:5px;flex:0 0 auto}
+.lanc-tipo{display:flex;gap:9px}
+.lanc-tipo-btn{flex:1;padding:12px;border:1.5px solid var(--borda);border-radius:11px;background:#fff;font:inherit;font-weight:700;font-size:13.6px;cursor:pointer;color:var(--texto)}
+.lanc-tipo-btn.on.receita{border-color:#22c55e;background:#f0fdf4;color:#15803d}
+.lanc-tipo-btn.on.despesa{border-color:#ef4444;background:#fef2f2;color:#b91c1c}
+body.tema-escuro .rl-item{background:#0b1526}
+body.tema-escuro .lanc-tipo-btn{background:#0d1728}
+body.tema-escuro .lanc-linha{background:#0d1728}
 @media (max-width:760px){
   .contr-cards{display:flex}
   .tabela-contratos{display:none}
@@ -314,7 +340,7 @@ body.tema-escuro .fup-pill.venc{background:#2a1215;color:#fca5a5}
 .card-cli .nm{font-weight:650;font-size:13.6px;margin-bottom:2px}
 .card-cli .mt{font-size:12.2px;color:var(--suave)}
 .card-cli .rodape{display:flex;gap:6px;align-items:center;margin-top:8px;flex-wrap:wrap}
-.mini{font-size:11.3px;color:var(--suave);background:#f1f5f9;border-radius:6px;padding:2px 7px}
+.mini{font-size:11.3px;color:#475569;background:#f1f5f9;border-radius:6px;padding:2px 7px}
 .mini.fup{background:#eff6ff;color:#1d4ed8}
 .mini.venc{background:#fef2f2;color:#dc2626;font-weight:700}
 
@@ -962,6 +988,7 @@ function normalizar(d){
   if(!Array.isArray(d.produtos)) d.produtos = [];
   if(!Array.isArray(d.fornecedores)) d.fornecedores = [];
   if(!Array.isArray(d.ordens)) d.ordens = [];
+  if(!Array.isArray(d.lancamentos)) d.lancamentos = [];
   if(!Array.isArray(d.mensagens)) d.mensagens = [];
   if(!Array.isArray(d.contratos)) d.contratos = [];
   if(!Array.isArray(d.backups)) d.backups = [];
@@ -981,7 +1008,7 @@ function normalizar(d){
   if(typeof d.prefs.densidade!=='string') d.prefs.densidade = 'normal';
   return d;
 }
-function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], mensagens:mensagemPadrao(), contratos:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
+function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], lancamentos:[], mensagens:mensagemPadrao(), contratos:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
 function prefs(){ if(!db.prefs) db.prefs = baseVazia().prefs; if(!db.prefs.cartoes) db.prefs.cartoes = baseVazia().prefs.cartoes; return db.prefs; }
 
 /* ---------- Financeiro: pagamentos e contas a receber ---------- */
@@ -1032,6 +1059,92 @@ function rmPagamento(orcId, pagId){
   auditar('pagamento', `Pagamento removido do orçamento ${o.numero||''}`);
 }
 const FORMAS_PGTO = ['Pix','Dinheiro','Cartão de crédito','Cartão de débito','Boleto','Transferência'];
+
+/* ---------- Lançamentos manuais (receitas e despesas avulsas) ---------- */
+const CATEGORIAS_RECEITA = ['Venda avulsa','Serviço','Contrato','Mensalidade','Comissão','Outra receita'];
+const CATEGORIAS_DESPESA = ['Compra de peças','Fornecedor','Conta fixa (luz/água/internet)','Aluguel','Marketing','Impostos/Taxas','Transporte','Software/Assinatura','Manutenção','Outra despesa'];
+function listaLancamentos(){ return Array.isArray(db.lancamentos) ? db.lancamentos : (db.lancamentos=[]); }
+function valorLanc(l){ return Math.abs(Number(String(l.valor||'').replace(',','.'))||0); }
+function lancamentosPeriodo(periodo){
+  const hoje = new Date();
+  const mesAtual = hojeISO().slice(0,7);
+  return listaLancamentos().filter(l=>{
+    const dt = String(l.data||'').slice(0,7);
+    if(periodo==='mes') return dt===mesAtual;
+    if(periodo==='30'){ const d=diasAte(l.data); return d!=null && d>=-30 && d<=0; }
+    if(periodo==='ano') return String(l.data||'').slice(0,4)===String(hoje.getFullYear());
+    return true;
+  });
+}
+function resumoLancamentos(periodo){
+  const l = lancamentosPeriodo(periodo||'todos');
+  const receitas = l.filter(x=>x.tipo==='receita').reduce((s,x)=>s+valorLanc(x),0);
+  const despesas = l.filter(x=>x.tipo==='despesa').reduce((s,x)=>s+valorLanc(x),0);
+  return {receitas, despesas, saldo: receitas-despesas, qtd: l.length};
+}
+function formLancamento(id, tipoPadrao){
+  const l = id ? listaLancamentos().find(x=>x.id===id) : null;
+  const tipo = l ? l.tipo : (tipoPadrao||'receita');
+  const v = l || {id:null, tipo, descricao:'', valor:'', data:hojeISO(), categoria:'', forma:'Pix', obs:''};
+  const cats = (v.tipo==='receita') ? CATEGORIAS_RECEITA : CATEGORIAS_DESPESA;
+  const titulo = v.tipo==='receita' ? '➕ Nova receita' : '➖ Nova despesa';
+  abrirModal(`
+  <div class="modal-h"><h2>${id?(v.tipo==='receita'?'✏️ Editar receita':'✏️ Editar despesa'):titulo}</h2><button type="button" class="x" data-fechar>×</button></div>
+  <div class="modal-b">
+    <form id="fLanc">
+      <div class="lanc-tipo" id="lancTipo">
+        <button type="button" class="lanc-tipo-btn ${v.tipo==='receita'?'on receita':''}" data-tipo="receita">➕ Receita (entrada)</button>
+        <button type="button" class="lanc-tipo-btn ${v.tipo==='despesa'?'on despesa':''}" data-tipo="despesa">➖ Despesa (saída)</button>
+      </div>
+      <div class="campo" style="margin-top:14px"><label>Descrição *</label><input name="descricao" maxlength="120" required value="${esc(v.descricao||'')}" placeholder="Ex.: Venda de cabo HDMI, Conta de luz, Compra de toner..."></div>
+      <div class="linha-campos">
+        <div class="campo"><label>Valor (R$) *</label><input type="number" step="0.01" min="0" name="valor" value="${v.valor!==''?esc(String(v.valor)):''}" required></div>
+        <div class="campo"><label>Data</label><input type="date" name="data" value="${v.data||hojeISO()}"></div>
+      </div>
+      <div class="linha-campos">
+        <div class="campo"><label>Categoria</label><select name="categoria" id="lancCat">${cats.map(c=>`<option ${v.categoria===c?'selected':''}>${esc(c)}</option>`).join('')}</select></div>
+        <div class="campo"><label>Forma / meio</label><select name="forma">${FORMAS_PGTO.concat(['Outro']).map(f=>`<option ${v.forma===f?'selected':''}>${esc(f)}</option>`).join('')}</select></div>
+      </div>
+      <div class="campo"><label>Observações</label><input name="obs" maxlength="180" value="${esc(v.obs||'')}"></div>
+      <div class="btn-linha" style="justify-content:flex-end;margin-top:16px">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">Salvar</button>
+      </div>
+    </form>
+  </div>`);
+  let tipoAtual = v.tipo;
+  modal.querySelectorAll('.lanc-tipo-btn').forEach(b=>b.addEventListener('click', ()=>{
+    tipoAtual = b.dataset.tipo;
+    modal.querySelectorAll('.lanc-tipo-btn').forEach(x=>{ x.classList.toggle('on', x===b); x.classList.toggle('receita', x===b && tipoAtual==='receita'); x.classList.toggle('despesa', x===b && tipoAtual==='despesa'); });
+    const sel = document.getElementById('lancCat');
+    const lista = tipoAtual==='receita' ? CATEGORIAS_RECEITA : CATEGORIAS_DESPESA;
+    sel.innerHTML = lista.map(c=>`<option>${esc(c)}</option>`).join('');
+  }));
+  document.getElementById('fLanc').addEventListener('submit', e=>{
+    e.preventDefault();
+    const d = Object.fromEntries(new FormData(e.target).entries());
+    const val = Math.abs(Number(d.valor)||0);
+    if(!(val>0)) return toast('Informe um valor maior que zero.','erro');
+    const novo = id ? l : {id:uid(), criadoEm:agoraDT()};
+    Object.assign(novo, {
+      tipo: tipoAtual, descricao:String(d.descricao||'').trim(), valor: val,
+      data: d.data||hojeISO(), categoria: d.categoria||'', forma: d.forma||'',
+      obs: String(d.obs||'').trim(), atualizadoEm: agoraDT()
+    });
+    if(!id) listaLancamentos().unshift(novo);
+    auditar('financeiro', `${id?'Lançamento editado':'Lançamento criado'}: ${tipoAtual==='receita'?'receita':'despesa'} ${brl(val)} — ${novo.descricao}`);
+    salvar(); fecharModal(); render();
+    toast(id?'Lançamento atualizado.':(tipoAtual==='receita'?'Receita registrada.':'Despesa registrada.'));
+  });
+}
+function excluirLancamento(id){
+  const l = listaLancamentos().find(x=>x.id===id); if(!l) return;
+  if(!confirm(`Excluir "${l.descricao}"?`)) return;
+  db.lancamentos = listaLancamentos().filter(x=>x.id!==id);
+  auditar('financeiro', `Lançamento excluído: ${l.descricao}`);
+  salvar(); render(); toast('Lançamento excluído.');
+}
+
 
 /* ---------- Estoque ---------- */
 function estoqueDe(p){ return p.estoque==null ? null : Number(p.estoque); }
@@ -2190,6 +2303,10 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='fin-pagar') formPagamento(id);
   else if(btn.dataset.act==='fin-ver') verPagamentos(id);
   else if(btn.dataset.act==='fin-rm'){ rmPagamento(id, btn.dataset.pag); salvar(); verPagamentos(id); render(); toast('Pagamento removido.'); }
+  else if(btn.dataset.act==='fin-nova-receita') formLancamento(null, 'receita');
+  else if(btn.dataset.act==='fin-nova-despesa') formLancamento(null, 'despesa');
+  else if(btn.dataset.act==='fin-lanc-editar') formLancamento(id);
+  else if(btn.dataset.act==='fin-lanc-excluir') excluirLancamento(id);
   else if(btn.dataset.act==='orc-abrir'){ verOrc(id); }
   /* Contratos */
   else if(btn.dataset.act==='cont-editar') formContrato(id);
@@ -5127,20 +5244,58 @@ let filtroFin = {busca:'', status:'todos', periodo:'todos'};
 function htmlFinanceiro(){
   const r = resumoCaixa();
   const mesAtual = hojeISO().slice(0,7);
+  const rl = resumoLancamentos(filtroFin.periodo);
   /* entradas do mês agrupadas por forma */
   const porForma = {};
   listaOrcamentos().forEach(o=>pagamentosDe(o).forEach(p=>{
     if(String(p.data||'').slice(0,7)!==mesAtual) return;
     porForma[p.forma||'Outro'] = (porForma[p.forma||'Outro']||0) + (Number(p.valor)||0);
   }));
+  const manualMes = resumoLancamentos('mes');
   return `
   <div class="grid-stats">
-    ${stat('Recebido (total)', brl(r.recebido), '💵')}
+    ${stat('Recebido (orçamentos)', brl(r.recebido), '💵')}
     ${stat('Recebido no mês', brl(r.recebMes), '📅')}
     ${stat('Em aberto', brl(r.aberto), '⏳', r.aberto>0)}
     ${stat('Vencido', brl(r.vencido), '🚨', r.vencido>0)}
+    ${stat('Saldo do mês (caixa)', brl(r.recebMes + manualMes.saldo), '🧮', (r.recebMes + manualMes.saldo)<0)}
   </div>
-  <div class="card">
+
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-h"><h2>🧾 Lançamentos manuais</h2>
+      <span class="mini" style="margin-left:auto">Receitas e despesas que não vêm de orçamento</span></div>
+    <div class="card-b">
+      <p class="mini" style="margin-bottom:12px">Registre entradas e saídas avulsas: venda direta, compra de peças, contas fixas, aluguel, impostos, etc. Isso entra no cálculo do saldo abaixo.</p>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="btn primary" id="btnNovaReceita" data-act="fin-nova-receita">➕ Nova receita</button>
+        <button class="btn ghost" id="btnNovaDespesa" data-act="fin-nova-despesa" style="border-color:#fecaca;color:#b91c1c">➖ Nova despesa</button>
+      </div>
+      <div class="resumo-lanc">
+        <div class="rl-item"><span class="rl-lbl">Entradas</span><span class="rl-val ok">${brl(rl.receitas)}</span></div>
+        <div class="rl-item"><span class="rl-lbl">Saídas</span><span class="rl-val erro">− ${brl(rl.despesas)}</span></div>
+        <div class="rl-item"><span class="rl-lbl">Saldo do período</span><span class="rl-val ${rl.saldo>=0?'ok':'erro'}">${brl(rl.saldo)}</span></div>
+        <div class="rl-item"><span class="rl-lbl">Entradas − saídas no mês</span><span class="rl-val ${manualMes.saldo>=0?'ok':'erro'}">${brl(manualMes.saldo)}</span></div>
+      </div>
+      <div class="toolbar" style="margin-top:14px">
+        <div class="busca"><input id="buscaLanc" placeholder="Buscar lançamento por descrição, categoria..." value="${esc(filtroFin.buscaLanc||'')}"></div>
+        <select class="filtro" id="fTipoLanc" title="Tipo">
+          <option value="todos" ${(filtroFin.tipoLanc||'todos')==='todos'?'selected':''}>Todos os tipos</option>
+          <option value="receita" ${filtroFin.tipoLanc==='receita'?'selected':''}>➕ Receitas</option>
+          <option value="despesa" ${filtroFin.tipoLanc==='despesa'?'selected':''}>➖ Despesas</option>
+        </select>
+        <select class="filtro" id="fPeriodoLanc" title="Período">
+          <option value="todos" ${filtroFin.periodo==='todos'?'selected':''}>Período: tudo</option>
+          <option value="mes" ${filtroFin.periodo==='mes'?'selected':''}>Este mês</option>
+          <option value="30" ${filtroFin.periodo==='30'?'selected':''}>Últimos 30 dias</option>
+          <option value="ano" ${filtroFin.periodo==='ano'?'selected':''}>Este ano</option>
+        </select>
+      </div>
+      <div class="contagem" id="contLanc"></div>
+      <div class="lanc-lista" id="listaLanc"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:18px">
     <div class="card-h"><h2>📊 Recebido neste mês por forma de pagamento</h2></div>
     <div class="card-b">
       ${Object.keys(porForma).length ? Object.entries(porForma).sort((a,b)=>b[1]-a[1]).map(([f,v])=>`
@@ -5148,9 +5303,11 @@ function htmlFinanceiro(){
       : `<div class="vazio"><span class="big">💳</span>Nenhum pagamento registrado neste mês.</div>`}
     </div>
   </div>
-  <div class="toolbar" style="margin-top:16px">
+
+  <div class="card-h" style="padding-left:0"><h2>💰 Contas a receber (de orçamentos)</h2></div>
+  <div class="toolbar">
     <div class="busca"><input id="buscaFin" placeholder="Buscar por número, cliente..." value="${esc(filtroFin.busca)}"></div>
-    <select class="filtro" id="fStatusFin">
+    <select class="filtro" id="fStatusFin" title="Situação do título" aria-label="Filtrar por situação">
       <option value="todos">Todos</option>
       <option value="aberto" ${filtroFin.status==='aberto'?'selected':''}>Em aberto</option>
       <option value="parcial" ${filtroFin.status==='parcial'?'selected':''}>Parcial</option>
@@ -5160,16 +5317,56 @@ function htmlFinanceiro(){
   </div>
   <div class="contagem" id="contFin"></div>
   <div class="tabela-wrap"><table>
-    <thead><tr><th>Orçamento</th><th>Cliente</th><th>Total</th><th>Recebido</th><th>Em aberto</th><th>Situação</th><th style="text-align:right">Ações</th></tr></thead>
+    <thead><tr><th>Orçamento</th><th>Vencimento</th><th>Total</th><th>Recebido</th><th>Em aberto</th><th>Situação</th><th style="text-align:right">Ações</th></tr></thead>
     <tbody id="tabelaFin"></tbody>
   </table></div>`;
+}
+function listaLancFiltrada(){
+  const q = String(filtroFin.buscaLanc||'').trim().toLowerCase();
+  return lancamentosPeriodo(filtroFin.periodo||'todos').filter(l=>{
+    if(filtroFin.tipoLanc && filtroFin.tipoLanc!=='todos' && l.tipo!==filtroFin.tipoLanc) return false;
+    if(!q) return true;
+    return [l.descricao, l.categoria, l.obs, l.forma].some(v=>String(v||'').toLowerCase().includes(q));
+  }).sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')));
+}
+function lancamentosHTML(){
+  const l = listaLancFiltrada();
+  if(!l.length) return `<div class="vazio"><span class="big">🧾</span>Nenhum lançamento${(filtroFin.buscaLanc||filtroFin.tipoLanc&&filtroFin.tipoLanc!=='todos')?' com esses filtros':' ainda'}.<br>Use os botões acima para lançar uma receita ou despesa.</div>`;
+  return l.map(x=>{
+    const rec = x.tipo==='receita';
+    return `<div class="lanc-linha ${rec?'rec':'desp'}">
+      <span class="lanc-sinal">${rec?'➕':'➖'}</span>
+      <div class="lanc-info">
+        <div class="nm">${esc(x.descricao||'—')}</div>
+        <div class="mt">${fmtData(x.data)}${x.categoria?' · '+esc(x.categoria):''}${x.forma?' · '+esc(x.forma):''}${x.obs?' · '+esc(x.obs):''}</div>
+      </div>
+      <div class="lanc-val">${rec?'+':'−'} ${brl(valorLanc(x))}</div>
+      <div class="lanc-acoes">
+        <button class="icon-btn" title="Editar" data-act="fin-lanc-editar" data-id="${x.id}">✏️</button>
+        <button class="icon-btn del" title="Excluir" data-act="fin-lanc-excluir" data-id="${x.id}">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+function atualizarListaLanc(){
+  const el = document.getElementById('listaLanc'); if(!el) return;
+  el.innerHTML = lancamentosHTML();
+  const c = document.getElementById('contLanc');
+  if(c) c.textContent = `${listaLancFiltrada().length} lançamento(s)`;
 }
 function ligarFinanceiro(){
   const b = document.getElementById('buscaFin');
   if(b) b.addEventListener('input', ()=>{ filtroFin.busca=b.value; atualizarTabelaFin(); });
   const f = document.getElementById('fStatusFin');
   if(f) f.addEventListener('change', e=>{ filtroFin.status=e.target.value; atualizarTabelaFin(); });
+  const bl = document.getElementById('buscaLanc');
+  if(bl) bl.addEventListener('input', ()=>{ filtroFin.buscaLanc=bl.value; atualizarListaLanc(); });
+  const ft = document.getElementById('fTipoLanc');
+  if(ft) ft.addEventListener('change', e=>{ filtroFin.tipoLanc=e.target.value; atualizarListaLanc(); });
+  const fp = document.getElementById('fPeriodoLanc');
+  if(fp) fp.addEventListener('change', e=>{ filtroFin.periodo=e.target.value; render(); });
   atualizarTabelaFin();
+  atualizarListaLanc();
 }
 function listaFinFiltrada(){
   const q = filtroFin.busca.trim().toLowerCase();
@@ -5199,7 +5396,7 @@ function tabelaFinHTML(){
       <td>${esc(o.vencimento||o.validade?fmtData(o.vencimento||o.validade):'—')} ${venc?'<span class="selo venc">vencido</span>':''}</td>
       <td class="vl-total">${brl(tot)}</td>
       <td>${brl(pg)}</td>
-      <td style="font-weight:700;color:${ab>0?'var(--erro)':'var(--ok)'}">${brl(ab)}</td>
+      <td style="font-weight:700;color:${ab>0?'#b91c1c':'#15803d'}">${brl(ab)}</td>
       <td><span class="mini">${rot}</span></td>
       <td><div class="acoes">
         ${st!=='pago'?`<button class="icon-btn" title="Registrar pagamento" data-act="fin-pagar" data-id="${o.id}">💵</button>`:''}
