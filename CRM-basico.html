@@ -177,6 +177,24 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .op-card p{font-size:12.8px;color:var(--suave);line-height:1.55;margin-bottom:12px}
 .nota-rodape{margin-top:18px;font-size:12.5px;color:var(--suave);background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;line-height:1.6}
 
+/* ---------- Relatórios ---------- */
+.rel-filtros{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);padding:16px;box-shadow:var(--sombra);margin-bottom:12px}
+.rel-acoes{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.rel-chart{display:flex;align-items:flex-end;gap:8px;height:170px;padding:10px 4px 0;overflow-x:auto}
+.rel-bar-wrap{flex:1;min-width:34px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+.rel-bar{width:100%;max-width:46px;background:linear-gradient(180deg,#3b82f6,#2563eb);border-radius:6px 6px 0 0;transition:height .3s ease}
+.rel-bar-lbl{font-size:10.5px;color:var(--suave);margin-top:6px;white-space:nowrap}
+.rel-chart-base{margin-top:8px;font-size:12.5px;color:var(--suave)}
+.rel-duas{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:820px){ .rel-duas{grid-template-columns:1fr} }
+.rel-lista{display:flex;flex-direction:column;gap:2px}
+.rel-linha{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--borda);font-size:13px}
+.rel-linha:last-child{border-bottom:0}
+.rel-pos{width:22px;height:22px;flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;background:var(--prim-cl);color:var(--prim);border-radius:50%;font-size:11.5px;font-weight:800}
+.rel-nome{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rel-qtd{font-size:11.8px;color:var(--suave);white-space:nowrap}
+.rel-valor{white-space:nowrap}
+
 /* ---------- Toast ---------- */
 #toast{position:fixed;bottom:22px;right:22px;display:flex;flex-direction:column;gap:9px;z-index:80}
 .toast{background:#0f172a;color:#fff;padding:12px 18px;border-radius:10px;font-size:13.5px;font-weight:500;box-shadow:0 10px 30px rgba(15,23,42,.35);animation:slide .25s ease;display:flex;gap:9px;align-items:center;max-width:340px}
@@ -190,13 +208,13 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .link-btn{color:var(--prim);font-weight:600;font-size:12.5px}
 .link-btn:hover{text-decoration:underline}
 .itens-wrap{overflow-x:auto;border:1px solid var(--borda);border-radius:10px;background:#fff}
-table.itens{min-width:660px}
+table.itens{min-width:790px}
 table.itens th{padding:9px 10px;font-size:11px}
 table.itens td{padding:7px 8px;vertical-align:middle}
 table.itens input,table.itens select{width:100%;padding:7px 9px;border:1px solid var(--borda);border-radius:8px;outline:none;background:#fff;min-width:0}
 table.itens input:focus,table.itens select:focus{border-color:var(--prim);box-shadow:0 0 0 3px var(--prim-cl)}
 table.itens .num{text-align:right;white-space:nowrap}
-.col-qtd{width:76px}.col-unit{width:112px}.col-tot{width:112px}.col-rm{width:42px}
+.col-qtd{width:76px}.col-unit{width:112px}.col-tot{width:112px}.col-rm{width:42px}.col-desc-item{width:130px}
 .val-total{font-weight:750;font-size:13.2px}
 .totais{display:flex;justify-content:flex-end;gap:24px;margin-top:6px;flex-wrap:wrap;align-items:baseline}
 .totais .linha{font-size:13.3px;color:var(--suave)}
@@ -336,6 +354,7 @@ table.itens .num{text-align:right;white-space:nowrap}
       <button class="nav-item" data-view="clientes"><span class="ico">👥</span><span>Clientes</span></button>
       <button class="nav-item" data-view="funil"><span class="ico">🗂️</span><span>Funil</span></button>
       <button class="nav-item" data-view="orcamentos"><span class="ico">🧾</span><span>Orçamentos</span></button>
+      <button class="nav-item" data-view="relatorios"><span class="ico">📈</span><span>Relatórios</span></button>
       <button class="nav-item" data-view="agenda"><span class="ico">⏰</span><span>Agenda</span><span class="pill" id="pillAgenda" style="display:none">0</span></button>
       <button class="nav-item" data-view="dados"><span class="ico">💾</span><span>Dados</span></button>
     </nav>
@@ -393,6 +412,7 @@ const TITULOS = {
   clientes:['Clientes','Cadastro e acompanhamento dos seus clientes'],
   funil:['Funil de vendas','Arraste os clientes entre as etapas'],
   orcamentos:['Orçamentos','Crie orçamentos com produtos, totais e impressão'],
+  relatorios:['Relatórios','Faturamento, orçamentos e ranking de itens'],
   agenda:['Agenda de follow-ups','Contatos que precisam da sua atenção'],
   dados:['Dados','Backup, importação e configurações']
 };
@@ -1111,8 +1131,19 @@ function listaOrcamentos(){ return db.orcamentos || (db.orcamentos=[]); }
 function listaProdutos(){ return db.produtos || (db.produtos=[]); }
 function buscarOrc(id){ return listaOrcamentos().find(o=>o.id===id); }
 function buscarProd(id){ return listaProdutos().find(p=>p.id===id); }
-function subtotalOrc(o){ return (o.itens||[]).reduce((s,i)=>s+(Number(i.qtd)||0)*(Number(i.unit)||0),0); }
-function totalOrc(o){ return Math.max(0, subtotalOrc(o) - (Number(o.desconto)||0)); }
+function itemBruto(i){ return (Number(i.qtd)||0)*(Number(i.unit)||0); }
+function itemDescV(i){
+  const bruto = itemBruto(i);
+  const d = Number(i.descItem)||0;
+  if(!d) return 0;
+  return i.descTipo==='%' ? bruto*(d/100) : Math.min(bruto, d);
+}
+function itemTotal(i){ return Math.max(0, itemBruto(i) - itemDescV(i)); }
+function subtotalBrutoOrc(o){ return (o.itens||[]).reduce((s,i)=>s+itemBruto(i),0); }
+function descItensOrc(o){ return (o.itens||[]).reduce((s,i)=>s+itemDescV(i),0); }
+function subtotalOrc(o){ return (o.itens||[]).reduce((s,i)=>s+itemTotal(i),0); }
+function freteOrc(o){ return Math.max(0, Number(o.frete)||0); }
+function totalOrc(o){ return Math.max(0, subtotalOrc(o) + freteOrc(o) - (Number(o.desconto)||0)); }
 function nomeClienteOrc(o){
   const c = buscarCli(o.clienteId);
   return c ? c.nome : (o.clienteNome || 'Cliente removido');
@@ -1122,7 +1153,7 @@ function novoNumeroOrc(){
   db.seqOrc = n;
   return 'ORC-' + new Date().getFullYear() + '-' + String(n).padStart(4,'0');
 }
-function novoItemOrc(){ return {id:uid(), produtoId:'', desc:'', qtd:1, unit:0}; }
+function novoItemOrc(){ return {id:uid(), produtoId:'', desc:'', qtd:1, unit:0, descItem:0, descTipo:'%'}; }
 
 /* Resumo financeiro do cliente em orçamentos */
 function resumoOrcCliente(clienteId){
@@ -1144,8 +1175,12 @@ function textoProntoOrc(o){
   linhas.push(`Segue o orçamento *${o.numero}* no valor total de *${brl(totalOrc(o))}*:`);
   linhas.push('');
   const itens = (o.itens||[]).slice(0,8);
-  itens.forEach(i=>linhas.push(`• ${i.desc} — ${Number(i.qtd)||0} × ${brl(i.unit)} = ${brl((Number(i.qtd)||0)*(Number(i.unit)||0))}`));
+  itens.forEach(i=>{
+    const dv = itemDescV(i);
+    linhas.push(`• ${i.desc} — ${Number(i.qtd)||0} × ${brl(i.unit)}${dv>0?` (− desc. ${brl(dv)})`:''} = ${brl(itemTotal(i))}`);
+  });
   if((o.itens||[]).length>8) linhas.push(`• ... e mais ${o.itens.length-8} item(ns)`);
+  if(freteOrc(o)>0) linhas.push(`• Frete/instalação: + ${brl(freteOrc(o))}`);
   if((Number(o.desconto)||0)>0) linhas.push(`• Desconto: − ${brl(o.desconto)}`);
   linhas.push('');
   if(o.validade) linhas.push(`Validade: até ${fmtData(o.validade)}.`);
@@ -1259,6 +1294,7 @@ function render(){
   else if(view==='clientes'){ el.innerHTML = htmlClientes(); ligarClientes(); }
   else if(view==='funil') el.innerHTML = htmlFunil();
   else if(view==='orcamentos'){ el.innerHTML = htmlOrcamentos(); ligarOrcamentos(); }
+  else if(view==='relatorios'){ el.innerHTML = htmlRelatorios(); ligarRelatorios(); }
   else if(view==='agenda') el.innerHTML = htmlAgenda();
   else if(view==='dados'){ el.innerHTML = htmlDados(); ligarDados(); }
   /* mantém os indicadores de nuvem em dia após redesenhar a tela */
@@ -1956,12 +1992,22 @@ function opcoesProduto(sel){
     + `<option value="__novo">＋ Novo produto / serviço...</option>`;
 }
 function itemOrcHTML(it){
+  const dv = itemDescV(it);
   return `<tr data-item="${it.id}">
     <td><select data-campo="produto">${opcoesProduto(it.produtoId)}</select></td>
     <td><input data-campo="desc" maxlength="160" value="${esc(it.desc)}" placeholder="Descrição do item"></td>
     <td class="col-qtd"><input data-campo="qtd" type="number" min="0" step="0.01" value="${Number(it.qtd)||0}"></td>
     <td class="col-unit"><input data-campo="unit" type="number" min="0" step="0.01" value="${Number(it.unit)||0}"></td>
-    <td class="col-tot num val-total" data-tot>${brl((Number(it.qtd)||0)*(Number(it.unit)||0))}</td>
+    <td class="col-desc-item">
+      <div style="display:flex;gap:4px;align-items:center">
+        <input data-campo="descItem" type="number" min="0" step="0.01" value="${Number(it.descItem)||0}" style="min-width:0;flex:1" title="Desconto neste item">
+        <select data-campo="descTipo" title="Tipo de desconto" style="width:52px;flex:0 0 auto">
+          <option value="%" ${(it.descTipo||'%')==='%'?'selected':''}>%</option>
+          <option value="R$" ${it.descTipo==='R$'?'selected':''}>R$</option>
+        </select>
+      </div>
+    </td>
+    <td class="col-tot num val-total" data-tot>${brl(itemTotal(it))}${dv>0?`<div class="mt" style="color:var(--erro)">− ${brl(dv)}</div>`:''}</td>
     <td class="col-rm"><button type="button" class="icon-btn del" data-rm-item title="Remover item">🗑</button></td>
   </tr>`;
 }
@@ -1972,7 +2018,7 @@ function formOrcamento(id){
   if(id && !o) return;
   const v = o ? JSON.parse(JSON.stringify(o)) : {
     id:null, numero:'', clienteId:'', clienteNome:'', data:hojeISO(),
-    validade:'', status:'rascunho', desconto:0, obs:'', itens:[]
+    validade:'', status:'rascunho', desconto:0, frete:0, obs:'', itens:[]
   };
   if(!Array.isArray(v.itens) || !v.itens.length) v.itens = [novoItemOrc()];
 
@@ -2025,6 +2071,7 @@ function formOrcamento(id){
                 <thead><tr>
                   <th>Produto / serviço</th><th>Descrição</th>
                   <th class="col-qtd num">Qtd</th><th class="col-unit num">Valor unit. R$</th>
+                  <th class="col-desc-item num">Desc. item</th>
                   <th class="col-tot num">Total</th><th class="col-rm"></th>
                 </tr></thead>
                 <tbody id="itensTbody">${v.itens.map(itemOrcHTML).join('')}</tbody>
@@ -2050,11 +2097,17 @@ function formOrcamento(id){
             </div>
 
             <div class="totais">
-              <span class="linha">Subtotal: <b id="tSub">—</b></span>
-              <span class="linha">Desconto: <b id="tDesc">—</b></span>
+              <span class="linha">Subtotal bruto: <b id="tSubBruto">—</b></span>
+              <span class="linha">Desc. itens: <b id="tDescItens">—</b></span>
+              <span class="linha">Frete/instalação: <b id="tFrete">—</b></span>
+              <span class="linha">Desconto geral: <b id="tDesc">—</b></span>
               <span class="linha geral">Total: <b id="tTot">—</b></span>
             </div>
           </div>
+
+          <div class="subtitulo">🚚 Frete e desconto geral</div>
+          <div class="campo"><label>Frete / deslocamento / instalação (R$)</label><input type="number" name="frete" min="0" step="0.01" value="${Number(v.frete)||0}"></div>
+          <div class="campo"><label>Desconto geral (R$)</label><input type="number" name="desconto" min="0" step="0.01" value="${Number(v.desconto)||0}"></div>
 
           <div class="subtitulo">📝 Observações e condições</div>
           <div class="campo full"><textarea name="obs" maxlength="2000" placeholder="Ex.: Prazo de entrega: 15 dias corridos. Pagamento: 50% na assinatura e 50% na entrega. Garantia de 90 dias.">${esc(v.obs||'')}</textarea></div>
@@ -2072,13 +2125,18 @@ function formOrcamento(id){
 
   const tbody = document.getElementById('itensTbody');
   const descontoEl = modal.querySelector('[name="desconto"]');
+  const freteEl = modal.querySelector('[name="frete"]');
 
   function atualizarTotais(){
-    const sub = v.itens.reduce((s,i)=>s+(Number(i.qtd)||0)*(Number(i.unit)||0),0);
+    const bruto = v.itens.reduce((s,i)=>s+itemBruto(i),0);
+    const descItens = v.itens.reduce((s,i)=>s+itemDescV(i),0);
+    const frete = Math.max(0, Number(freteEl.value)||0);
     const desc = Math.max(0, Number(descontoEl.value)||0);
-    document.getElementById('tSub').textContent = brl(sub);
-    document.getElementById('tDesc').textContent = brl(desc);
-    document.getElementById('tTot').textContent = brl(Math.max(0, sub-desc));
+    document.getElementById('tSubBruto').textContent = brl(bruto);
+    document.getElementById('tDescItens').textContent = descItens>0 ? '− '+brl(descItens) : brl(0);
+    document.getElementById('tFrete').textContent = frete>0 ? '+ '+brl(frete) : brl(0);
+    document.getElementById('tDesc').textContent = desc>0 ? '− '+brl(desc) : brl(0);
+    document.getElementById('tTot').textContent = brl(Math.max(0, bruto - descItens + frete - desc));
   }
   function lerItem(tr){
     const it = v.itens.find(x=>x.id===tr.dataset.item);
@@ -2086,6 +2144,9 @@ function formOrcamento(id){
     it.desc = tr.querySelector('[data-campo="desc"]').value;
     it.qtd = Math.max(0, Number(tr.querySelector('[data-campo="qtd"]').value)||0);
     it.unit = Math.max(0, Number(tr.querySelector('[data-campo="unit"]').value)||0);
+    it.descItem = Math.max(0, Number(tr.querySelector('[data-campo="descItem"]').value)||0);
+    const tSel = tr.querySelector('[data-campo="descTipo"]');
+    it.descTipo = tSel ? tSel.value : '%';
     return it;
   }
   function repintarItens(){
@@ -2097,11 +2158,13 @@ function formOrcamento(id){
     const tr = e.target.closest('tr[data-item]'); if(!tr) return;
     if(e.target.dataset.campo==='desc') tr.dataset.previa = '0';
     const it = lerItem(tr); if(!it) return;
-    tr.querySelector('[data-tot]').textContent = brl(it.qtd*it.unit);
+    const dv = itemDescV(it);
+    tr.querySelector('[data-tot]').innerHTML = brl(itemTotal(it)) + (dv>0?`<div class="mt" style="color:var(--erro)">− ${brl(dv)}</div>`:'');
     atualizarTotais();
   });
   tbody.addEventListener('change', e=>{
     const tr = e.target.closest('tr[data-item]'); if(!tr) return;
+    if(e.target.dataset.campo==='descTipo'){ const it=lerItem(tr); if(it){ const dv=itemDescV(it); tr.querySelector('[data-tot]').innerHTML = brl(itemTotal(it)) + (dv>0?`<div class="mt" style="color:var(--erro)">− ${brl(dv)}</div>`:''); atualizarTotais(); } return; }
     const sel = e.target.closest('[data-campo="produto"]'); if(!sel) return;
     const it = lerItem(tr); if(!it) return;
     if(sel.value==='__novo'){
@@ -2120,7 +2183,7 @@ function formOrcamento(id){
       }
       it.unit = Math.max(0, Number(p.preco)||0);
       tr.querySelector('[data-campo="unit"]').value = it.unit;
-      tr.querySelector('[data-tot]').textContent = brl(it.qtd*it.unit);
+      tr.querySelector('[data-tot]').innerHTML = brl(itemTotal(it));
       atualizarTotais();
     }
   });
@@ -2142,6 +2205,7 @@ function formOrcamento(id){
   };
 
   descontoEl.addEventListener('input', atualizarTotais);
+  freteEl.addEventListener('input', atualizarTotais);
 
   /* Cadastro rápido de cliente */
   const painelCli = document.getElementById('cliRapido');
@@ -2221,7 +2285,8 @@ function formOrcamento(id){
     if(!clienteId){ toast('Selecione ou cadastre um cliente.','erro'); return; }
     const itens = v.itens.filter(i=>String(i.desc||'').trim()!=='')
       .map(i=>({id:i.id||uid(), produtoId:i.produtoId||'', desc:String(i.desc).trim(),
-                qtd:Math.max(0,Number(i.qtd)||0), unit:Math.max(0,Number(i.unit)||0)}));
+                qtd:Math.max(0,Number(i.qtd)||0), unit:Math.max(0,Number(i.unit)||0),
+                descItem:Math.max(0,Number(i.descItem)||0), descTipo:(i.descTipo==='R$'?'R$':'%')}));
     if(!itens.length){ toast('Adicione ao menos um item ao orçamento.','erro'); return; }
     const dados = {
       clienteId,
@@ -2230,6 +2295,7 @@ function formOrcamento(id){
       validade: String(f.get('validade')||''),
       status: String(f.get('status')||'rascunho'),
       desconto: Math.max(0, Number(f.get('desconto'))||0),
+      frete: Math.max(0, Number(f.get('frete'))||0),
       obs: String(f.get('obs')||'').trim(),
       itens
     };
@@ -2247,7 +2313,6 @@ function orcDocHTML(o){
   const em = db.emissor || emissorVazio();
   const cli = buscarCli(o.clienteId);
   const st = statusOrc(o.status);
-  const sub = subtotalOrc(o);
   const desc = Math.max(0, Number(o.desconto)||0);
   const temEm = em.nome || em.telefone || em.email || em.endereco;
   return `
@@ -2293,18 +2358,20 @@ function orcDocHTML(o){
       <thead><tr><th>Descrição</th><th class="num-c">Qtd</th><th class="num-c">Valor unit.</th><th class="num-c">Total</th></tr></thead>
       <tbody>
         ${(o.itens||[]).map(i=>`<tr>
-          <td>${esc(i.desc||'—')}</td>
+          <td>${esc(i.desc||'—')}${itemDescV(i)>0?`<div style="color:#ef4444;font-size:11.5px">desconto: − ${brl(itemDescV(i))}${i.descTipo==='%'?` (${Number(i.descItem)||0}%)`:''}</div>`:''}</td>
           <td class="num-c">${Number(i.qtd)||0}</td>
           <td class="num-c">${brl(i.unit)}</td>
-          <td class="num-c">${brl((Number(i.qtd)||0)*(Number(i.unit)||0))}</td>
+          <td class="num-c">${brl(itemTotal(i))}</td>
         </tr>`).join('')}
       </tbody>
     </table>
 
     <div style="margin-top:9px">
-      <div class="tot-line"><span>Subtotal</span><b>${brl(sub)}</b></div>
-      ${desc>0?`<div class="tot-line"><span>Desconto</span><b>− ${brl(desc)}</b></div>`:''}
-      <div class="tot-line geral"><span>TOTAL</span><b>${brl(Math.max(0,sub-desc))}</b></div>
+      <div class="tot-line"><span>Subtotal</span><b>${brl(subtotalBrutoOrc(o))}</b></div>
+      ${descItensOrc(o)>0?`<div class="tot-line"><span>Descontos nos itens</span><b>− ${brl(descItensOrc(o))}</b></div>`:''}
+      ${freteOrc(o)>0?`<div class="tot-line"><span>Frete / instalação</span><b>+ ${brl(freteOrc(o))}</b></div>`:''}
+      ${desc>0?`<div class="tot-line"><span>Desconto geral</span><b>− ${brl(desc)}</b></div>`:''}
+      <div class="tot-line geral"><span>TOTAL</span><b>${brl(totalOrc(o))}</b></div>
     </div>
 
     ${o.obs?`<div class="obs"><b>Observações e condições:</b><br>${esc(o.obs)}</div>`:''}
@@ -2361,6 +2428,237 @@ function excluirOrc(id){
   if(!confirm(`Excluir o orçamento ${o.numero}? Essa ação não pode ser desfeita.`)) return;
   db.orcamentos = listaOrcamentos().filter(x=>x.id!==id);
   salvar(); render(); toast('Orçamento excluído.');
+}
+
+/* =========================================================
+   RELATÓRIOS
+   ========================================================= */
+let relFiltro = { ini:'', fim:'', status:'todos', cliente:'todos' };
+
+function relOrcamentosFiltrados(){
+  const { ini, fim, status, cliente } = relFiltro;
+  return listaOrcamentos().filter(o=>{
+    if(status!=='todos' && o.status!==status) return false;
+    if(cliente!=='todos' && o.clienteId!==cliente) return false;
+    const d = String(o.data||'').slice(0,10);
+    if(ini && d < ini) return false;
+    if(fim && d > fim) return false;
+    return true;
+  });
+}
+function htmlRelatorios(){
+  const os = relOrcamentosFiltrados();
+  const todos = listaOrcamentos();
+  const total = os.reduce((s,o)=>s+totalOrc(o),0);
+  const aprov = os.filter(o=>o.status==='aprovado');
+  const totalAprov = aprov.reduce((s,o)=>s+totalOrc(o),0);
+  const ticket = aprov.length ? totalAprov/aprov.length : 0;
+  const taxa = os.length ? Math.round(aprov.length/os.length*100) : 0;
+
+  /* Faturamento por mês (aprovados), últimos 12 meses */
+  const meses = {};
+  const base = new Date();
+  for(let k=11;k>=0;k--){
+    const d = new Date(base.getFullYear(), base.getMonth()-k, 1);
+    const chave = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    meses[chave] = {valor:0, qtd:0, label: d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','') + '/' + String(d.getFullYear()).slice(2)};
+  }
+  os.filter(o=>o.status==='aprovado').forEach(o=>{
+    const chave = String(o.data||'').slice(0,7);
+    if(meses[chave]){ meses[chave].valor += totalOrc(o); meses[chave].qtd++; }
+  });
+  const mesesArr = Object.keys(meses).map(k=>({...meses[k], chave:k}));
+  const maiorMes = Math.max(1, ...mesesArr.map(m=>m.valor));
+
+  /* Ranking de itens/serviços */
+  const rank = {};
+  os.forEach(o=>(o.itens||[]).forEach(i=>{
+    const nome = String(i.desc||'').trim();
+    if(!nome) return;
+    const chave = nome.toLowerCase();
+    if(!rank[chave]) rank[chave] = {nome, qtd:0, valor:0};
+    rank[chave].qtd += Number(i.qtd)||0;
+    rank[chave].valor += itemTotal(i);
+  }));
+  const ranking = Object.values(rank).sort((a,b)=>b.valor-a.valor).slice(0,12);
+
+  /* Totais por status */
+  const porStatus = STATUS_ORC.map(s=>{
+    const lista = os.filter(o=>o.status===s.id);
+    return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a+totalOrc(o),0) };
+  });
+
+  const opcoesStatus = ['<option value="todos">Todos os status</option>', ...STATUS_ORC.map(s=>`<option value="${s.id}" ${relFiltro.status===s.id?'selected':''}>${s.label}</option>`)].join('');
+  const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const opcoesCliente = ['<option value="todos">Todos os clientes</option>', ...clientes.map(c=>`<option value="${c.id}" ${relFiltro.cliente===c.id?'selected':''}>${esc(c.nome)}</option>`)].join('');
+
+  return `
+  <div class="rel-filtros">
+    <div class="campo"><label>De</label><input type="date" id="relIni" value="${esc(relFiltro.ini||'')}"></div>
+    <div class="campo"><label>Até</label><input type="date" id="relFim" value="${esc(relFiltro.fim||'')}"></div>
+    <div class="campo"><label>Status</label><select id="relStatus">${opcoesStatus}</select></div>
+    <div class="campo"><label>Cliente</label><select id="relCliente">${opcoesCliente}</select></div>
+    <div class="campo" style="justify-content:flex-end"><div style="display:flex;gap:8px">
+      <button class="btn ghost sm" data-act="rel-limpar">Limpar</button>
+      <button class="btn primary sm" data-act="rel-aplicar">Aplicar</button>
+    </div></div>
+  </div>
+  <div class="rel-acoes">
+    <button class="btn ghost sm" data-act="rel-print">🖨️ PDF / Imprimir</button>
+    <button class="btn ghost sm" data-act="rel-csv">⬇ Exportar CSV</button>
+  </div>
+
+  <div class="grid-stats">
+    ${stat('Orçamentos no filtro', os.length, '🧾')}
+    ${stat('Valor total', brl(total), '💰')}
+    ${stat('Aprovados', aprov.length, '✅')}
+    ${stat('Faturamento aprovado', brl(totalAprov), '📈')}
+    ${stat('Ticket médio (aprov.)', brl(ticket), '🎯')}
+    ${stat('Taxa de aprovação', taxa+'%', '📊')}
+  </div>
+
+  <div class="op-card" style="margin-bottom:16px">
+    <h4>📈 Faturamento por mês (orçamentos aprovados)</h4>
+    ${maiorMes>0 ? `<div class="rel-chart">${mesesArr.map(m=>`
+      <div class="rel-bar-wrap" title="${m.label}: ${brl(m.valor)} (${m.qtd})">
+        <div class="rel-bar" style="height:${Math.max(2, Math.round(m.valor/maiorMes*100))}%"></div>
+        <span class="rel-bar-lbl">${m.label}</span>
+      </div>`).join('')}</div>
+      <div class="rel-chart-base">Total no período: <b>${brl(mesesArr.reduce((s,m)=>s+m.valor,0))}</b></div>`
+    : `<div class="vazio"><span class="big">📈</span>Nenhum orçamento aprovado no período.<br>Aprove orçamentos para ver o faturamento.</div>`}
+  </div>
+
+  <div class="rel-duas">
+    <div class="op-card">
+      <h4>🏆 Ranking de itens e serviços</h4>
+      ${ranking.length ? `<div class="rel-lista">${ranking.map((p,ix)=>`
+        <div class="rel-linha">
+          <span class="rel-pos">${ix+1}</span>
+          <span class="rel-nome">${esc(p.nome)}</span>
+          <span class="rel-qtd">${p.qtd} un</span>
+          <b class="rel-valor">${brl(p.valor)}</b>
+        </div>`).join('')}</div>`
+      : `<div class="vazio"><span class="big">🏆</span>Sem itens no período.</div>`}
+    </div>
+
+    <div class="op-card">
+      <h4>📊 Resumo por status</h4>
+      <div class="rel-lista">${porStatus.map(s=>`
+        <div class="rel-linha">
+          <span class="badge" style="--c:${s.cor}">${s.label}</span>
+          <span class="rel-nome"></span>
+          <span class="rel-qtd">${s.qtd} orç.</span>
+          <b class="rel-valor">${brl(s.valor)}</b>
+        </div>`).join('')}</div>
+    </div>
+  </div>
+
+  <div class="op-card" style="margin-top:16px">
+    <h4>🧾 Orçamentos do período (${os.length})</h4>
+    ${os.length ? `<div class="rel-lista">${os.slice().sort((a,b)=>String(b.data).localeCompare(String(a.data))).map(o=>`
+      <div class="rel-linha">
+        <span class="rel-nome">${esc(o.numero||'')} · ${esc(nomeClienteOrc(o))}</span>
+        <span class="rel-qtd">${fmtData(o.data)}</span>
+        ${badgeOrc(o.status)}
+        <b class="rel-valor">${brl(totalOrc(o))}</b>
+      </div>`).join('')}</div>`
+    : `<div class="vazio"><span class="big">🧾</span>Nenhum orçamento no período.</div>`}
+  </div>
+
+  <div class="nota-rodape">
+    <b>Como usar:</b> filtre por período, status ou cliente e use <b>PDF / Imprimir</b> para gerar um relatório ou <b>CSV</b> para abrir no Excel/Google Sheets.
+  </div>`;
+}
+
+function ligarRelatorios(){
+  const ini = document.getElementById('relIni');
+  const fim = document.getElementById('relFim');
+  const st = document.getElementById('relStatus');
+  const cl = document.getElementById('relCliente');
+
+  document.querySelector('[data-act="rel-aplicar"]').onclick = ()=>{
+    relFiltro.ini = ini.value; relFiltro.fim = fim.value;
+    relFiltro.status = st.value; relFiltro.cliente = cl.value;
+    render();
+  };
+  document.querySelector('[data-act="rel-limpar"]').onclick = ()=>{
+    relFiltro = { ini:'', fim:'', status:'todos', cliente:'todos' };
+    render();
+  };
+  document.querySelector('[data-act="rel-print"]').onclick = imprimirRelatorio;
+  document.querySelector('[data-act="rel-csv"]').onclick = exportarRelatorioCSV;
+}
+
+function resumoRelatorio(){
+  const os = relOrcamentosFiltrados();
+  const total = os.reduce((s,o)=>s+totalOrc(o),0);
+  const aprov = os.filter(o=>o.status==='aprovado');
+  const totalAprov = aprov.reduce((s,o)=>s+totalOrc(o),0);
+  return { os, total, aprov, totalAprov,
+    ticket: aprov.length ? totalAprov/aprov.length : 0,
+    taxa: os.length ? Math.round(aprov.length/os.length*100) : 0 };
+}
+function imprimirRelatorio(){
+  const { os, total, aprov, totalAprov, ticket, taxa } = resumoRelatorio();
+  const em = db.emissor || emissorVazio();
+  const periodo = (relFiltro.ini||relFiltro.fim)
+    ? `${relFiltro.ini?fmtData(relFiltro.ini):'início'} até ${relFiltro.fim?fmtData(relFiltro.fim):'hoje'}`
+    : 'todo o período';
+  const esc2 = s=>String(s==null?'':s).replace(/[&<>]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+  const rows = os.slice().sort((a,b)=>String(b.data).localeCompare(String(a.data))).map(o=>`<tr>
+    <td>${esc2(o.numero||'')}</td>
+    <td>${esc2(nomeClienteOrc(o))}</td>
+    <td>${fmtData(o.data)}</td>
+    <td>${esc2(statusOrc(o.status).label)}</td>
+    <td style="text-align:right">${brl(totalOrc(o))}</td>
+  </tr>`).join('');
+  const area = document.getElementById('areaImpressao');
+  area.innerHTML = `<div class="orc-doc orc-print">
+    <div class="topo">
+      <div class="marca-doc">
+        <img class="doc-logo" src="${LOGO_DATA_URI}" alt="${esc2(MARCA_NOME)}">
+        <div class="marca-txt"><div style="font-size:16.5px;font-weight:800">${em.nome?esc2(em.nome):esc2(MARCA_NOME)}</div>${em.telefone?`<div>${esc2(em.telefone)}</div>`:''}${em.email?`<div>${esc2(em.email)}</div>`:''}</div>
+      </div>
+      <div class="emissor"><div class="num">RELATÓRIO</div><div style="color:#64748b;font-size:13px;margin-top:3px">Período: ${periodo}</div><div style="color:#64748b;font-size:13px">Gerado em ${fmtData(hojeISO())}</div></div>
+    </div>
+    <div class="duas">
+      <div class="bloco"><h4>Resumo</h4>
+        <div>Orçamentos: <b>${os.length}</b></div>
+        <div>Aprovados: <b>${aprov.length}</b> (${taxa}%)</div>
+        <div>Ticket médio: <b>${brl(ticket)}</b></div>
+      </div>
+      <div class="bloco" style="text-align:right"><h4>Valores</h4>
+        <div>Total dos orçamentos: <b>${brl(total)}</b></div>
+        <div>Faturamento aprovado: <b>${brl(totalAprov)}</b></div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Número</th><th>Cliente</th><th>Data</th><th>Status</th><th style="text-align:right">Total</th></tr></thead>
+      <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#64748b">Nenhum orçamento no período.</td></tr>'}</tbody>
+    </table>
+    <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())} · Relatório de orçamentos</div></div>
+  </div>`;
+  document.body.classList.add('imprimindo');
+  const limpar = ()=>{ document.body.classList.remove('imprimindo'); window.removeEventListener('afterprint', limpar); };
+  window.addEventListener('afterprint', limpar);
+  try{ window.print(); }catch(e){ toast('Não foi possível abrir a janela de impressão.','erro'); }
+  setTimeout(limpar, 1500);
+}
+function exportarRelatorioCSV(){
+  const { os } = resumoRelatorio();
+  if(!os.length){ toast('Nenhum orçamento no período para exportar.','erro'); return; }
+  const linhas = [];
+  linhas.push(['numero','cliente','data','validade','status','itens','subtotal','desconto_itens','frete','desconto_geral','total'].join(';'));
+  os.slice().sort((a,b)=>String(a.data).localeCompare(String(b.data))).forEach(o=>{
+    linhas.push([
+      csvEsc(o.numero||''), csvEsc(nomeClienteOrc(o)), o.data||'', o.validade||'', statusOrc(o.status).label,
+      (o.itens||[]).length,
+      subtotalBrutoOrc(o).toFixed(2), descItensOrc(o).toFixed(2), freteOrc(o).toFixed(2),
+      (Number(o.desconto)||0).toFixed(2), totalOrc(o).toFixed(2)
+    ].map(csvEsc).join(';'));
+  });
+  baixar(`relatorio-orcamentos-${hojeISO()}.csv`, linhas.join('\r\n'), 'text/csv;charset=utf-8');
+  toast('Relatório exportado em CSV.');
 }
 
 /* ---------- Catálogo de produtos ---------- */
