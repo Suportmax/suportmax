@@ -782,7 +782,6 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
     <nav class="nav">
       <button class="nav-item active" data-view="painel"><span class="ico">📊</span><span>Painel</span></button>
       <button class="nav-item" data-view="clientes"><span class="ico">👥</span><span>Clientes</span></button>
-      <button class="nav-item" data-view="funil"><span class="ico">🗂️</span><span>Funil</span></button>
       <button class="nav-item" data-view="ordens"><span class="ico">🛠️</span><span>Ordens de serviço</span><span class="pill" id="pillOS" style="display:none">0</span></button>
       <button class="nav-item" data-view="financeiro"><span class="ico">💰</span><span>Financeiro</span><span class="pill" id="pillFin" style="display:none">0</span></button>
       <button class="nav-item" data-view="contratos"><span class="ico">🔁</span><span>Contratos</span><span class="pill" id="pillContrato" style="display:none">0</span></button>
@@ -858,7 +857,6 @@ function stageNormal(id){ return STAGE_APELIDOS[id] || id; }
 const TITULOS = {
   painel:['Painel','Visão geral do seu negócio'],
   clientes:['Clientes','Cadastro e acompanhamento dos seus clientes'],
-  funil:['Funil de vendas','Acompanhe cada negociação, o valor em jogo e o próximo contato'],
   orcamentos:['Orçamentos','Crie orçamentos com produtos, totais e impressão'],
   ordens:['Ordens de serviço','Acompanhe a execução dos serviços aprovados'],
   financeiro:['Financeiro','Contas a receber, pagamentos e fluxo de caixa'],
@@ -2290,14 +2288,8 @@ function render(){
     btnNovo.textContent = '＋ Novo cliente';
     btnNovo.onclick = ()=>formCliente(null);
   }
-
-  const el = document.getElementById('view');
-  if(view==='orcamentos'){ estado.view='ordens'; view='ordens'; salvarPrefs(); }
-  if(view==='painel') el.innerHTML = htmlPainel();
-  else if(view==='clientes'){ el.innerHTML = htmlClientes(); ligarClientes(); }
-  else if(view==='funil'){ el.innerHTML = htmlFunil(); ligarFunil(); }
-  else if(view==='orcamentos'){ el.innerHTML = htmlOrcamentos(); ligarOrcamentos(); }
-  else if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
+  if(view==='funil'){ estado.view='painel'; view='painel'; salvarPrefs(); }
+  if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
   else if(view==='financeiro'){ el.innerHTML = htmlFinanceiro(); ligarFinanceiro(); }
   else if(view==='contratos'){ el.innerHTML = htmlContratos(); ligarContratos(); }
   else if(view==='mensagens'){ el.innerHTML = htmlMensagens(); ligarMensagens(); }
