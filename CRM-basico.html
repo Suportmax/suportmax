@@ -2483,6 +2483,11 @@ function resumoMensalCard(){
   const pct = meta>0 ? Math.min(100, Math.round(fatMes/meta*100)) : 0;
   const fupMes = agendaPendentes().filter(c=>String(c.followup.data).slice(0,7)===mes).length;
   const osMes = listaOrdens().filter(o=>String(o.criadoEm||o.data||'').slice(0,7)===mes).length;
+  const hojeIso = hojeISO();
+  const osVencidas = listaOrdens().filter(o=>o.prazo && o.prazo < hojeIso && !['concluida','vendida','cancelada'].includes(o.status)).length;
+  const osVencerHoje = listaOrdens().filter(o=>o.prazo === hojeIso && !['concluida','vendida','cancelada'].includes(o.status)).length;
+  const produtos = listaProdutos();
+  const estoqueBaixo = produtos.filter(p=>p.estoqueControlado && Number(p.estoque)||0 <= Number(p.estoqueMinimo)||0 && (Number(p.estoqueMinimo)||0)>=0).slice(0,5);
   const mrrV = mrr();
   return `<div class="card" style="margin-bottom:18px">
     <div class="card-h"><h2>📆 Resumo de ${new Date().toLocaleDateString('pt-BR',{month:'long', year:'numeric'})}</h2>
@@ -2496,6 +2501,11 @@ function resumoMensalCard(){
         <div class="mini-stat"><div class="ml">Ordens abertas no mês</div><div class="mv">${osMes}</div></div>
         <div class="mini-stat"><div class="ml">Receita recorrente (MRR)</div><div class="mv">${brl(mrrV)}</div></div>
       </div>
+      ${(osVencidas>0||osVencerHoje>0||estoqueBaixo.length)?`<div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+        ${osVencidas>0?`<button class="btn sm danger" data-go="ordens"><span style="font-weight:800">🚨 ${osVencidas}</span> OS vencida(s)</button>`:''}
+        ${osVencerHoje>0?`<button class="btn sm ghost" style="background:#fffbeb;border-color:#fde68a" data-go="ordens"><span style="font-weight:800;color:#b45309">⏰ ${osVencerHoje}</span> OS vencem hoje</button>`:''}
+        ${estoqueBaixo.length?`<button class="btn sm ghost" style="background:#fef2f2;border-color:#fecaca" data-go="catalogo"><span style="font-weight:800;color:#b91c1c">📦 ${estoqueBaixo.length}</span> produto(s) com estoque baixo</button>`:''}
+      </div>`:''}
       ${meta>0?`<div style="margin-top:14px">
         <div style="display:flex;justify-content:space-between;font-size:12.6px;margin-bottom:5px">
           <span>Meta do mês: <b>${brl(meta)}</b></span><span>${pct}% atingido</span></div>
