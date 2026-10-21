@@ -374,6 +374,25 @@ body.tema-escuro table td,body.tema-escuro table th{border-color:var(--borda)}
 body.tema-escuro .fup-pill.sem{background:#16233a;color:#93c5fd}
 body.tema-escuro .fup-pill.hoje{background:#2a2410;color:#fcd34d}
 body.tema-escuro .fup-pill.venc{background:#2a1215;color:#fca5a5}
+/* Superfícies interativas que também aparecem dentro de formulários e menus. */
+body.tema-escuro .btn.ghost,
+body.tema-escuro .busca-global input,
+body.tema-escuro .busca-resultados,
+body.tema-escuro .menu-pop,
+body.tema-escuro .prod-pick,
+body.tema-escuro .picker-busca,
+body.tema-escuro .chip,
+body.tema-escuro .pick-item,
+body.tema-escuro .cal-dia,
+body.tema-escuro .cal-nav,
+body.tema-escuro .tk-check{background:var(--painel);color:var(--texto);border-color:var(--borda)}
+body.tema-escuro .busca-resultados .br-item:hover,
+body.tema-escuro .menu-pop button:hover,
+body.tema-escuro .pick-item:hover,
+body.tema-escuro .linha-lista:hover{background:#17263d}
+body.tema-escuro .busca-resultados .br-ico{background:var(--prim-cl)}
+body.tema-escuro .th,body.tema-escuro th{background:#0f1b2e;color:var(--suave)}
+body.tema-escuro .ff-etapa.on,body.tema-escuro .td-h{background:#0f1b2e}
 
 /* ===== PWA / instalar ===== */
 .pwa-dica{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:12px;background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;font-size:13px;margin-bottom:14px}
@@ -822,10 +841,20 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
   .nav-item .ico{font-size:18px}
   .logo-img{max-width:200px}
 }
+@media(max-width:980px){
+  /* Busca e ações permanecem disponíveis sem ocupar a primeira linha do cabeçalho. */
+  .topbar{flex-wrap:wrap}
+  .topbar-actions{display:flex;flex:1 0 100%;width:100%;margin-left:0;flex-wrap:wrap;gap:7px;min-width:0}
+  .busca-global{flex:1 0 100%;min-width:0}
+  .busca-global input{width:100%;min-height:42px}
+  .busca-resultados{left:0;right:auto;width:min(420px,92vw)}
+  .topbar-actions .btn{min-height:40px}
+}
 @media (max-width:560px){
-  .topbar-actions{gap:6px}
+  .topbar-actions{gap:6px;flex-wrap:wrap;overflow:visible;padding-bottom:2px}
+  .busca-global{flex:1 0 100%;margin-right:0}
   .topbar-actions .btn{padding:8px 11px;font-size:12.5px}
-  .topbar-actions .btn.only-desktop{display:none}
+  .topbar-actions .btn.only-desktop{display:inline-flex}
   .view{padding:14px 11px 50px}
   .topbar h1{font-size:17px}
 }
@@ -871,7 +900,7 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
   .sidebar-user .u-mail{display:none}
 }
 .fab-novo{display:none;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));width:58px;height:58px;border-radius:50%;background:var(--prim);color:#fff;font-size:30px;box-shadow:0 12px 34px rgba(37,99,235,.4);align-items:center;justify-content:center;z-index:50}
-@media(max-width:980px){ .fab-novo{display:flex} .topbar-actions{display:none} }
+@media(max-width:980px){ .fab-novo{display:flex} }
 /* Botão que só aparece no celular (tema, por exemplo) */
 .only-mobile{display:none}
 @media(max-width:980px){ .only-mobile{display:inline-flex} }
@@ -938,7 +967,7 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
 
   <main class="main">
     <header class="topbar">
-      <button class="btn ghost menu-mobile" id="btnMenu" type="button" aria-label="Abrir menu" title="Menu">☰</button>
+      <button class="btn ghost menu-mobile" id="btnMenu" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="sidebar" title="Menu">☰</button>
       <div>
         <h1 id="viewTitle">Painel</h1>
         <div class="sub" id="viewSub">Visão geral do seu negócio</div>
@@ -2604,8 +2633,8 @@ document.querySelector('.nav').addEventListener('click', e=>{
   render();
 });
 /* ---------- Menu deslizante (celular) ---------- */
-function abrirMenu(){ document.body.classList.add('menu-aberto'); const b=document.getElementById('menuBackdrop'); if(b) b.classList.add('aberto'); }
-function fecharMenu(){ document.body.classList.remove('menu-aberto'); const b=document.getElementById('menuBackdrop'); if(b) b.classList.remove('aberto'); }
+function abrirMenu(){ document.body.classList.add('menu-aberto'); const b=document.getElementById('menuBackdrop'); if(b) b.classList.add('aberto'); const m=document.getElementById('btnMenu'); if(m){m.setAttribute('aria-expanded','true');m.setAttribute('aria-label','Fechar menu');} }
+function fecharMenu(){ document.body.classList.remove('menu-aberto'); const b=document.getElementById('menuBackdrop'); if(b) b.classList.remove('aberto'); const m=document.getElementById('btnMenu'); if(m){m.setAttribute('aria-expanded','false');m.setAttribute('aria-label','Abrir menu');} }
 (function ligarMenu(){
   const btn = document.getElementById('btnMenu');
   const bd = document.getElementById('menuBackdrop');
@@ -9284,6 +9313,8 @@ function aplicarMarca(){
 const SUPABASE_URL = 'https://rjjduwtjrncjyqexdbqz.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_ZQa1E-hZ0sYGgrnkth67fQ_xPPVe7Dt';
 const SUPABASE_NAO_CONFIGURADO = 'COLE_A_URL_DO_PROJETO';
+const KEY_MEMBRO_VALIDADO = 'suportmax_membro_validado_v1_';
+const VALIDADE_MEMBRO_OFFLINE = 30 * 24 * 60 * 60 * 1000;
 
 let crmClient = null;
 
@@ -9358,18 +9389,36 @@ function aplicarPermissoes(){
   document.querySelectorAll('[data-view="dados"], [data-view="catalogo"]').forEach(b=>{ b.style.display = comum ? 'none' : ''; });
   if(comum && (view==='dados' || view==='catalogo')) view = 'painel';
 }
+function membroValidadoOffline(user){
+  if(!user || navigator.onLine) return false;
+  try{
+    const validadoEm=Number(localStorage.getItem(KEY_MEMBRO_VALIDADO+user.id)||0);
+    return validadoEm>0 && Date.now()-validadoEm<VALIDADE_MEMBRO_OFFLINE;
+  }catch(e){ return false; }
+}
+function entrarEmModoOffline(user){
+  try{ selecionarDadosLocaisDoUsuario(user); }
+  catch(err){ mostrarLogin('Não foi possível abrir os dados locais desta conta: '+String(err&&err.message||err), 'error'); return false; }
+  db.role='comum';
+  aplicarPermissoes();
+  toast('Modo offline: dados locais disponíveis. A sincronização será retomada quando houver conexão.');
+  entrarNoApp(user);
+  return true;
+}
 /* Valida se a conta está autorizada (public.is_crm_member) e entra */
 async function validarEEntrar(user){
   let resp;
   try{
     resp = await crmClient.rpc('is_crm_member');
   }catch(err){
+    if(membroValidadoOffline(user) && entrarEmModoOffline(user)) return;
     await crmClient.auth.signOut();
     mostrarLogin('Não foi possível validar a autorização da conta: ' + (err && err.message ? err.message : err), 'error');
     return;
   }
   const { data: isMember, error } = resp;
   if(error){
+    if(membroValidadoOffline(user) && entrarEmModoOffline(user)) return;
     await crmClient.auth.signOut();
     const msg = (error.code === 'PGRST202')
       ? 'A configuração de autorização do CRM está incompleta no Supabase. Execute novamente todo o arquivo crm-schema.sql no SQL Editor e tente entrar outra vez.'
@@ -9382,6 +9431,7 @@ async function validarEEntrar(user){
     mostrarLogin('Esta conta não está autorizada a acessar o CRM.', 'error');
     return;
   }
+  try{ localStorage.setItem(KEY_MEMBRO_VALIDADO+user.id, String(Date.now())); }catch(e){}
   try{
     selecionarDadosLocaisDoUsuario(user);
   }catch(err){

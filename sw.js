@@ -4,7 +4,8 @@
    - Demais requisições do mesmo site: cache primeiro, atualizando em segundo plano.
    - Requisições para outros domínios (ex.: Supabase) nunca são interceptadas. */
 
-const CACHE = 'suportmax-crm-v22';
+const CACHE = 'suportmax-crm-v23';
+const SDK_SUPABASE = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 const ESSENCIAIS = ['./', './CRM-basico.html', './index.html', './manifest.webmanifest', './crm-icon.svg'];
 
 self.addEventListener('install', (e) => {
@@ -30,7 +31,8 @@ self.addEventListener('fetch', (e) => {
 
   let url;
   try { url = new URL(req.url); } catch (_) { return; }
-  if (url.origin !== self.location.origin) return;
+  const ehSdkSupabase = req.url === SDK_SUPABASE;
+  if (url.origin !== self.location.origin && !ehSdkSupabase) return;
 
   /* Navegação: tenta a rede, cai para o cache (abre offline) */
   if (req.mode === 'navigate') {
@@ -44,6 +46,20 @@ self.addEventListener('fetch', (e) => {
         .catch(() =>
           caches.match(req).then((r) => r || caches.match('./CRM-basico.html') || caches.match('./'))
         )
+    );
+    return;
+  }
+
+  /* Guarda o SDK após uma carga online para restaurar sessões já autenticadas offline. */
+  if (ehSdkSupabase) {
+    e.respondWith(
+      caches.match(SDK_SUPABASE).then((cacheado) => cacheado ||
+        fetch(req).then((resp) => {
+          const copia = resp.clone();
+          caches.open(CACHE).then((c) => c.put(SDK_SUPABASE, copia)).catch(() => {});
+          return resp;
+        }).catch(() => caches.match(SDK_SUPABASE))
+      )
     );
     return;
   }
