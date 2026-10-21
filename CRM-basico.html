@@ -5,6 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description" content="CRM Básico Suport Max: gestão de clientes, orçamentos, ordens de serviço, financeiro e catálogo de produtos para tecnologia da informação.">
 <meta name="theme-color" content="#0f172a">
+<!-- Cartão de compartilhamento (WhatsApp/LinkedIn): o cliente vê "ORÇAMENTO SUPORT MAX" e o link gigante fica escondido dentro do cartão -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="SUPORT MAX">
+<meta property="og:title" content="ORÇAMENTO SUPORT MAX">
+<meta property="og:description" content="Aceite ou recuse o seu orçamento.">
+<meta property="og:image" content="https://suportmax.github.io/suportmax/og-orcamento.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Orçamento Suport Max - aceite ou recuse">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ORÇAMENTO SUPORT MAX">
+<meta name="twitter:description" content="Aceite ou recuse o seu orçamento.">
+<meta name="twitter:image" content="https://suportmax.github.io/suportmax/og-orcamento.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f172a'/%3E%3Ctext x='50' y='58' font-size='44' text-anchor='middle' fill='%23fff' font-weight='700'%3ESM%3C/text%3E%3C/svg%3E">
 <title>CRM Suport Max</title>
 <style>
@@ -6447,7 +6460,12 @@ function orcParaLink(o){
     fr:freteOrc(o), dg:descGeralV(o), dgt:o.descGeralTipo||'R$', dgv:Number(o.desconto)||0, tt:totalOrc(o),
     ob:o.obs||''
   };
-  return linkBase() + '#orc=' + encodeURIComponent(btoa(unescape(encodeURIComponent(JSON.stringify(dados)))));
+  return linkBase() + '#orc=' + b64url(JSON.stringify(dados));
+}
+/* Base64 "url-safe": sem +, / nem = — o link fica menor e mais limpo no WhatsApp */
+function b64url(txt){
+  try{ return btoa(unescape(encodeURIComponent(txt))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,''); }
+  catch(e){ return ''; }
 }
 function linkBase(){
   return location.origin + location.pathname;
@@ -6774,7 +6792,8 @@ function mostrarLinkOrc(id){
   abrirModal(`
     <div class="modal-h"><h2>🔗 Link público do orçamento</h2><button type="button" class="x" data-fechar>×</button></div>
     <div class="modal-b">
-      <p style="font-size:13.5px;color:var(--suave);margin:0 0 8px">Envie este link ao cliente. Ele abre o orçamento em modo leitura no celular e pode <b>aceitar</b> ou <b>recusar</b> — a resposta volta para você pelo WhatsApp.</p>
+      <p style="font-size:13.5px;color:var(--suave);margin:0 0 8px">Envie este link ao cliente. Ele abre o orçamento em modo leitura no celular e pode <b>aceitar</b> ou <b>recusar</b> — a resposta volta para você pelo WhatsApp.<br>
+      <span style="display:inline-block;margin-top:6px;padding:7px 10px;border-radius:10px;background:var(--prim-cl);color:var(--prim-esc);font-weight:600">💡 No WhatsApp o cliente recebe um cartão <b>“ORÇAMENTO SUPORT MAX”</b> com a capa da marca — o endereço gigante fica escondido dentro do cartão.</span></p>
       <div class="link-box">
         <input id="linkOrcPub" readonly value="${esc(link)}">
         <button class="btn ghost sm" id="btnCopiarLink">📋 Copiar</button>
@@ -6787,6 +6806,7 @@ function mostrarLinkOrc(id){
       <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn ghost sm" id="btnAbrirLink">👁️ Abrir prévia</button>
         <button class="btn ghost sm" id="btnLinkZap">💬 Enviar por WhatsApp</button>
+        <button class="btn ghost sm" id="btnLinkZapTxt">💬 Enviar com texto</button>
       </div>
     </div>
     <div class="modal-f"><button class="btn primary" data-fechar>Fechar</button></div>`);
@@ -6800,17 +6820,27 @@ function mostrarLinkOrc(id){
     toast('QR Code baixado.');
   };
   document.getElementById('btnAbrirLink').onclick = ()=>window.open(link,'_blank','noopener');
-  document.getElementById('btnLinkZap').onclick = ()=>{
+  const abrirZap = (msg)=>{
     const c = buscarCli(o.clienteId);
     let tel = String((c&&c.telefone)||'').replace(/\D/g,'');
     if(tel && tel.length<=11) tel = '55'+tel;
-    const msg = `Olá! Segue o orçamento ${o.numero} (${brl(totalOrc(o))}). Você pode ver e responder por aqui: ${link}`;
     window.open((tel?'https://wa.me/'+tel+'?text=':'https://wa.me/?text=')+encodeURIComponent(msg), '_blank','noopener');
+  };
+  document.getElementById('btnLinkZap').onclick = ()=>{
+    /* Envia SÓ o link: o WhatsApp mostra o cartão "ORÇAMENTO SUPORT MAX" (com capa e descrição)
+       e esconde a URL gigante dentro do cartão — o cliente não vê o linkiao. */
+    abrirZap(link);
+  };
+  document.getElementById('btnLinkZapTxt').onclick = ()=>{
+    abrirZap(`Olá! Segue o orçamento ${o.numero} (${brl(totalOrc(o))}). Você pode ver e responder por aqui: ${link}`);
   };
 }
 function decodificarOrcLink(enc){
   try{
-    const txt = decodeURIComponent(escape(atob(decodeURIComponent(enc))));
+    /* aceita links antigos (base64 com + / =) e novos (base64 url-safe) */
+    let b = decodeURIComponent(String(enc||'')).replace(/-/g,'+').replace(/_/g,'/');
+    while(b.length % 4) b += '=';
+    const txt = decodeURIComponent(escape(atob(b)));
     return JSON.parse(txt);
   }catch(e){ return null; }
 }
@@ -9262,6 +9292,16 @@ function instalarApp(){
 /* =========================================================
    PÁGINA PÚBLICA DO ORÇAMENTO (?/#orc=...)
    ========================================================= */
+/* Cartão de compartilhamento: título limpo "ORÇAMENTO SUPORT MAX" + o nº do orçamento na descrição */
+function aplicarMetaOrc(d){
+  const set = (sel, val)=>{ const e = document.querySelector(sel); if(e) e.setAttribute('content', val); };
+  const titulo = 'ORÇAMENTO SUPORT MAX';
+  const desc = (d && d.n) ? `Orçamento ${d.n} — aceite ou recuse.` : 'Aceite ou recuse o seu orçamento.';
+  set('meta[property="og:title"]', titulo);
+  set('meta[property="og:description"]', desc);
+  set('meta[name="twitter:title"]', titulo);
+  set('meta[name="twitter:description"]', desc);
+}
 function verificarOrcPublico(){
   const m = (location.hash||'').match(/orc=([^&]+)/);
   if(!m) return false;
@@ -9274,6 +9314,7 @@ function verificarOrcPublico(){
   host.hidden = false;
   host.innerHTML = htmlOrcPublico(dados);
   iniciarOrcPublico(dados);
+  aplicarMetaOrc(dados);
   document.title = 'Orçamento ' + (dados.n||'') + ' — SUPORT MAX';
   return true;
 }
