@@ -1342,7 +1342,7 @@ function aplicarFotosCatalogoEm(base){
 function aplicarFotosCatalogo(){ return aplicarFotosCatalogoEm(db); }
 let db = carregar();
 let view = 'painel';
-let filtro = {busca:'', status:'todos', ordenar:'recentes'};
+let filtro = {busca:'', status:'todos', ordenar:'nome'};
 let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos'};
 let filtroOS = {busca:'', status:'todos', fornecedor:'', rapido:'todas'};
 let filtroCat = {busca:'', margem:'todos'};
@@ -2665,6 +2665,10 @@ function caixaCard(){
 /* =========================================================
    CLIENTES
    ========================================================= */
+/* Ordem alfabética (A–Z): ignora maiúsculas/minúsculas, acentos e trata números como números */
+function ordenarPorNome(a,b){
+  return String(a&&a.nome||'').localeCompare(String(b&&b.nome||''),'pt-BR',{numeric:true,sensitivity:'base'});
+}
 function listaFiltrada(){
   const q = filtro.busca.trim().toLowerCase();
   let l = db.clientes.filter(c=>{
@@ -2674,7 +2678,7 @@ function listaFiltrada(){
     return [c.nome,c.empresa,c.email,c.telefone,c.cpf,c.cnpj,c.notas,c.origem].some(v=>String(v||'').toLowerCase().includes(q));
   });
   if(filtro.ordenar==='recentes') l.sort((a,b)=>(b.criadoEm||'').localeCompare(a.criadoEm||''));
-  else if(filtro.ordenar==='nome') l.sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  else if(filtro.ordenar==='nome') l.sort((a,b)=>ordenarPorNome(a,b));
   else if(filtro.ordenar==='contato') l.sort((a,b)=>String(ultimoContato(b)||'').localeCompare(String(ultimoContato(a)||'')));
   else if(filtro.ordenar==='followup') l.sort((a,b)=>String(a.followup&&a.followup.data||'9999').localeCompare(String(b.followup&&b.followup.data||'9999')));
   return l;
@@ -2689,8 +2693,8 @@ function htmlClientes(){
       ${STAGES.map(s=>`<option value="${s.id}" ${filtro.status===s.id?'selected':''}>${s.label}</option>`).join('')}
     </select>
     <select class="filtro" id="fOrd">
-      <option value="recentes" ${filtro.ordenar==='recentes'?'selected':''}>Mais recentes</option>
       <option value="nome" ${filtro.ordenar==='nome'?'selected':''}>Nome (A–Z)</option>
+      <option value="recentes" ${filtro.ordenar==='recentes'?'selected':''}>Mais recentes</option>
       <option value="contato" ${filtro.ordenar==='contato'?'selected':''}>Último contato</option>
       <option value="followup" ${filtro.ordenar==='followup'?'selected':''}>Próximo follow-up</option>
     </select>
@@ -4308,7 +4312,7 @@ function agendaEscolherData(id){
   };
 }
 function formAgendarFollowup(dataPre){
-  const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const clientes = db.clientes.slice().sort(ordenarPorNome);
   if(!clientes.length){ toast('Cadastre um cliente primeiro.','erro'); return; }
   abrirModal(`
     <form id="fAgendar">
@@ -4628,7 +4632,7 @@ function formOrcamento(id){
   };
   if(!Array.isArray(v.itens) || !v.itens.length) v.itens = [novoItemOrc()];
 
-  const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const clientes = db.clientes.slice().sort(ordenarPorNome);
   const UN = ['un','cx','kg','m','m²','h','hora','serviço','pacote'];
 
   abrirModal(`
@@ -5503,7 +5507,7 @@ function formOrdem(id){
   };
   if(!Array.isArray(v.checklist)) v.checklist = [];
   if(!Array.isArray(v.itens)) v.itens = [];
-  const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const clientes = db.clientes.slice().sort(ordenarPorNome);
   const orcsAprov = listaOrcamentos().filter(o=>o.status==='aprovado');
   const UN = ['un','cx','kg','m','m²','h','hora','serviço','pacote'];
 
@@ -7752,7 +7756,7 @@ function htmlRelatorios(){
   const metaPct = metaMensal>0 ? Math.min(100, Math.round(faturamentoMes/metaMensal*100)) : 0;
 
   const opcoesStatus = ['<option value="todos">Todos os status</option>', ...STATUS_ORC.map(s=>`<option value="${s.id}" ${relFiltro.status===s.id?'selected':''}>${s.label}</option>`)].join('');
-  const clientes = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const clientes = db.clientes.slice().sort(ordenarPorNome);
   const opcoesCliente = ['<option value="todos">Todos os clientes</option>', ...clientes.map(c=>`<option value="${c.id}" ${relFiltro.cliente===c.id?'selected':''}>${esc(c.nome)}</option>`)].join('');
 
   return `
@@ -9210,7 +9214,7 @@ function imprimirEtiquetas(){
 }
 function imprimirListaClientes(){
   if(!db.clientes.length){ toast('Nenhum cliente para imprimir.','erro'); return; }
-  const linhas = db.clientes.slice().sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  const linhas = db.clientes.slice().sort(ordenarPorNome);
   const html = `<div class="lista-print">
     <h1>Lista de clientes</h1>
     <div class="lp-sub">${linhas.length} cliente(s) · emitido em ${fmtDT(agoraDT())}</div>
