@@ -785,6 +785,7 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
     <nav class="nav">
       <button class="nav-item active" data-view="painel"><span class="ico">📊</span><span>Painel</span></button>
       <button class="nav-item" data-view="clientes"><span class="ico">👥</span><span>Clientes</span></button>
+      <button class="nav-item" data-view="orcamentos"><span class="ico">🧾</span><span>Orçamentos</span></button>
       <button class="nav-item" data-view="ordens"><span class="ico">🛠️</span><span>Ordens de serviço</span><span class="pill" id="pillOS" style="display:none">0</span></button>
       <button class="nav-item" data-view="financeiro"><span class="ico">💰</span><span>Financeiro</span><span class="pill" id="pillFin" style="display:none">0</span></button>
       <button class="nav-item" data-view="contratos"><span class="ico">🔁</span><span>Contratos</span><span class="pill" id="pillContrato" style="display:none">0</span></button>
@@ -2361,10 +2362,10 @@ function render(){
   }
 
   const el = document.getElementById('view');
-  if(view==='orcamentos'){ estado.view='ordens'; view='ordens'; salvarPrefs(); }
   if(view==='funil'){ estado.view='painel'; view='painel'; salvarPrefs(); }
   if(view==='painel') el.innerHTML = htmlPainel();
   else if(view==='clientes'){ el.innerHTML = htmlClientes(); ligarClientes(); }
+  else if(view==='orcamentos'){ el.innerHTML = htmlOrcamentos(); ligarOrcamentos(); }
   else if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
   else if(view==='financeiro'){ el.innerHTML = htmlFinanceiro(); ligarFinanceiro(); }
   else if(view==='contratos'){ el.innerHTML = htmlContratos(); ligarContratos(); }
@@ -2407,6 +2408,8 @@ function htmlPainel(){
   const orcs = listaOrcamentos();
   const orcAbertos = orcs.filter(o=>o.status==='rascunho'||o.status==='enviado');
   const valorAprov = orcs.filter(o=>o.status==='aprovado').reduce((s,o)=>s+totalOrc(o),0);
+  const osVendidas = listaOrdens().filter(o=>o.status==='vendida');
+  const valorVendasOS = osVendidas.reduce((s,o)=>s+valorVendaOS(o),0);
   const ultOrc = orcs.slice().sort((a,b)=>(b.criadoEm||b.data||'').localeCompare(a.criadoEm||a.data||'')).slice(0,5);
 
   if(t===0){
@@ -2426,6 +2429,7 @@ function htmlPainel(){
     ${stat('Follow-ups vencidos', vencidos, '⏰', vencidos>0)}
     ${stat('Orçamentos em aberto', orcAbertos.length, '🧾')}
     ${stat('Valor aprovado', brl(valorAprov), '💰')}
+    ${stat('Vendas de OS', brl(valorVendasOS), '🧾')}
     ${stat('NF pendentes', qtdNFPendentes(), '📄', qtdNFPendentes()>0)}
     ${stat('Vencendo / vencidos', orcamentosVencendo(5).length, '⏳', orcamentosVencendo(5).length>0)}
   </div>
@@ -2535,7 +2539,9 @@ function resumoMensalCard(){
   const orcs = listaOrcamentos();
   const doMes = orcs.filter(o=>String(o.data||'').slice(0,7)===mes);
   const aprovMes = doMes.filter(o=>o.status==='aprovado'||o.status==='entregue');
-  const fatMes = aprovMes.reduce((s,o)=>s+totalOrc(o),0);
+  const vendasMes = listaOrdens().filter(o=>o.status==='vendida' && String(dataVendaOS(o)||'').slice(0,7)===mes);
+  const fatVendasMes = vendasMes.reduce((s,o)=>s+valorVendaOS(o),0);
+  const fatMes = aprovMes.reduce((s,o)=>s+totalOrc(o),0) + fatVendasMes;
   const meta = Number(db.meta&&db.meta.valorMensal)||0;
   const pct = meta>0 ? Math.min(100, Math.round(fatMes/meta*100)) : 0;
   const fupMes = agendaPendentes().filter(c=>String(c.followup.data).slice(0,7)===mes).length;
@@ -2552,6 +2558,7 @@ function resumoMensalCard(){
     <div class="card-b">
       <div class="grid-4">
         <div class="mini-stat"><div class="ml">Faturamento aprovado</div><div class="mv">${brl(fatMes)}</div></div>
+        <div class="mini-stat"><div class="ml">Vendas de OS no mês</div><div class="mv">${vendasMes.length} · ${brl(fatVendasMes)}</div></div>
         <div class="mini-stat"><div class="ml">Orçamentos criados</div><div class="mv">${doMes.length}</div></div>
         <div class="mini-stat"><div class="ml">Aprovados</div><div class="mv">${aprovMes.length}</div></div>
         <div class="mini-stat"><div class="ml">Follow-ups no mês</div><div class="mv">${fupMes}</div></div>
@@ -2575,12 +2582,16 @@ function caixaCard(){
   const r = resumoCaixa();
   const cr = contasReceber();
   const venc = cr.filter(c=>c.vencido);
+  const osV = listaOrdens().filter(o=>o.status==='vendida');
+  const recebidoOS = osV.reduce((s,o)=>s+valorVendaOS(o),0);
+  const mesAtual = hojeISO().slice(0,7);
+  const recebMesOS = osV.filter(o=>String(dataVendaOS(o)||'').slice(0,7)===mesAtual).reduce((s,o)=>s+valorVendaOS(o),0);
   return `<div class="card" style="margin-bottom:18px">
     <div class="card-h"><h2>💰 Fluxo de caixa</h2><button class="link" data-go="financeiro">Financeiro →</button></div>
     <div class="card-b">
       <div class="grid-4">
-        <div class="mini-stat"><div class="ml">Recebido no mês</div><div class="mv ok">${brl(r.recebMes)}</div></div>
-        <div class="mini-stat"><div class="ml">Recebido (total)</div><div class="mv">${brl(r.recebido)}</div></div>
+        <div class="mini-stat"><div class="ml">Recebido no mês</div><div class="mv ok">${brl(r.recebMes + recebMesOS)}</div></div>
+        <div class="mini-stat"><div class="ml">Recebido (total)</div><div class="mv">${brl(r.recebido + recebidoOS)}</div></div>
         <div class="mini-stat"><div class="ml">A receber</div><div class="mv">${brl(r.aberto)}</div></div>
         <div class="mini-stat"><div class="ml">Vencido</div><div class="mv ${r.vencido>0?'erro':''}">${brl(r.vencido)}</div></div>
       </div>
@@ -6844,6 +6855,35 @@ function relOrcamentosFiltrados(){
     return true;
   });
 }
+/* ---------- Vendas originadas das Ordens de Serviço ---------- */
+/* Valor da venda: usa o valor registrado na venda (pode ser diferente do total da OS) */
+function valorVendaOS(os){
+  const v = vendaDaOS(os);
+  if(v && Number(v.valor)>0) return Number(v.valor)||0;
+  return totalOS(os);
+}
+/* Data usada para filtrar a venda no período */
+function dataVendaOS(os){
+  const v = vendaDaOS(os);
+  return String((v && v.data) || os.data || os.criadoEm || '').slice(0,10);
+}
+/* Custo dos itens da OS (para o lucro real) */
+function custoOS(os){
+  return itensOS(os).reduce((s,i)=>s+custoItemOrc(i),0);
+}
+/* Ordens de serviço já convertidas em venda e que atendem ao filtro do relatório */
+function relOrdensVendidas(){
+  const { ini, fim, status, cliente } = relFiltro;
+  if(status!=='todos') return [];
+  return listaOrdens().filter(o=>{
+    if(o.status!=='vendida') return false;
+    if(cliente!=='todos' && o.clienteId!==cliente) return false;
+    const d = dataVendaOS(o);
+    if(ini && d < ini) return false;
+    if(fim && d > fim) return false;
+    return true;
+  });
+}
 /* =========================================================
    FINANCEIRO — contas a receber, pagamentos e fluxo de caixa
    ========================================================= */
@@ -7527,10 +7567,14 @@ function menuMensagens(ctx){
 function htmlRelatorios(){
   const os = relOrcamentosFiltrados();
   const todos = listaOrcamentos();
-  const total = os.reduce((s,o)=>s+totalOrc(o),0);
+  /* vendas realizadas a partir das Ordens de Serviço (Ordens de serviço -> Vender) */
+  const vendas = relOrdensVendidas();
+  const totalVendas = vendas.reduce((s,o)=>s+valorVendaOS(o),0);
+  const total = os.reduce((s,o)=>s+totalOrc(o),0) + totalVendas;
   const aprov = os.filter(o=>o.status==='aprovado');
-  const totalAprov = aprov.reduce((s,o)=>s+totalOrc(o),0);
-  const ticket = aprov.length ? totalAprov/aprov.length : 0;
+  const totalAprov = aprov.reduce((s,o)=>s+totalOrc(o),0) + totalVendas;
+  const qtdAprov = aprov.length + vendas.length;
+  const ticket = qtdAprov ? totalAprov/qtdAprov : 0;
   const taxa = os.length ? Math.round(aprov.length/os.length*100) : 0;
 
   /* Faturamento por mês (aprovados), últimos 12 meses */
@@ -7545,6 +7589,11 @@ function htmlRelatorios(){
     const chave = String(o.data||'').slice(0,7);
     if(meses[chave]){ meses[chave].valor += totalOrc(o); meses[chave].qtd++; }
   });
+  /* vendas das OS entram no faturamento do mês em que a venda aconteceu */
+  vendas.forEach(o=>{
+    const chave = String(dataVendaOS(o)||'').slice(0,7);
+    if(meses[chave]){ meses[chave].valor += valorVendaOS(o); meses[chave].qtd++; }
+  });
   const mesesArr = Object.keys(meses).map(k=>({...meses[k], chave:k}));
   const maiorMes = Math.max(1, ...mesesArr.map(m=>m.valor));
 
@@ -7556,6 +7605,17 @@ function htmlRelatorios(){
     if(!lucroMeses[chave]) return;
     const rec = totalOrc(o);
     const cus = custoOrc(o);
+    lucroMeses[chave].receita += rec;
+    lucroMeses[chave].custo += cus;
+    lucroMeses[chave].lucro += (rec - cus);
+    lucroMeses[chave].qtd++;
+  });
+  /* lucro das vendas feitas a partir das OS */
+  vendas.forEach(o=>{
+    const chave = String(dataVendaOS(o)||'').slice(0,7);
+    if(!lucroMeses[chave]) return;
+    const rec = valorVendaOS(o);
+    const cus = custoOS(o);
     lucroMeses[chave].receita += rec;
     lucroMeses[chave].custo += cus;
     lucroMeses[chave].lucro += (rec - cus);
@@ -7579,6 +7639,15 @@ function htmlRelatorios(){
     rank[chave].qtd += Number(i.qtd)||0;
     rank[chave].valor += itemTotal(i);
   }));
+  /* itens das OS que viraram venda também entram no ranking */
+  vendas.forEach(o=>itensOS(o).forEach(i=>{
+    const nome = String(i.desc||'').trim();
+    if(!nome) return;
+    const chave = nome.toLowerCase();
+    if(!rank[chave]) rank[chave] = {nome, qtd:0, valor:0};
+    rank[chave].qtd += Number(i.qtd)||0;
+    rank[chave].valor += itemTotal(i);
+  }));
   const ranking = Object.values(rank).sort((a,b)=>b.valor-a.valor).slice(0,12);
 
   /* Totais por status */
@@ -7587,12 +7656,23 @@ function htmlRelatorios(){
     return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a+totalOrc(o),0) };
   });
 
+  /* Vendas por cliente (a partir das Ordens de Serviço) */
+  const vendasPorCliente = {};
+  vendas.forEach(o=>{
+    const k = o.clienteId || nomeClienteOrdem(o);
+    if(!vendasPorCliente[k]) vendasPorCliente[k] = {nome:nomeClienteOrdem(o), qtd:0, valor:0};
+    vendasPorCliente[k].qtd++;
+    vendasPorCliente[k].valor += valorVendaOS(o);
+  });
+  const vendasPorClienteArr = Object.values(vendasPorCliente).sort((a,b)=>b.valor-a.valor);
+
   /* Comissão e meta */
   const comissaoPct = Number((db.meta||{}).comissao)||0;
   const valorComissao = totalAprov * comissaoPct/100;
   const metaMensal = Number((db.meta||{}).valorMensal)||0;
   const mesAtualChave = new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
-  const faturamentoMes = listaOrcamentos().filter(o=>o.status==='aprovado' && String(o.data||'').slice(0,7)===mesAtualChave).reduce((s,o)=>s+totalOrc(o),0);
+  const faturamentoMes = listaOrcamentos().filter(o=>o.status==='aprovado' && String(o.data||'').slice(0,7)===mesAtualChave).reduce((s,o)=>s+totalOrc(o),0)
+    + listaOrdens().filter(o=>o.status==='vendida' && String(dataVendaOS(o)||'').slice(0,7)===mesAtualChave).reduce((s,o)=>s+valorVendaOS(o),0);
   const metaPct = metaMensal>0 ? Math.min(100, Math.round(faturamentoMes/metaMensal*100)) : 0;
 
   const opcoesStatus = ['<option value="todos">Todos os status</option>', ...STATUS_ORC.map(s=>`<option value="${s.id}" ${relFiltro.status===s.id?'selected':''}>${s.label}</option>`)].join('');
@@ -7617,6 +7697,7 @@ function htmlRelatorios(){
 
   <div class="grid-stats">
     ${stat('Orçamentos no filtro', os.length, '🧾')}
+    ${stat('Vendas (OS)', vendas.length, '🛠️')}
     ${stat('Valor total', brl(total), '💰')}
     ${stat('Aprovados', aprov.length, '✅')}
     ${stat('Faturamento aprovado', brl(totalAprov), '📈')}
@@ -7625,14 +7706,14 @@ function htmlRelatorios(){
   </div>
 
   <div class="op-card" style="margin-bottom:16px">
-    <h4>📈 Faturamento por mês (orçamentos aprovados)</h4>
+    <h4>📈 Faturamento por mês (orçamentos aprovados + vendas das OS)</h4>
     ${maiorMes>0 ? `<div class="rel-chart">${mesesArr.map(m=>`
       <div class="rel-bar-wrap" title="${m.label}: ${brl(m.valor)} (${m.qtd})">
         <div class="rel-bar" style="height:${Math.max(2, Math.round(m.valor/maiorMes*100))}%"></div>
         <span class="rel-bar-lbl">${m.label}</span>
       </div>`).join('')}</div>
       <div class="rel-chart-base">Total no período: <b>${brl(mesesArr.reduce((s,m)=>s+m.valor,0))}</b></div>`
-    : `<div class="vazio"><span class="big">📈</span>Nenhum orçamento aprovado no período.<br>Aprove orçamentos para ver o faturamento.</div>`}
+    : `<div class="vazio"><span class="big">📈</span>Nenhuma venda no período.<br>Aprove orçamentos ou registre vendas em Ordens de serviço.</div>`}
   </div>
 
   <div class="op-card" style="margin-bottom:16px">
@@ -7654,7 +7735,25 @@ function htmlRelatorios(){
             <div class="rel-linha"><span class="rel-nome"><b>Lucro no período</b></span><b class="rel-valor" style="color:${totalLucroPeriodo>=0?'#15803d':'#b91c1c'}">${brl(totalLucroPeriodo)}</b></div>
             <div class="rel-linha"><span class="rel-nome">Margem média</span><b class="rel-valor">${margemPeriodo.toFixed(1)}%</b></div>
           </div>`
-        : `<div class="vazio"><span class="big">💵</span>Sem orçamentos aprovados no período.</div>`)}
+        : `<div class="vazio"><span class="big">💵</span>Sem vendas no período.</div>`)}
+  </div>
+
+  <div class="op-card" style="margin-bottom:16px">
+    <h4>🧾 Vendas das Ordens de Serviço</h4>
+    ${vendas.length ? `
+      <div class="rel-lista">
+        <div class="rel-linha">
+          <span class="rel-nome"><b>Total vendido</b> (${vendas.length} venda${vendas.length>1?'s':''})</span>
+          <b class="rel-valor" style="color:#15803d">${brl(totalVendas)}</b>
+        </div>
+        ${vendasPorClienteArr.map(c=>`
+          <div class="rel-linha">
+            <span class="rel-nome">${esc(c.nome)}</span>
+            <span class="rel-qtd">${c.qtd} venda${c.qtd>1?'s':''}</span>
+            <b class="rel-valor">${brl(c.valor)}</b>
+          </div>`).join('')}
+      </div>`
+    : `<div class="vazio"><span class="big">🧾</span>Nenhuma venda de OS no período selecionado.<br>Em <b>Ordens de serviço</b>, use <b>Vender</b> para registrar a venda.</div>`}
   </div>
 
   <div class="rel-duas">
@@ -7755,15 +7854,18 @@ function ligarRelatorios(){
 
 function resumoRelatorio(){
   const os = relOrcamentosFiltrados();
-  const total = os.reduce((s,o)=>s+totalOrc(o),0);
+  const vendas = relOrdensVendidas();
+  const totalVendas = vendas.reduce((s,o)=>s+valorVendaOS(o),0);
+  const total = os.reduce((s,o)=>s+totalOrc(o),0) + totalVendas;
   const aprov = os.filter(o=>o.status==='aprovado');
-  const totalAprov = aprov.reduce((s,o)=>s+totalOrc(o),0);
-  return { os, total, aprov, totalAprov,
-    ticket: aprov.length ? totalAprov/aprov.length : 0,
+  const totalAprov = aprov.reduce((s,o)=>s+totalOrc(o),0) + totalVendas;
+  const qtdAprov = aprov.length + vendas.length;
+  return { os, vendas, total, totalVendas, aprov, totalAprov,
+    ticket: qtdAprov ? totalAprov/qtdAprov : 0,
     taxa: os.length ? Math.round(aprov.length/os.length*100) : 0 };
 }
 function imprimirRelatorio(){
-  const { os, total, aprov, totalAprov, ticket, taxa } = resumoRelatorio();
+  const { os, vendas, total, totalVendas, aprov, totalAprov, ticket, taxa } = resumoRelatorio();
   const em = db.emissor || emissorVazio();
   const periodo = (relFiltro.ini||relFiltro.fim)
     ? `${relFiltro.ini?fmtData(relFiltro.ini):'início'} até ${relFiltro.fim?fmtData(relFiltro.fim):'hoje'}`
@@ -7775,6 +7877,13 @@ function imprimirRelatorio(){
     <td>${fmtData(o.data)}</td>
     <td>${esc2(statusOrc(o.status).label)}</td>
     <td style="text-align:right">${brl(totalOrc(o))}</td>
+  </tr>`).join('');
+  const rowsVenda = vendas.slice().sort((a,b)=>String(dataVendaOS(b)).localeCompare(String(dataVendaOS(a)))).map(o=>`<tr>
+    <td>${esc2((vendaDaOS(o)||{}).numero || o.numero || '')}</td>
+    <td>${esc2(nomeClienteOrdem(o))}</td>
+    <td>${fmtData(dataVendaOS(o))}</td>
+    <td>Venda (OS)</td>
+    <td style="text-align:right">${brl(valorVendaOS(o))}</td>
   </tr>`).join('');
   const area = document.getElementById('areaImpressao');
   area.innerHTML = `<div class="orc-doc orc-print">
@@ -7789,10 +7898,12 @@ function imprimirRelatorio(){
       <div class="bloco"><h4>Resumo</h4>
         <div>Orçamentos: <b>${os.length}</b></div>
         <div>Aprovados: <b>${aprov.length}</b> (${taxa}%)</div>
+        <div>Vendas de OS: <b>${vendas.length}</b></div>
         <div>Ticket médio: <b>${brl(ticket)}</b></div>
       </div>
       <div class="bloco" style="text-align:right"><h4>Valores</h4>
         <div>Total dos orçamentos: <b>${brl(total)}</b></div>
+        <div>Vendas das OS: <b>${brl(totalVendas)}</b></div>
         <div>Faturamento aprovado: <b>${brl(totalAprov)}</b></div>
         ${Number((db.meta||{}).comissao)>0?`<div>Comissão (${Number(db.meta.comissao)}%): <b>${brl(totalAprov*Number(db.meta.comissao)/100)}</b></div>`:''}
       </div>
@@ -7801,7 +7912,12 @@ function imprimirRelatorio(){
       <thead><tr><th>Número</th><th>Cliente</th><th>Data</th><th>Status</th><th style="text-align:right">Total</th></tr></thead>
       <tbody>${rows || '<tr><td colspan="5" style="text-align:center;color:#64748b">Nenhum orçamento no período.</td></tr>'}</tbody>
     </table>
-    <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())} · Relatório de orçamentos</div></div>
+    ${rowsVenda ? `<h4 style="margin-top:16px">Vendas das Ordens de Serviço</h4>
+    <table>
+      <thead><tr><th>Pedido</th><th>Cliente</th><th>Data</th><th>Origem</th><th style="text-align:right">Valor</th></tr></thead>
+      <tbody>${rowsVenda}</tbody>
+    </table>` : ''}
+    <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())} · Relatório de orçamentos e vendas</div></div>
   </div>`;
   document.body.classList.add('imprimindo');
   const limpar = ()=>{ document.body.classList.remove('imprimindo'); window.removeEventListener('afterprint', limpar); };
@@ -7810,16 +7926,25 @@ function imprimirRelatorio(){
   setTimeout(limpar, 1500);
 }
 function exportarRelatorioCSV(){
-  const { os } = resumoRelatorio();
-  if(!os.length){ toast('Nenhum orçamento no período para exportar.','erro'); return; }
+  const { os, vendas } = resumoRelatorio();
+  if(!os.length && !vendas.length){ toast('Nenhum orçamento ou venda no período para exportar.','erro'); return; }
   const linhas = [];
-  linhas.push(['numero','cliente','data','validade','status','itens','subtotal','desconto_itens','frete','desconto_geral','desconto_geral_tipo','total'].join(';'));
+  linhas.push(['tipo','numero','cliente','data','validade','status','itens','subtotal','desconto_itens','frete','desconto_geral','desconto_geral_tipo','total'].join(';'));
   os.slice().sort((a,b)=>String(a.data).localeCompare(String(b.data))).forEach(o=>{
     linhas.push([
-      csvEsc(o.numero||''), csvEsc(nomeClienteOrc(o)), o.data||'', o.validade||'', statusOrc(o.status).label,
+      'orcamento', csvEsc(o.numero||''), csvEsc(nomeClienteOrc(o)), o.data||'', o.validade||'', statusOrc(o.status).label,
       (o.itens||[]).length,
       subtotalBrutoOrc(o).toFixed(2), descItensOrc(o).toFixed(2), freteOrc(o).toFixed(2),
       descGeralV(o).toFixed(2), csvEsc(o.descGeralTipo==='%' ? (Number(o.desconto)||0)+'%' : 'R$'), totalOrc(o).toFixed(2)
+    ].map(csvEsc).join(';'));
+  });
+  vendas.slice().sort((a,b)=>String(dataVendaOS(a)).localeCompare(String(dataVendaOS(b)))).forEach(o=>{
+    const v = vendaDaOS(o) || {};
+    linhas.push([
+      'venda_os', csvEsc(v.numero||o.numero||''), csvEsc(nomeClienteOrdem(o)), dataVendaOS(o), '', 'Venda (OS)',
+      itensOS(o).length,
+      subtotalOS(o).toFixed(2), '0.00', '0.00',
+      '0.00', 'R$', valorVendaOS(o).toFixed(2)
     ].map(csvEsc).join(';'));
   });
   baixar(`relatorio-orcamentos-${hojeISO()}.csv`, linhas.join('\r\n'), 'text/csv;charset=utf-8');
@@ -8803,7 +8928,7 @@ function iniciarBuscaGlobal(){
    ========================================================= */
 const ATALHOS = [
   {tecla:'Ctrl+K', desc:'Abrir a busca global', fn:()=>{ const i=document.getElementById('buscaGlobal'); if(i){ i.focus(); i.select(); } }},
-  {tecla:'N',      desc:'Nova ordem de serviço', fn:()=>{ view='ordens'; render(); formOrdem(null); }},
+  {tecla:'N',      desc:'Novo orçamento', fn:()=>{ view='orcamentos'; render(); formOrcamento(null); }},
   {tecla:'C',      desc:'Novo cliente', fn:()=>{ view='clientes'; render(); formCliente(null); }},
   {tecla:'O',      desc:'Nova ordem de serviço', fn:()=>{ view='ordens'; render(); formOrdem(null); }},
   {tecla:'P',      desc:'Novo item no catálogo', fn:()=>{ view='catalogo'; render(); formProduto(null); }},
