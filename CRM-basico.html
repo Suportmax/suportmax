@@ -269,6 +269,23 @@ body.tema-escuro .lanc-linha{background:#0d1728}
 body.tema-escuro .prod-pick,body.tema-escuro .picker-busca,body.tema-escuro .chip,body.tema-escuro .pick-item{background:#0d1728}
 body.tema-escuro .pick-item:hover{background:#0f1c30}
 .cat-item{display:flex;gap:10px;align-items:flex-start}
+.cat-cards{display:none}
+.cat-card{background:var(--painel);border:1px solid var(--borda);border-radius:12px;padding:13px;box-shadow:var(--sombra)}
+.cat-card-top{display:flex;align-items:flex-start;gap:10px;min-width:0}
+.cat-card-top .cat-foto{width:48px;height:48px}
+.cat-card-main{flex:1;min-width:0}
+.cat-card-name{font-size:14px;font-weight:700;overflow-wrap:anywhere}
+.cat-card-desc{font-size:12px;color:var(--suave);margin-top:3px;line-height:1.4}
+.cat-card-values{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.cat-card-value{padding:8px 9px;border:1px solid var(--borda);border-radius:9px;background:var(--bg);min-width:0}
+.cat-card-value span{display:block;font-size:10.5px;color:var(--suave);text-transform:uppercase;font-weight:700;letter-spacing:.3px}
+.cat-card-value b{display:block;margin-top:2px;font-size:13px;overflow-wrap:anywhere}
+.cat-card-actions{display:flex;justify-content:flex-end;gap:7px;border-top:1px solid var(--borda);padding-top:9px}
+body.tema-escuro .cat-card-value{background:#0d1728}
+@media(max-width:760px){
+  #catalogoTabelaWrap{display:none}
+  .cat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:10px}
+}
 body.tema-escuro .foto-prod-prev{background:#0d1728}
 .pub-wrap{max-width:900px;margin:0 auto;padding:20px}
 /* Ações (aceitar / não aceitar) — sempre visíveis, sem precisar rolar a página */
@@ -1455,7 +1472,7 @@ let view = 'painel';
 let filtro = {busca:'', status:'todos', ordenar:'nome'};
 let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos', aba:'ativos'};
 let filtroOS = {busca:'', status:'todos', fornecedor:'', rapido:'todas'};
-let filtroCat = {busca:'', margem:'todos'};
+let filtroCat = {busca:'', margem:'todos', ordem:'nome'};
 let filtroAgenda = {busca:'', periodo:'todos', prioridade:'todas', ordenar:'data', modo:'lista'};
 let filtroFunil = {busca:'', origem:'todas', prio:'todas', fup:'todos', ordem:'fup', esfriando:false, etapa:'', colapsados:{}, metaEditar:false, refModo:'hoje', refAno:new Date().getFullYear(), refMes:new Date().getMonth()+1};
 let calRef = null; /* mês exibido na visão de calendário (Date do 1º dia do mês) */
@@ -6742,19 +6759,26 @@ function htmlCatalogo(){
   </div>
 
   <div class="toolbar">
-    <div class="busca"><input id="buscaCat" placeholder="Buscar produto ou serviço..." value="${esc(filtroCat.busca)}"></div>
+    <div class="busca"><input id="buscaCat" type="search" placeholder="Buscar item, descrição ou fornecedor..." value="${esc(filtroCat.busca)}" aria-label="Buscar no catálogo"></div>
     <select class="filtro" id="fCatMargem">
       <option value="todos" ${filtroCat.margem==='todos'?'selected':''}>Todos os itens</option>
       <option value="comCusto" ${filtroCat.margem==='comCusto'?'selected':''}>Com custo cadastrado</option>
       <option value="semCusto" ${filtroCat.margem==='semCusto'?'selected':''}>Sem custo cadastrado</option>
+    </select>
+    <select class="filtro" id="fCatOrdem" aria-label="Ordenar itens">
+      <option value="nome" ${filtroCat.ordem==='nome'?'selected':''}>Ordem alfabética</option>
+      <option value="precoAsc" ${filtroCat.ordem==='precoAsc'?'selected':''}>Menor preço</option>
+      <option value="precoDesc" ${filtroCat.ordem==='precoDesc'?'selected':''}>Maior preço</option>
+      <option value="margemDesc" ${filtroCat.ordem==='margemDesc'?'selected':''}>Maior margem</option>
     </select>
     <button class="btn ghost" id="btnCatModelo" title="Adiciona os itens de informática que ainda não estão no catálogo">📦 Modelo de informática</button>
     <button class="btn primary" id="btnNovoItem">＋ Novo item</button>
   </div>
 
   <div class="subtitulo" style="margin:14px 0 8px">📦 Produtos e serviços</div>
-  <div class="contagem" id="contCat"></div>
-  <div class="tabela-wrap"><table>
+  <div class="contagem" id="contCat" aria-live="polite"></div>
+  <div class="cat-cards" id="catCards"></div>
+  <div class="tabela-wrap" id="catalogoTabelaWrap"><table>
     <thead><tr><th>Item</th><th>Un.</th><th>Custo</th><th>Preço</th><th>Margem</th><th style="text-align:right">Ações</th></tr></thead>
     <tbody id="tabelaCat"></tbody>
   </table></div>
@@ -6770,6 +6794,7 @@ function htmlCatalogo(){
 function ligarCatalogo(){
   document.getElementById('buscaCat').addEventListener('input', e=>{ filtroCat.busca=e.target.value; renderTabelaCat(); });
   document.getElementById('fCatMargem').addEventListener('change', e=>{ filtroCat.margem=e.target.value; renderTabelaCat(); });
+  document.getElementById('fCatOrdem').addEventListener('change', e=>{ filtroCat.ordem=e.target.value; renderTabelaCat(); });
   document.getElementById('btnNovoItem').addEventListener('click', ()=>formProduto(null));
   document.getElementById('btnCatModelo').addEventListener('click', ()=>{
     const n = carregarCatalogoInfo(); render(); toast(n?`${n} item(ns) adicionado(s) ao catálogo.`:'O modelo de informática já está completo.');
@@ -6780,16 +6805,28 @@ function ligarCatalogo(){
 }
 function listaCatFiltrada(){
   const q = filtroCat.busca.trim().toLowerCase();
-  return listaProdutos().filter(p=>{
-    if(q && !String(p.nome||'').toLowerCase().includes(q) && !String(p.desc||'').toLowerCase().includes(q)) return false;
+  const itens=listaProdutos().filter(p=>{
+    const fornecedor=listaFornecedores().find(f=>f.id===p.fornecedorId);
+    if(q && ![p.nome,p.desc,p.un,fornecedor&&fornecedor.nome].some(v=>String(v||'').toLowerCase().includes(q))) return false;
     const comCusto = Number(p.custo)>0;
     if(filtroCat.margem==='comCusto' && !comCusto) return false;
     if(filtroCat.margem==='semCusto' && comCusto) return false;
     return true;
-  }).sort((a,b)=>String(a.nome).localeCompare(String(b.nome),'pt-BR'));
+  });
+  const modo=filtroCat.ordem||'nome';
+  return itens.sort((a,b)=>{
+    if(modo==='precoAsc') return (Number(a.preco)||0)-(Number(b.preco)||0);
+    if(modo==='precoDesc') return (Number(b.preco)||0)-(Number(a.preco)||0);
+    if(modo==='margemDesc'){
+      const temCustoA=Number(a.custo)>0, temCustoB=Number(b.custo)>0;
+      if(temCustoA!==temCustoB) return temCustoA?-1:1;
+      return (margemProduto(b)?.pct||0)-(margemProduto(a)?.pct||0);
+    }
+    return String(a.nome).localeCompare(String(b.nome),'pt-BR');
+  });
 }
 function renderTabelaCat(){
-  const tb = document.getElementById('tabelaCat'); if(!tb) return;
+  const tb = document.getElementById('tabelaCat'); const cards=document.getElementById('catCards'); if(!tb||!cards) return;
   const l = listaCatFiltrada();
   tb.innerHTML = l.length ? l.map(p=>{
     const m = margemProduto(p);
@@ -6804,11 +6841,32 @@ function renderTabelaCat(){
         <button class="icon-btn del" title="Excluir" data-cat-rm="${p.id}">🗑️</button>
       </div></td>
     </tr>`;
-  }).join('') : `<tr><td colspan="6"><div class="vazio"><span class="big">📦</span>Nenhum item encontrado.</div></td></tr>`;
+  }).join('') : `<tr><td colspan="6"><div class="vazio"><span class="big">📦</span>${listaProdutos().length?'Nenhum item corresponde aos filtros.':'Seu catálogo ainda está vazio.'}</div></td></tr>`;
+  cards.innerHTML=l.length?l.map(p=>{
+    const m=margemProduto(p);
+    const foto=p.foto?`<img class="cat-foto" src="${p.foto}" alt="">`:'<div class="cat-foto" aria-hidden="true" style="display:grid;place-items:center">📦</div>';
+    return `<article class="cat-card">
+      <div class="cat-card-top">${foto}<div class="cat-card-main"><div class="cat-card-name">${esc(p.nome)}</div><div class="cat-card-desc">${esc(p.desc||'Sem descrição padrão')}</div></div><span class="mini">${esc(p.un||'un')}</span></div>
+      <div class="cat-card-values">
+        <div class="cat-card-value"><span>Custo</span><b>${Number(p.custo)>0?brl(p.custo):'Não informado'}</b></div>
+        <div class="cat-card-value"><span>Preço de venda</span><b>${brl(p.preco)}</b></div>
+        <div class="cat-card-value"><span>Margem</span><b>${m&&m.custo?`${seloMargem(p)} ${brl(m.valor)}`:'Cadastre o custo'}</b></div>
+        <div class="cat-card-value"><span>Fornecedor</span><b>${esc(listaFornecedores().find(f=>f.id===p.fornecedorId)?.nome||'—')}</b></div>
+      </div>
+      <div class="cat-card-actions"><button class="btn ghost sm" type="button" data-cat-edit="${p.id}">✏️ Editar</button><button class="btn danger sm" type="button" data-cat-rm="${p.id}">🗑️ Excluir</button></div>
+    </article>`;
+  }).join(''):`<div class="card"><div class="vazio"><span class="big">📦</span>${listaProdutos().length?'Nenhum item corresponde aos filtros.':'Seu catálogo ainda está vazio.'}<br><button class="btn ${listaProdutos().length?'ghost':'primary'} sm" type="button" data-cat-empty>${listaProdutos().length?'Limpar busca e filtros':'＋ Cadastrar primeiro item'}</button></div></div>`;
   const c = document.getElementById('contCat');
   if(c) c.textContent = `${l.length} de ${listaProdutos().length} item(ns)`;
   tb.querySelectorAll('[data-cat-edit]').forEach(b=>b.onclick=()=>formProduto(b.dataset.catEdit));
   tb.querySelectorAll('[data-cat-rm]').forEach(b=>b.onclick=()=>excluirProduto(b.dataset.catRm));
+  cards.querySelectorAll('[data-cat-edit]').forEach(b=>b.onclick=()=>formProduto(b.dataset.catEdit));
+  cards.querySelectorAll('[data-cat-rm]').forEach(b=>b.onclick=()=>excluirProduto(b.dataset.catRm));
+  const vazio=cards.querySelector('[data-cat-empty]');
+  if(vazio) vazio.onclick=()=>{
+    if(listaProdutos().length){ filtroCat.busca=''; filtroCat.margem='todos'; filtroCat.ordem='nome'; document.getElementById('buscaCat').value=''; document.getElementById('fCatMargem').value='todos'; document.getElementById('fCatOrdem').value='nome'; renderTabelaCat(); }
+    else formProduto(null);
+  };
 }
 function renderFornecedores(){
   const el = document.getElementById('listaForn'); if(!el) return;
@@ -6839,7 +6897,7 @@ function formProduto(id){
       <div class="modal-h"><h2>${p?'✏️ Editar item':'＋ Novo produto / serviço'}</h2><button type="button" class="x" data-fechar>×</button></div>
       <div class="modal-b">
         <div class="form-grid">
-          <div class="campo full"><label>Nome * <span class="req">*</span></label><input name="nome" required maxlength="100" value="${esc(v.nome)}" placeholder="Ex.: Formatação com backup" autofocus></div>
+          <div class="campo full"><label>Nome <span class="req">*</span></label><input name="nome" required maxlength="100" value="${esc(v.nome)}" placeholder="Ex.: Formatação com backup" autofocus></div>
           <div class="campo"><label>Unidade</label><select name="un">${UN.map(u=>`<option ${v.un===u?'selected':''}>${u}</option>`).join('')}</select></div>
           <div class="campo"><label>Fornecedor</label><select name="fornecedorId"><option value="">— Nenhum —</option>${listaFornecedores().map(f=>`<option value="${f.id}" ${v.fornecedorId===f.id?'selected':''}>${esc(f.nome)}</option>`).join('')}</select></div>
           <div class="campo"><label>Custo (R$)</label><input name="custo" type="number" min="0" step="0.01" value="${Number(v.custo)||0}"></div>
@@ -6923,6 +6981,9 @@ function formProduto(id){
     const f = new FormData(e.target);
     const nome = String(f.get('nome')||'').trim();
     if(!nome){ toast('Informe o nome.','erro'); return; }
+    const chaveNome=nome.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+    const duplicado=listaProdutos().find(x=>x.id!==(p&&p.id)&&String(x.nome||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR')===chaveNome);
+    if(duplicado){ toast(`Já existe um item chamado "${duplicado.nome}". Edite o cadastro existente ou escolha outro nome.`,'erro'); modal.querySelector('[name="nome"]').focus(); return; }
     const dados = {
       nome,
       un:String(f.get('un')||'un'),
