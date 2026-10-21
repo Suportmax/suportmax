@@ -5803,55 +5803,68 @@ function osDocHTML(os){
   const em = db.emissor || emissorVazio();
   const c = buscarCli(os.clienteId);
   const pr = osProgresso(os);
+  const st = badgeOS(os.status);
   return `
-    <div class="topo">
-      <div class="marca-doc">
-        <img class="doc-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
-        <div class="marca-txt">
-          <div style="font-size:16.5px;font-weight:800">${em.nome?esc(em.nome):esc(MARCA_NOME)}</div>
-          ${em.telefone?`<div>${esc(em.telefone)}</div>`:''}
-          ${em.email?`<div>${esc(em.email)}</div>`:''}
-          ${em.doc?`<div>${esc(em.doc)}</div>`:''}
+    <div class="os-print-wrap">
+      <div class="os-head">
+        <div class="os-brand">
+          <img class="os-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
+          <div class="os-brand-txt">
+            <div class="os-brand-nome">${em.nome?esc(em.nome):esc(MARCA_NOME)}</div>
+            <div class="os-brand-meta">${[em.telefone, em.email, em.doc].filter(Boolean).map(x=>esc(x)).join(' · ')}</div>
+          </div>
+        </div>
+        <div class="os-title">
+          <div class="os-title-top">ORDEM DE SERVIÇO</div>
+          <div class="os-title-num">${esc(os.numero||'—')}</div>
+          <div class="os-title-status">${st}</div>
+          <div class="os-title-dates">Abertura: ${fmtData(os.data)}${os.prazo?` • Prazo: ${fmtData(os.prazo)}`:''}</div>
         </div>
       </div>
-      <div class="doc-titulo">
-        <div class="t">ORDEM DE SERVIÇO</div>
-        <div class="n">${esc(os.numero||'—')}</div>
-        <div style="margin-top:5px">${badgeOS(os.status)}</div>
+      <div class="os-grid">
+        <div class="os-card">
+          <div class="os-card-h">DADOS DO CLIENTE</div>
+          <div class="os-card-b">
+            <div><b>${esc(c?c.nome:nomeClienteOrdem(os))}</b>${c&&c.empresa?`<br><span style="color:#475569">${esc(c.empresa)}</span>`:''}</div>
+            ${c&&docCliente(c)?`<div style="margin-top:4px">${docCliente(c).rotulo}: ${esc(docCliente(c).valor)}</div>`:''}
+            ${c&&c.telefone?`<div style="margin-top:4px">Tel/WhatsApp: ${esc(c.telefone)}</div>`:''}
+            ${c&&c.email?`<div style="margin-top:4px">E-mail: ${esc(c.email)}</div>`:''}
+            ${c&&c.endereco?`<div style="margin-top:4px;color:#475569">${esc(c.endereco)}</div>`:''}
+          </div>
+        </div>
+        <div class="os-card">
+          <div class="os-card-h">ATENDIMENTO</div>
+          <div class="os-card-b">
+            ${os.responsavel?`<div><b>Responsável:</b> ${esc(os.responsavel)}</div>`:''}
+            ${(()=>{ const f=os.fornecedorId?buscarForn(os.fornecedorId):null; if(!f) return ''; return `<div style="margin-top:4px"><b>Fornecedor:</b> ${esc(f.nome)}${f.telefone?` • ${esc(f.telefone)}`:''}${f.contato?` • ${esc(f.contato)}`:''}</div>`; })()}
+            ${!os.responsavel && !os.fornecedorId?`<div style="color:#64748b">Não informado</div>`:''}
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="doc-info">
-      <div><b>Cliente:</b> ${esc(c?c.nome:nomeClienteOrdem(os))}${c&&c.empresa?` — ${esc(c.empresa)}`:''}</div>
-      ${c&&docCliente(c)?`<div><b>${docCliente(c).rotulo}:</b> ${esc(docCliente(c).valor)}</div>`:''}
-      ${c&&c.telefone?`<div><b>Telefone:</b> ${esc(c.telefone)}</div>`:''}
-      <div><b>Abertura:</b> ${fmtData(os.data)}${os.prazo?` · <b>Prazo:</b> ${fmtData(os.prazo)}`:''}</div>
-      ${os.responsavel?`<div><b>Responsável:</b> ${esc(os.responsavel)}</div>`:''}
-      ${(()=>{ const f=os.fornecedorId?buscarForn(os.fornecedorId):null; if(!f) return ''; return `<div><b>Fornecedor:</b> ${esc(f.nome)}${f.telefone?` · ${esc(f.telefone)}`:''}${f.contato?` · ${esc(f.contato)}`:''}</div>`; })()}
-    </div>
-    ${itensOS(os).length?`<table>
-      <thead><tr><th>Descrição</th><th class="num-c">Qtd</th><th class="num-c">Valor unit.</th><th class="num-c">Total</th></tr></thead>
-      <tbody>${itensOS(os).map(i=>`<tr>
-        <td>${esc(i.desc||'—')}${itemDescV(i)>0?`<div style="color:#ef4444;font-size:11.5px">desconto: − ${brl(itemDescV(i))}${i.descTipo==='%'?` (${Number(i.descItem)||0}%)`:''}</div>`:''}</td>
-        <td class="num-c">${Number(i.qtd)||0}</td>
-        <td class="num-c">${brl(i.unit)}</td>
-        <td class="num-c">${brl(itemTotal(i))}</td>
-      </tr>`).join('')}</tbody>
-    </table>`:''}
-    ${os.descricao?`<div class="obs"><b>Serviço:</b><br>${esc(os.descricao).replace(/\n/g,'<br>')}</div>`:''}
-    ${pr.total?`<div class="obs"><b>Checklist (${pr.feito}/${pr.total} — ${pr.pct}%):</b><br>
-      ${(os.checklist||[]).map(i=>`${i.feito?'☑':'☐'} ${esc(i.tarefa)}`).join('<br>')}</div>`:''}
-    ${os.obs?`<div class="obs"><b>Observações:</b><br>${esc(os.obs)}</div>`:''}
-    <div style="margin-top:9px">
-      ${itensOS(os).length?`<div class="tot-line"><span>SUBTOTAL DOS ITENS</span><b>${brl(subtotalOS(os))}</b></div>`:''}
-      ${valorServicoOS(os)>0?`<div class="tot-line"><span>${itensOS(os).length?'SERVIÇO AVULSO':'VALOR DO SERVIÇO'}</span><b>${brl(valorServicoOS(os))}</b></div>`:''}
-      <div class="tot-line geral"><span>TOTAL DA OS</span><b>${brl(totalOS(os))}</b></div>
-    </div>
-    ${vendaDaOS(os)?`<div class="obs" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><b>Vendida:</b> ${fmtData(os.venda.data)}${os.venda.forma?` · pagamento: ${esc(os.venda.forma)}`:''}${os.venda.numero?` · pedido nº ${esc(os.venda.numero)}`:''}</div>`:''}
-    <div class="assinaturas">
-      <div>Assinatura do cliente</div>
-      <div>Responsável técnico</div>
-    </div>
-    <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())} · Ordem de serviço ${esc(os.numero||'')}</div></div>`;
+      ${os.descricao?`<div class="os-block"><div class="os-block-h">DESCRIÇÃO DO SERVIÇO</div><div class="os-block-b">${esc(os.descricao).replace(/\n/g,'<br>')}</div></div>`:''}
+      ${itensOS(os).length?`<div class="os-block"><div class="os-block-h">PRODUTOS / SERVIÇOS</div><div class="os-block-b" style="padding:0"><table class="os-table">
+        <thead><tr><th>Descrição</th><th class="num">Qtd</th><th class="num">Unitário</th><th class="num">Total</th></tr></thead>
+        <tbody>${itensOS(os).map(i=>`<tr>
+          <td>${esc(i.desc||'—')}${itemDescV(i)>0?`<div class="os-item-desc">Desconto: - ${brl(itemDescV(i))}${i.descTipo==='%'?` (${Number(i.descItem)||0}%)`:''}</div>`:''}</td>
+          <td class="num">${Number(i.qtd)||0}</td>
+          <td class="num">${brl(i.unit)}</td>
+          <td class="num"><b>${brl(itemTotal(i))}</b></td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>`:''}
+      ${pr.total?`<div class="os-block"><div class="os-block-h">CHECKLIST DE EXECUÇÃO (${pr.feito}/${pr.total} • ${pr.pct}%)</div><div class="os-block-b os-check">${(os.checklist||[]).map(i=>`<div class="os-chk-item">${i.feito?'☑':'☐'} ${esc(i.tarefa)}</div>`).join('')}</div></div>`:''}
+      ${os.obs?`<div class="os-block"><div class="os-block-h">OBSERVAÇÕES</div><div class="os-block-b">${esc(os.obs).replace(/\n/g,'<br>')}</div></div>`:''}
+      <div class="os-totals">
+        ${itensOS(os).length?`<div class="os-tot-line"><span>Subtotal dos itens</span><span>${brl(subtotalOS(os))}</span></div>`:''}
+        ${valorServicoOS(os)>0?`<div class="os-tot-line"><span>${itensOS(os).length?'Serviço avulso':'Valor do serviço'}</span><span>${brl(valorServicoOS(os))}</span></div>`:''}
+        <div class="os-tot-line os-tot-geral"><span>TOTAL DA OS</span><span>${brl(totalOS(os))}</span></div>
+      </div>
+      ${vendaDaOS(os)?`<div class="os-venda"><b>✓ Vendida</b> em ${fmtData(os.venda.data)}${os.venda.forma?` • ${esc(os.venda.forma)}`:''}${os.venda.numero?` • Pedido ${esc(os.venda.numero)}`:''}</div>`:''}
+      <div class="os-ass">
+        <div class="os-ass-box"><div class="os-ass-line"></div><div class="os-ass-txt">Assinatura do cliente</div></div>
+        <div class="os-ass-box"><div class="os-ass-line"></div><div class="os-ass-txt">Responsável técnico</div></div>
+      </div>
+      <div class="os-foot">Emitido em ${fmtData(hojeISO())} • Ordem de Serviço ${esc(os.numero||'')}</div>
+    </div>`;
 }
 function verOrdem(id){
   const os = buscarOrdem(id); if(!os) return;
