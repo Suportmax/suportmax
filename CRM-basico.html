@@ -2619,13 +2619,22 @@ function htmlAniversarios(){
   const hoje = new Date();
   const mes = hoje.getMonth()+1;
   const diaHoje = hoje.getDate();
-  const lista = (db.clientes||[]).filter(c=>c.nascimento).map(c=>{
+  let lista = (db.clientes||[]).filter(c=>c.nascimento).map(c=>{
     const p = String(c.nascimento).split('-');
     if(p.length<3) return null;
     const m = Number(p[1]), d = Number(p[2]);
-    const diff = (new Date(hoje.getFullYear(), m-1, d) - new Date(hoje.getFullYear(), hoje.getMonth(), diaHoje)) / 86400000;
-    return {...c, m, d, diff: Math.ceil(diff)};
-  }).filter(Boolean).sort((a,b)=> a.m!==b.m ? a.m-b.m : a.d-b.d);
+    const nasc = new Date(hoje.getFullYear(), m-1, d);
+    const hoje0 = new Date(hoje.getFullYear(), hoje.getMonth(), diaHoje);
+    let diff = Math.round((nasc - hoje0)/86400000);
+    if(diff < 0) diff += 365;
+    return {...c, m, d, diff, origem:'crm'};
+  }).filter(Boolean);
+  const gcal = db.anivGoogle || [];
+  gcal.forEach(g=>{
+    const ja = lista.find(x=>x.nome===g.nome && x.d===g.d && x.m===g.m);
+    if(!ja) lista.push({...g, diff: g.diff>=0?g.diff:365+g.diff, origem:'google'});
+  });
+  lista = lista.sort((a,b)=> a.diff!==b.diff ? a.diff-b.diff : String(a.nome).localeCompare(String(b.nome),'pt-BR'));
   const hojeList = lista.filter(x=>x.diff===0);
   const prox = lista.filter(x=>x.diff>0 && x.diff<=30);
   const resto = lista.filter(x=>x.diff<0 || x.diff>30);
