@@ -1744,7 +1744,7 @@ function prepararPrimeiroUso(nova){
     if(n) setTimeout(()=>toast(`📦 Catálogo de informática carregado: ${n} produtos e serviços já estão disponíveis nos orçamentos.`, 'ok'), 400);
   }
   /* Aplica as fotos embutidas nos itens do catálogo que ainda não têm foto (uma vez por sessão de carga) */
-  if((nova.produtos||[]).some(p=>p && !p.foto && fotoDoProduto(p.nome))){
+  if(!nova.catalogoFotosOmitidas && (nova.produtos||[]).some(p=>p && !p.foto && fotoDoProduto(p.nome))){
     const q = aplicarFotosCatalogoEm(nova);
     if(q) try{ localStorage.setItem(localDataKey, JSON.stringify(nova)); }catch(e){}
   }
@@ -1769,6 +1769,52 @@ function carregar(chave=localDataKey){
   return prepararPrimeiroUso(nova);
 }
 
+function compactarDadosParaQuotaLocal(removerTodasFotos=false){
+  if(Array.isArray(db.backups)) db.backups=[];
+  let removeuFotoModelo=false;
+  if(Array.isArray(db.produtos)) db.produtos=db.produtos.map(p=>{
+    if(!p||!p.foto||typeof p.foto!=='string') return p;
+    const fotoModelo=fotoDoProduto(p.nome);
+    if(removerTodasFotos || p.foto.length>50000 || (fotoModelo&&p.foto===fotoModelo)){
+      if(fotoModelo&&p.foto===fotoModelo) removeuFotoModelo=true;
+      const {foto,...rest}=p; return rest;
+    }
+    return p;
+  });
+  if(Array.isArray(db.clientes)) db.clientes=db.clientes.map(c=>{
+    if(c&&typeof c.foto==='string'&&(removerTodasFotos||c.foto.length>50000)){const {foto,...rest}=c;return rest;}
+    return c;
+  });
+  if(removeuFotoModelo) db.catalogoFotosOmitidas=true;
+}
+
+/* Migra o estado legado sem manter duas cópias grandes ao mesmo tempo. */
+function gravarDadosUsuarioLocal(chaveUsuario, migrarLegado){
+  const gravar=()=>localStorage.setItem(chaveUsuario,JSON.stringify(db));
+  try{gravar();return true;}catch(erroInicial){}
+  let legado=null;
+  if(migrarLegado){try{legado=localStorage.getItem(KEY);}catch(e){}}
+  const tentarMoverLegado=()=>{
+    if(legado===null) return false;
+    try{localStorage.removeItem(KEY);gravar();return true;}
+    catch(e){try{localStorage.setItem(KEY,legado);}catch(restauracao){console.error('Não foi possível restaurar a cópia local antiga.',restauracao);}return false;}
+  };
+  if(tentarMoverLegado()) return true;
+  compactarDadosParaQuotaLocal();
+  try{gravar();toast('O espaço local estava cheio. Removi backups internos e fotos predefinidas/pesadas; os dados dos cadastros foram mantidos.','aviso');return true;}catch(e){}
+  if(tentarMoverLegado()){
+    toast('O espaço local estava cheio. Removi backups internos e fotos predefinidas/pesadas; os dados dos cadastros foram mantidos.','aviso');
+    return true;
+  }
+  compactarDadosParaQuotaLocal(true);
+  try{gravar();toast('O espaço local estava cheio. Fotos de produtos/clientes e backups internos foram removidos; os demais dados foram mantidos.','aviso');return true;}catch(e){}
+  if(tentarMoverLegado()){
+    toast('O espaço local estava cheio. Fotos de produtos/clientes e backups internos foram removidos; os demais dados foram mantidos.','aviso');
+    return true;
+  }
+  return false;
+}
+
 /* Cada conta autenticada mantém seu próprio estado local neste navegador. */
 function selecionarDadosLocaisDoUsuario(user){
   const userId = String(user&&user.id||'');
@@ -1782,7 +1828,7 @@ function selecionarDadosLocaisDoUsuario(user){
   }else if(!donoAntigo || donoAntigo===userId){
     /* Migra o estado legado uma única vez para a primeira conta autenticada. */
     db = prepararPrimeiroUso(normalizar(db)||baseVazia());
-    localStorage.setItem(chaveUsuario, JSON.stringify(db));
+    if(!gravarDadosUsuarioLocal(chaveUsuario,true)) throw new Error('O navegador está sem espaço local. Libere espaço ou exporte/remova imagens grandes e tente novamente.');
     localStorage.setItem(KEY_DONO_LOCAL, userId);
     const pendente = localStorage.getItem(KEY_SYNC_PENDENTE);
     const versao = localStorage.getItem(KEY_SYNC_AT);
@@ -1795,7 +1841,7 @@ function selecionarDadosLocaisDoUsuario(user){
   }else{
     /* Sem dados locais próprios: começa vazio; nunca copia dados de outra conta. */
     db = prepararPrimeiroUso(baseVazia());
-    localStorage.setItem(chaveUsuario, JSON.stringify(db));
+    if(!gravarDadosUsuarioLocal(chaveUsuario,false)) throw new Error('O navegador está sem espaço local. Libere espaço ou exporte/remova imagens grandes e tente novamente.');
   }
   db.role = 'comum';
   aplicarPermissoes();
@@ -1942,26 +1988,9 @@ function persistirDadosLocal(){
       }catch(e2){ e = e2; }
     }
     try{
-      if(db.produtos){
-        db.produtos = db.produtos.map(p=>{
-          if(p.foto && typeof p.foto === 'string' && p.foto.length > 50000){
-            const {foto,...rest} = p;
-            return rest;
-          }
-          return p;
-        });
-      }
-      if(db.clientes){
-        db.clientes = db.clientes.map(c=>{
-          if(c.foto && typeof c.foto === 'string' && c.foto.length > 50000){
-            const {foto,...rest} = c;
-            return rest;
-          }
-          return c;
-        });
-      }
+      compactarDadosParaQuotaLocal();
       localStorage.setItem(localDataKey, JSON.stringify(db));
-      toast('Armazenamento cheio: fotos pesadas foram removidas. Exporte um backup JSON agora.','aviso');
+      toast('Armazenamento cheio: backups internos e fotos predefinidas/pesadas foram removidos. Os dados dos cadastros foram mantidos.','aviso');
       return true;
     }catch(e2){
       console.error('Falha ao salvar os dados localmente.', e2||e);
