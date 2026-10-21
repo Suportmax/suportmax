@@ -2440,6 +2440,19 @@ function htmlPainel(){
   ${cartaoLigado('caixa')?caixaCard():''}
 
   ${(()=>{
+    const hoje = new Date();
+    const mes = hoje.getMonth()+1, diaHoje = hoje.getDate();
+    const aniv = (db.clientes||[]).filter(c=>c.nascimento).map(c=>{
+      const p=String(c.nascimento).split('-'); if(p.length<3) return null;
+      const m=Number(p[1]), d=Number(p[2]);
+      const diff = Math.ceil((new Date(hoje.getFullYear(),m-1,d)-new Date(hoje.getFullYear(),hoje.getMonth(),diaHoje))/86400000);
+      return {...c,m,d,diff};
+    }).filter(Boolean).filter(x=>x.diff>=0 && x.diff<=7).sort((a,b)=>a.diff-b.diff).slice(0,6);
+    if(!aniv.length) return '';
+    return `<div class="card" style="margin-bottom:18px"><div class="card-h"><h3>🎂 Aniversariantes próximos 7 dias</h3><button class="link" data-go="aniversarios">Ver todos →</button></div><div class="card-b">${aniv.map(c=>`<div class="linha-lista"><div class="avatar">${c.diff===0?'🎂':String(c.d).padStart(2,'0')+'/'+String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.diff===0?'Hoje':c.diff===1?'Amanhã':`Faltam ${c.diff} dias`}${c.telefone?' · '+esc(c.telefone):''}</div></div><button class="btn sm primary" data-act="cli-zap" data-id="${c.id}">💬 Parabenizar</button></div>`).join('')}</div></div>`;
+  })()}
+
+  ${(()=>{
     const venc = orcamentosVencendo(5);
     const nfp = listaOrcamentos().filter(nfPendente);
     const osab = listaOrdens().filter(o=>!['concluida','cancelada','vendida'].includes(o.status));
