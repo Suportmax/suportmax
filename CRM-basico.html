@@ -752,7 +752,46 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
 .fab-novo{display:none;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));width:58px;height:58px;border-radius:50%;background:var(--prim);color:#fff;font-size:30px;box-shadow:0 12px 34px rgba(37,99,235,.4);align-items:center;justify-content:center;z-index:50}
 @media(max-width:980px){ .fab-novo{display:flex} .topbar-actions{display:none} }
 </style>
-</head>
+<style>
+.os-print-compact{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:10.5pt;line-height:1.35;color:#111;padding:10mm 12mm;background:#fff}
+.os-topo{width:100%;border-collapse:collapse;margin-bottom:10px}
+.os-topo-esq{width:60%;vertical-align:top;padding:0}
+.os-topo-dir{text-align:right;vertical-align:top;padding:0}
+.os-marca{display:flex;align-items:center;gap:10px}
+.os-logo-c{height:38px;max-width:120px;object-fit:contain}
+.os-marca-nome{font-weight:800;font-size:12pt}
+.os-marca-meta{font-size:8.5pt;color:#475569}
+.os-tit{font-size:9pt;text-transform:uppercase;letter-spacing:.5pt;color:#475569}
+.os-num{font-size:16pt;font-weight:800;line-height:1}
+.os-st{margin-top:4px}
+.os-datas{margin-top:4px;font-size:9pt;color:#475569}
+.os-info{width:100%;border-collapse:collapse;margin-bottom:8px}
+.os-info-blk{width:50%;vertical-align:top;padding:8px 10px;border:1px solid #e5e7eb}
+.os-blk-tit{font-size:8pt;text-transform:uppercase;letter-spacing:.3pt;font-weight:700;color:#475569;margin-bottom:4px}
+.os-linha-suave{color:#475569;font-size:9pt}
+.os-bloco{margin:8px 0;padding:8px 10px;border:1px solid #e5e7eb}
+.os-texto{white-space:normal}
+.os-tab{width:100%;border-collapse:collapse;margin-top:2px}
+.os-tab th{background:#f1f5f9;padding:4px 6px;font-size:8pt;text-align:left;border-bottom:1px solid #e5e7eb;text-transform:uppercase;letter-spacing:.2pt}
+.os-tab td{padding:5px 6px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.os-tab .num{text-align:right;white-space:nowrap}
+.os-desc-item{font-size:8.5pt;color:#dc2626;margin-top:1px}
+.os-chk-c{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 10px}
+.os-chk-i{font-size:9pt}
+.os-tot{width:100%;border-collapse:collapse;margin-top:8px;border:1px solid #e5e7eb}
+.os-tot td{padding:4px 8px;border-bottom:1px solid #f1f5f9}
+.os-tot td.num{text-align:right;font-weight:600}
+.os-tot .os-tot-geral td{font-size:11pt;font-weight:800;background:#f8fafc;border-top:1px solid #e5e7eb}
+.os-venda-c{margin-top:6px;padding:4px 8px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:9pt}
+.os-assin{width:100%;margin-top:18px;border-collapse:collapse}
+.os-assin td{width:50%;padding:0 12px;text-align:center}
+.os-linha-ass{border-bottom:1px solid #111;height:28px}
+.os-ass-t{margin-top:4px;font-size:8.5pt;color:#475569}
+.os-rodape{margin-top:10px;text-align:center;font-size:8pt;color:#64748b}
+@media print{
+  .os-print-compact{padding:8mm 9mm}
+}
+</style></head>
 <body>
 <!-- ===== Tela de login (Supabase) ===== -->
 <div class="login-screen" id="loginScreen" hidden>
