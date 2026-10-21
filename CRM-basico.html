@@ -2237,7 +2237,7 @@ function textoProntoOrc(o){
   const linhas = [];
   linhas.push(`Olá${primeiro?', '+primeiro:''}! Tudo bem? 😊`);
   linhas.push('');
-  linhas.push(`Segue o orçamento *${o.numero}* no valor total de *${brl(totalOrc(o))}*:`);
+  linhas.push(`Segue o orçamento *${o.numero}* no valor total de *${brl(valorOrcVenda(o))}*:`);
   linhas.push('');
   const itens = (o.itens||[]).slice(0,8);
   itens.forEach(i=>{
@@ -2266,7 +2266,7 @@ function linkMail(o){
   const c = buscarCli(o.clienteId);
   const email = String((c&&c.email)||'').trim().replace(/\s/g,'');
   if(!email) return null;
-  const assunto = `Orçamento ${o.numero} — ${brl(totalOrc(o))}`;
+  const assunto = `Orçamento ${o.numero} — ${brl(valorOrcVenda(o))}`;
   return 'mailto:'+email+'?subject='+encodeURIComponent(assunto)+'&body='+encodeURIComponent(textoProntoOrc(o));
 }
 function enviarZap(id){
@@ -4542,7 +4542,7 @@ function tabelaOrcHTML(){
       <div class="mt">${esc((buscarCli(o.clienteId)||{}).empresa || o.clienteNome || '')}</div>
     </td>
     <td>${brl(subtotalOrc(o))}${descGeralV(o)>0?`<div class="mt">desconto ${brl(descGeralV(o))}</div>`:''}</td>
-    <td class="vl-total">${brl(totalOrc(o))}</td>
+    <td class="vl-total">${brl(valorOrcVenda(o))}</td>
     <td>
       <select class="filtro" style="min-width:118px;padding:6px 8px" data-act="orc-status" data-id="${o.id}" title="Mudar status">
         ${STATUS_ORC.map(s=>`<option value="${s.id}" ${o.status===s.id?'selected':''}>${s.label}</option>`).join('')}
@@ -5113,7 +5113,7 @@ function orcDocHTML(o){
       ${descItensOrc(o)>0?`<div class="tot-line"><span>Descontos nos itens</span><b>− ${brl(descItensOrc(o))}</b></div>`:''}
       ${freteOrc(o)>0?`<div class="tot-line"><span>Frete / instalação</span><b>+ ${brl(freteOrc(o))}</b></div>`:''}
       ${desc>0?`<div class="tot-line"><span>Desconto geral${o.descGeralTipo==='%'?` (${Number(o.desconto)||0}%)`:''}</span><b>− ${brl(desc)}</b></div>`:''}
-      <div class="tot-line geral"><span>TOTAL</span><b>${brl(totalOrc(o))}</b></div>
+      <div class="tot-line geral"><span>TOTAL</span><b>${brl(valorOrcVenda(o))}</b></div>
     </div>
 
     ${o.obs?`<div class="obs"><b>Observações e condições:</b><br>${esc(o.obs)}</div>`:''}
@@ -5399,7 +5399,7 @@ function formNotaFiscal(id){
             <div><b>Cliente:</b> ${esc(cli?cli.nome:o.clienteNome||'—')}${cli&&cli.empresa?` — ${esc(cli.empresa)}`:''}</div>
             ${docCliente(cli)?`<div><b>${docCliente(cli).rotulo}:</b> ${esc(docCliente(cli).valor)}</div>`:''}
             ${cli&&cli.telefone?`<div><b>Telefone:</b> ${esc(cli.telefone)}</div>`:''}
-            <div><b>Valor total:</b> ${brl(totalOrc(o))}</div>
+            <div><b>Valor total:</b> ${brl(valorOrcVenda(o))}</div>
             <div><b>Itens:</b> ${(o.itens||[]).map(i=>esc(i.desc||'')).filter(Boolean).join(' · ')||'—'}</div>
           </div>
           <div style="margin-top:10px"><button type="button" class="btn ghost sm" id="btnCopiarNF">📋 Copiar resumo</button></div>
@@ -5602,7 +5602,7 @@ function formOrdem(id){
         <div class="form-grid">
           ${!os && orcsAprov.length?`<div class="campo full"><label>Gerar a partir de um orçamento aprovado (opcional)</label>
             <select id="selOrcOS"><option value="">— Preencher manualmente —</option>
-              ${orcsAprov.map(o=>`<option value="${o.id}">${esc(o.numero)} · ${esc(nomeClienteOrc(o))} · ${brl(totalOrc(o))}</option>`).join('')}
+              ${orcsAprov.map(o=>`<option value="${o.id}">${esc(o.numero)} · ${esc(nomeClienteOrc(o))} · ${brl(valorOrcVenda(o))}</option>`).join('')}
             </select></div>`:''}
           <div class="campo full"><label>Cliente * <span class="req">*</span></label>
             <div style="display:flex;flex-direction:column;gap:6px">
@@ -6219,9 +6219,9 @@ function textoFollowupOrc(o){
   const primeiro = String(c?c.nome:nomeClienteOrc(o)).trim().split(/\s+/)[0] || '';
   const v = validadeInfo(o);
   const linhas = [`Olá${primeiro?', '+primeiro:''}! Tudo bem? 😊`, ''];
-  if(v && v.dias<0) linhas.push(`O orçamento *${o.numero}* (${brl(totalOrc(o))}) venceu em ${fmtData(o.validade)}. Posso renovar os valores para você?`);
-  else if(v && v.dias<=5) linhas.push(`Passando para lembrar que o orçamento *${o.numero}* (${brl(totalOrc(o))}) é válido até ${fmtData(o.validade)}. Quer garantir?`);
-  else linhas.push(`Passando para saber se você viu o orçamento *${o.numero}* (${brl(totalOrc(o))}).`);
+  if(v && v.dias<0) linhas.push(`O orçamento *${o.numero}* (${brl(valorOrcVenda(o))}) venceu em ${fmtData(o.validade)}. Posso renovar os valores para você?`);
+  else if(v && v.dias<=5) linhas.push(`Passando para lembrar que o orçamento *${o.numero}* (${brl(valorOrcVenda(o))}) é válido até ${fmtData(o.validade)}. Quer garantir?`);
+  else linhas.push(`Passando para saber se você viu o orçamento *${o.numero}* (${brl(valorOrcVenda(o))}).`);
   linhas.push('', 'Qualquer dúvida, é só me chamar! 🙂');
   return linhas.join('\n');
 }
@@ -6939,7 +6939,7 @@ function mostrarLinkOrc(id){
     const c = buscarCli(o.clienteId);
     let tel = String((c&&c.telefone)||'').replace(/\D/g,'');
     if(tel && tel.length<=11) tel = '55'+tel;
-    const msg = `Olá! Segue o orçamento ${o.numero} (${brl(totalOrc(o))}). Você pode ver e responder por aqui: ${link}`;
+    const msg = `Olá! Segue o orçamento ${o.numero} (${brl(valorOrcVenda(o))}). Você pode ver e responder por aqui: ${link}`;
     window.open((tel?'https://wa.me/'+tel+'?text=':'https://wa.me/?text=')+encodeURIComponent(msg), '_blank','noopener');
   };
 }
@@ -7198,7 +7198,7 @@ function formPagamento(orcId){
   <div class="modal-h"><h2>💵 Registrar pagamento</h2><button type="button" class="x" data-fechar>×</button></div>
   <div class="modal-b">
     <div class="info-orc">${esc(o.numero||'—')} · ${esc(nomeClienteOrc(o))}</div>
-    <div class="resumo-mini">Total ${brl(totalOrc(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(ab)}</b></div>
+    <div class="resumo-mini">Total ${brl(valorOrcVenda(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(ab)}</b></div>
     <form id="fPgto">
       <div class="linha-campos">
         <div class="campo"><label>Valor (R$)</label><input type="number" step="0.01" min="0" name="valor" value="${ab.toFixed(2)}" required></div>
@@ -7228,7 +7228,7 @@ function verPagamentos(orcId){
   <div class="modal-h"><h2>💵 Pagamentos</h2><button type="button" class="x" data-fechar>×</button></div>
   <div class="modal-b">
     <div class="info-orc">${esc(o.numero||'—')} · ${esc(nomeClienteOrc(o))}</div>
-    <div class="resumo-mini">Total ${brl(totalOrc(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(abertoOrc(o))}</b></div>
+    <div class="resumo-mini">Total ${brl(valorOrcVenda(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(abertoOrc(o))}</b></div>
     <div style="margin-top:12px">
     ${pgs.length ? pgs.map(p=>`<div class="linha-lista">
         <div><div class="nm">${brl(p.valor)}</div><div class="mt">${fmtData(p.data)} · ${esc(p.forma||'')}</div></div>
@@ -7875,7 +7875,7 @@ function htmlRelatorios(){
         <div class="rel-linha">
           <span class="rel-nome">${esc(o.numero||'')} · ${esc(nomeClienteOrc(o))}</span>
           ${seloValidade(o)}
-          <b class="rel-valor">${brl(totalOrc(o))}</b>
+          <b class="rel-valor">${brl(valorOrcVenda(o))}</b>
         </div>`).join('')}</div>` : `<div class="vazio"><span class="big">✅</span>Nenhum orçamento vencendo nos próximos dias.</div>`; })()}
     </div>
   </div>
@@ -7887,7 +7887,7 @@ function htmlRelatorios(){
         <span class="rel-nome">${esc(o.numero||'')} · ${esc(nomeClienteOrc(o))}</span>
         <span class="rel-qtd">${fmtData(o.data)}</span>
         ${badgeOrc(o.status)}
-        <b class="rel-valor">${brl(totalOrc(o))}</b>
+        <b class="rel-valor">${brl(valorOrcVenda(o))}</b>
       </div>`).join('')}</div>`
     : `<div class="vazio"><span class="big">🧾</span>Nenhum orçamento no período.</div>`}
   </div>
@@ -7944,7 +7944,7 @@ function imprimirRelatorio(){
     <td>${esc2(nomeClienteOrc(o))}</td>
     <td>${fmtData(o.data)}</td>
     <td>${esc2(statusOrc(o.status).label)}</td>
-    <td style="text-align:right">${brl(totalOrc(o))}</td>
+    <td style="text-align:right">${brl(valorOrcVenda(o))}</td>
   </tr>`).join('');
   const area = document.getElementById('areaImpressao');
   area.innerHTML = `<div class="orc-doc orc-print">
@@ -8932,7 +8932,7 @@ function iniciarBuscaGlobal(){
     const clis = db.clientes.filter(c=>[c.nome,c.empresa,c.email,c.telefone,c.cpf,c.cnpj].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,5);
     if(clis.length) gr.push({grupo:'Clientes', itens:clis.map(c=>({ico:'👤', titulo:c.nome, sub:c.empresa||c.telefone||'', tipo:'cli', id:c.id}))});
     const orcs = listaOrcamentos().filter(o=>[o.numero,nomeClienteOrc(o),o.obs].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,5);
-    if(orcs.length) gr.push({grupo:'Orçamentos', itens:orcs.map(o=>({ico:'🧾', titulo:o.numero, sub:`${nomeClienteOrc(o)} · ${brl(totalOrc(o))}`, tipo:'orc', id:o.id}))});
+    if(orcs.length) gr.push({grupo:'Orçamentos', itens:orcs.map(o=>({ico:'🧾', titulo:o.numero, sub:`${nomeClienteOrc(o)} · ${brl(valorOrcVenda(o))}`, tipo:'orc', id:o.id}))});
     const ordens = listaOrdens().filter(o=>[o.numero,nomeClienteOrdem(o),o.descricao].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,5);
     if(ordens.length) gr.push({grupo:'Ordens de serviço', itens:ordens.map(o=>({ico:'🛠️', titulo:o.numero, sub:`${nomeClienteOrdem(o)} · ${brl(o.valor)}`, tipo:'os', id:o.id}))});
     const prods = listaProdutos().filter(p=>[p.nome,p.desc].some(v=>String(v||'').toLowerCase().includes(t))).slice(0,5);
