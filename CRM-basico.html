@@ -2627,20 +2627,21 @@ function htmlAniversarios(){
     const hoje0 = new Date(hoje.getFullYear(), hoje.getMonth(), diaHoje);
     let diff = Math.round((nasc - hoje0)/86400000);
     if(diff < 0) diff += 365;
-    return {...c, m, d, diff, origem:'crm'};
+    return {...c, m, d, diff, origem:'crm', nome: c.nome};
   }).filter(Boolean);
   const gcal = db.anivGoogle || [];
   gcal.forEach(g=>{
-    const ja = lista.find(x=>x.nome===g.nome && x.d===g.d && x.m===g.m);
+    const ja = lista.find(x=>x.nome.toLowerCase()===String(g.nome).toLowerCase() && x.d===g.d && x.m===g.m);
     if(!ja) lista.push({...g, diff: g.diff>=0?g.diff:365+g.diff, origem:'google'});
   });
   lista = lista.sort((a,b)=> a.diff!==b.diff ? a.diff-b.diff : String(a.nome).localeCompare(String(b.nome),'pt-BR'));
   const hojeList = lista.filter(x=>x.diff===0);
   const prox = lista.filter(x=>x.diff>0 && x.diff<=30);
-  const resto = lista.filter(x=>x.diff<0 || x.diff>30);
-  return `<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>🎂 Aniversariantes de hoje (${hojeList.length})</h3></div><div class="card-b">${hojeList.length?hojeList.map(c=>`<div class="linha-lista" data-abrir="${c.id}"><div class="avatar">🎂</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')} ${c.telefone? '· '+esc(c.telefone):''}</div></div><button class="btn sm primary" data-act="cli-zap" data-id="${c.id}">💬 Parabenizar</button></div>`).join(''):'<div class="vazio">Nenhum aniversariante hoje</div>'}</div></div>
-  <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>📅 Próximos 30 dias (${prox.length})</h3></div><div class="card-b">${prox.length?prox.map(c=>`<div class="linha-lista" data-abrir="${c.id}"><div class="avatar">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.diff===1?'Amanhã':`Faltam ${c.diff} dias`}${c.telefone? ' · '+esc(c.telefone):''}</div></div><button class="btn sm ghost" data-act="cli-zap" data-id="${c.id}">💬 WhatsApp</button></div>`).join(''):'<div class="vazio">Nenhum nos próximos 30 dias</div>'}</div></div>
-  <div class="card"><div class="card-h"><h3>Demais aniversariantes (${resto.length})</h3></div><div class="card-b">${resto.length?resto.map(c=>`<div class="linha-lista" data-abrir="${c.id}"><div class="avatar">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.empresa||c.telefone||''}</div></div></div>`).join(''):'<div class="vazio">Sem outros aniversariantes</div>'}</div></div>`;
+  const resto = lista.filter(x=>x.diff>30);
+  return `<div class="toolbar"><button class="btn ghost" data-act="sync-google-aniv">🔄 Sincronizar com Google Agenda (suportmaxba@gmail.com)</button></div>
+  <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>🎂 Aniversariantes de hoje (${hojeList.length})</h3></div><div class="card-b">${hojeList.length?hojeList.map(c=>`<div class="linha-lista" ${c.origem==='crm'&&c.id?`data-abrir="${c.id}"`:''}><div class="avatar">🎂</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')} ${c.origem==='google'?'· Google Agenda':(c.telefone? '· '+esc(c.telefone):'')}</div></div>${c.origem==='crm'&&c.telefone?`<button class="btn sm primary" data-act="cli-zap" data-id="${c.id}">💬 Parabenizar</button>`:(c.origem==='google'?`<span class="selo info">Google</span>`:'')}</div>`).join(''):'<div class="vazio">Nenhum aniversariante hoje</div>'}</div></div>
+  <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>📅 Próximos 30 dias (${prox.length})</h3></div><div class="card-b">${prox.length?prox.map(c=>`<div class="linha-lista" ${c.origem==='crm'&&c.id?`data-abrir="${c.id}"`:''}><div class="avatar">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.diff===1?'Amanhã':`Faltam ${c.diff} dias`} ${c.origem==='google'?'· Google Agenda':(c.telefone? '· '+esc(c.telefone):'')}</div></div>${c.origem==='crm'&&c.telefone?`<button class="btn sm ghost" data-act="cli-zap" data-id="${c.id}">💬 WhatsApp</button>`:(c.origem==='google'?`<span class="selo info">Google</span>`:'')}</div>`).join(''):'<div class="vazio">Nenhum nos próximos 30 dias</div>'}</div></div>
+  <div class="card"><div class="card-h"><h3>Demais aniversariantes (${resto.length})</h3></div><div class="card-b">${resto.length?resto.map(c=>`<div class="linha-lista" ${c.origem==='crm'&&c.id?`data-abrir="${c.id}"`:''}><div class="avatar">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.origem==='google'?'Google Agenda':(c.empresa||c.telefone||'')}</div></div></div>`).join(''):'<div class="vazio">Sem outros aniversariantes</div>'}</div></div>`;
 }
 function ligarAniversarios(){}
 
