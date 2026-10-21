@@ -19,6 +19,7 @@
 <meta name="twitter:description" content="Aceite ou recuse o seu orçamento.">
 <meta name="twitter:image" content="https://suportmax.github.io/suportmax/og-orcamento.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%230f172a'/%3E%3Ctext x='50' y='58' font-size='44' text-anchor='middle' fill='%23fff' font-weight='700'%3ESM%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="./manifest.webmanifest">
 <title>CRM Suport Max</title>
 <style>
 :root{
@@ -29,8 +30,11 @@
   --radius:12px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-/* o atributo hidden sempre vence o display das classes (ex.: .app{display:flex}) */
 [hidden]{display:none !important}
+/* foco visível para navegação por teclado */
+:focus-visible{outline:3px solid #60a5fa;outline-offset:2px}
+button:focus:not(:focus-visible),a:focus:not(:focus-visible){outline:none}
+/* o atributo hidden sempre vence o display das classes (ex.: .app{display:flex}) */
 body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--texto);font-size:14.5px;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 button{cursor:pointer;border:none;background:none}
@@ -606,14 +610,14 @@ body.tema-escuro .tarefa-locais span{background:#0f1b2e;color:#cbd5e1}
 .overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);backdrop-filter:blur(2px);display:none;align-items:flex-start;justify-content:center;padding:40px 16px;z-index:50;overflow-y:auto}
 .overlay.open{display:flex}
 #overlay2{z-index:70}
-.modal{background:#fff;border-radius:16px;width:100%;max-width:600px;box-shadow:0 25px 60px rgba(15,23,42,.35);animation:pop .18s ease}
+.modal{background:var(--painel);color:var(--texto);border-radius:16px;width:100%;max-width:600px;box-shadow:0 25px 60px rgba(15,23,42,.35);animation:pop .18s ease}
 @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 .modal-h{padding:18px 22px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:10px}
 .modal-h h2{font-size:16.5px;font-weight:700}
 .modal-h .x{margin-left:auto;font-size:20px;color:var(--suave);width:32px;height:32px;border-radius:8px}
 .modal-h .x:hover{background:#f1f5f9}
 .modal-b{padding:20px 22px}
-.modal-f{padding:16px 22px;border-top:1px solid var(--borda);display:flex;gap:10px;justify-content:flex-end;background:#f8fafc;border-radius:0 0 16px 16px}
+.modal-f{padding:16px 22px;border-top:1px solid var(--borda);display:flex;gap:10px;justify-content:flex-end;background:var(--bg);border-radius:0 0 16px 16px}
 /* Lista de atalhos de teclado */
 .atalhos-lista{display:flex;flex-direction:column;gap:2px}
 .atalho-linha{display:flex;align-items:center;gap:12px;padding:7px 8px;border-radius:8px}
@@ -956,9 +960,9 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
   </main>
 </div>
 
-<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
-<div class="overlay" id="overlay2"><div class="modal" id="modal2"></div></div>
-<div id="toast"></div>
+<div class="overlay" id="overlay"><div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Janela do CRM" tabindex="-1"></div></div>
+<div class="overlay" id="overlay2"><div class="modal" id="modal2" role="dialog" aria-modal="true" aria-label="Janela adicional do CRM" tabindex="-1"></div></div>
+<div id="toast" role="status" aria-live="polite" aria-atomic="false"></div>
 <div id="areaImpressao"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -2563,14 +2567,28 @@ const overlay = document.getElementById('overlay');
 const modal = document.getElementById('modal');
 const overlay2 = document.getElementById('overlay2');
 const modal2 = document.getElementById('modal2');
-function abrirModal(html, wide){ modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); }
-function fecharModal(){ overlay.classList.remove('open'); modal.classList.remove('wide'); modal.innerHTML=''; limparEspelho(); fecharModal2(); }
+let focoAnteriorModal = null;
+function focarPrimeiro(modalEl){
+  const alvo=modalEl.querySelector('input:not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')||modalEl;
+  requestAnimationFrame(()=>alvo.focus());
+}
+function abrirModal(html, wide){ focoAnteriorModal=document.activeElement; modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); focarPrimeiro(modal); }
+function fecharModal(){ const devolver=focoAnteriorModal; focoAnteriorModal=null; overlay.classList.remove('open'); modal.classList.remove('wide'); modal.innerHTML=''; limparEspelho(); fecharModal2(); if(devolver&&devolver.isConnected) requestAnimationFrame(()=>devolver.focus()); }
 /* Segunda camada de modal (ex.: seletor de produto sobre o formulário do orçamento) */
-function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); }
-function fecharModal2(){ overlay2.classList.remove('open'); modal2.classList.remove('wide'); modal2.innerHTML=''; }
+function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); focarPrimeiro(modal2); }
+function fecharModal2(){ overlay2.classList.remove('open'); modal2.classList.remove('wide'); modal2.innerHTML=''; if(overlay.classList.contains('open')) focarPrimeiro(modal); }
 overlay.addEventListener('mousedown', e=>{ if(e.target===overlay) fecharModal(); });
 overlay2.addEventListener('mousedown', e=>{ if(e.target===overlay2) fecharModal2(); });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ if(overlay2.classList.contains('open')) fecharModal2(); else fecharModal(); } });
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape'){ if(overlay2.classList.contains('open')) fecharModal2(); else if(overlay.classList.contains('open')) fecharModal(); return; }
+  if(e.key!=='Tab') return;
+  const ativo=overlay2.classList.contains('open')?modal2:overlay.classList.contains('open')?modal:null;
+  if(!ativo) return;
+  const itens=[...ativo.querySelectorAll('a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null);
+  if(!itens.length){ e.preventDefault(); ativo.focus(); return; }
+  if(e.shiftKey&&document.activeElement===itens[0]){ e.preventDefault(); itens[itens.length-1].focus(); }
+  else if(!e.shiftKey&&document.activeElement===itens[itens.length-1]){ e.preventDefault(); itens[0].focus(); }
+});
 
 /* =========================================================
    NAVEGAÇÃO
@@ -8635,12 +8653,13 @@ function htmlDados(){
 
   <div class="op-card" style="margin-bottom:16px">
     <h4>👥 Multiusuário e permissões</h4>
-    <p>Várias pessoas podem usar o CRM com a mesma conta ou contas diferentes autorizadas. Quem for definido como <b>comum</b> não vê os dados da empresa, o catálogo com custos nem o botão de apagar tudo.</p>
+    <p>Contas autorizadas podem entrar separadamente. O armazenamento atual mantém os dados isolados por conta; usar e-mail diferente não compartilha automaticamente clientes e orçamentos. Quem for definido como <b>comum</b> não vê as áreas administrativas.</p>
     <p style="font-size:12.5px;color:var(--suave);margin-top:6px">Seu acesso atual: <b>${souAdmin()?'Administrador':'Usuário comum'}</b></p>
     <div class="nota-rodape" style="margin-top:10px;background:#f8fafc;border-color:#e2e8f0;color:#475569">
-      <b>Não é administrador?</b> Peça ao responsável para abrir o SQL Editor do Supabase e rodar:<br>
-      <code style="display:block;margin-top:6px;font-size:12px">alter table public.crm_members add column if not exists role text default 'admin';</code>
-      <code style="display:block;margin-top:4px;font-size:12px">update public.crm_members set role='comum' where user_id='ID_DO_USUARIO';</code>
+      <b>Configurar acesso:</b> execute primeiro o arquivo <code>crm-schema.sql</code> no Supabase. Para autorizar um usuário, crie a conta em Authentication → Users e rode no SQL Editor (substitua pelo UUID do usuário):
+      <code style="display:block;overflow-wrap:anywhere;margin-top:6px;font-size:12px">insert into public.crm_members (user_id, role) values ('UUID_DO_USUARIO', 'admin') on conflict (user_id) do update set role = excluded.role;</code>
+      <span style="display:block;margin-top:7px">Para rebaixar para usuário comum:</span>
+      <code style="display:block;overflow-wrap:anywhere;margin-top:4px;font-size:12px">update public.crm_members set role='comum' where user_id='UUID_DO_USUARIO';</code>
     </div>
   </div>
 
@@ -9819,16 +9838,6 @@ function registrarServiceWorker(){
 }
 function iniciarPWA(){
   try{
-    const manifest = {
-      name:'SUPORT MAX — CRM', short_name:'SuportMax CRM', start_url:'./CRM-basico.html',
-      display:'standalone', background_color:'#0f172a', theme_color:'#2563eb',
-      icons:[{src:LOGO_DATA_URI, sizes:'512x512', type:'image/jpeg', purpose:'any maskable'}]
-    };
-    const blob = new Blob([JSON.stringify(manifest)], {type:'application/manifest+json'});
-    const link = document.createElement('link');
-    link.rel = 'manifest';
-    link.href = URL.createObjectURL(blob);
-    document.head.appendChild(link);
     const mt = document.createElement('meta'); mt.name='theme-color'; mt.content='#2563eb'; document.head.appendChild(mt);
     const ap = document.createElement('link'); ap.rel='apple-touch-icon'; ap.href=LOGO_DATA_URI; document.head.appendChild(ap);
   }catch(e){}

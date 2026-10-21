@@ -1,0 +1,18 @@
+{
+  "name": "SUPORT MAX — CRM",
+  "short_name": "SuportMax CRM",
+  "description": "Gestão de clientes, orçamentos e serviços da SUPORT MAX.",
+  "start_url": "./CRM-basico.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "./crm-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

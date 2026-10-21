@@ -4,8 +4,8 @@
    - Demais requisições do mesmo site: cache primeiro, atualizando em segundo plano.
    - Requisições para outros domínios (ex.: Supabase) nunca são interceptadas. */
 
-const CACHE = 'suportmax-crm-v21';
-const ESSENCIAIS = ['./', './CRM-basico.html', './index.html'];
+const CACHE = 'suportmax-crm-v22';
+const ESSENCIAIS = ['./', './CRM-basico.html', './index.html', './manifest.webmanifest', './crm-icon.svg'];
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
