@@ -2669,6 +2669,48 @@ function caixaCard(){
 function ordenarPorNome(a,b){
   return String(a&&a.nome||'').localeCompare(String(b&&b.nome||''),'pt-BR',{numeric:true,sensitivity:'base'});
 }
+/* Opções do seletor de cliente em ordem alfabética, guardando os dados usados na pesquisa */
+function opcoesClienteHTML(lista, selecionadoId){
+  return lista.slice().sort(ordenarPorNome).map(c=>{
+    const busca = [c.nome,c.empresa,c.telefone,c.email,c.cpf,c.cnpj].filter(Boolean).join(' ');
+    const dig = [c.telefone,c.cpf,c.cnpj].filter(Boolean).join(' ');
+    return `<option value="${c.id}" data-busca="${esc(busca)}" data-digitos="${esc(dig)}" ${c.id===selecionadoId?'selected':''}>${esc(c.nome)}${c.empresa?' — '+esc(c.empresa):''}</option>`;
+  }).join('');
+}
+/* Pesquisa de cliente nos formulários (Orçamento/OS): filtra por nome, empresa, telefone,
+   e-mail ou CPF/CNPJ; mantém o cliente já selecionado se ele continuar na lista. */
+function filtrarOpcoesCliente(input, sel, dica){
+  if(!input || !sel) return;
+  const t = String(input.value||'').trim().toLowerCase();
+  const nums = t.replace(/\D+/g,'');
+  const valorAntes = sel.value;
+  let visiveis = 0, primeiro = null, achouAtual = false;
+  Array.from(sel.options).forEach(opt=>{
+    if(!opt.value) return;
+    const busca = String(opt.dataset.busca || opt.textContent).toLowerCase();
+    const dig = String(opt.dataset.digitos||'').replace(/\D+/g,'');
+    const visivel = !t || busca.includes(t) || (nums.length>=3 && dig.includes(nums));
+    opt.hidden = !visivel;
+    if(visivel){
+      visiveis++;
+      if(!primeiro) primeiro = opt;
+      if(opt.value===valorAntes) achouAtual = true;
+    }
+  });
+  const ph = sel.options[0];
+  if(ph) ph.hidden = !!t && visiveis>0;
+  if(t && !achouAtual){
+    if(primeiro) sel.value = primeiro.value;
+    else sel.value = '';
+  }
+  if(dica){
+    dica.textContent = !t
+      ? 'Digite para filtrar por nome, empresa, telefone, e-mail ou CPF/CNPJ.'
+      : (visiveis
+          ? `${visiveis} cliente(s) encontrado(s)${achouAtual?'':' — o primeiro foi selecionado'}.`
+          : 'Nenhum cliente encontrado.' + (document.getElementById('btnCliRapido') ? ' Use "＋ Cadastrar cliente" para criar um novo.' : ''));
+  }
+}
 function listaFiltrada(){
   const q = filtro.busca.trim().toLowerCase();
   let l = db.clientes.filter(c=>{
@@ -4644,14 +4686,14 @@ function formOrcamento(id){
             <label>Cliente * <span class="req">*</span></label>
             <div style="display:flex;flex-direction:column;gap:6px">
               <div style="display:flex;gap:8px;align-items:center">
-                <input id="buscaCliOrc" type="search" autocomplete="off" placeholder="Digite para buscar cliente por nome ou empresa..." value="${v.clienteId ? esc((clientes.find(x=>x.id===v.clienteId)||{}).nome || '') : ''}" style="flex:1">
+                <input id="buscaCliOrc" type="search" autocomplete="off" placeholder="Digite para buscar cliente por nome, empresa, telefone..." value="${v.clienteId ? esc((clientes.find(x=>x.id===v.clienteId)||{}).nome || '') : ''}" style="flex:1">
                 <button type="button" class="btn ghost sm" id="btnCliRapido">＋ Cadastrar cliente</button>
               </div>
               <select name="clienteId" id="selCliente">
                 <option value="">— Selecione ou pesquise acima —</option>
-                ${clientes.map(c=>`<option value="${c.id}" ${v.clienteId===c.id?'selected':''}>${esc(c.nome)}${c.empresa?' — '+esc(c.empresa):''}</option>`).join('')}
+                ${opcoesClienteHTML(clientes, v.clienteId)}
               </select>
-              <div class="mini">Digite no campo acima para filtrar e selecionar automaticamente.</div>
+              <div class="mini" id="dicaBuscaCliOrc">Digite para filtrar por nome, empresa, telefone, e-mail ou CPF/CNPJ.</div>
             </div>
           </div>
 
@@ -4865,6 +4907,14 @@ function formOrcamento(id){
   freteEl.addEventListener('input', atualizarTotais);
   if(descGeralTipoEl) descGeralTipoEl.addEventListener('change', atualizarTotais);
 
+  /* Pesquisa do cliente (filtra a lista e seleciona o primeiro encontrado) */
+  const inpBuscaCliOrc = document.getElementById('buscaCliOrc');
+  const selClienteOrc = document.getElementById('selCliente');
+  const dicaBuscaCliOrc = document.getElementById('dicaBuscaCliOrc');
+  if(inpBuscaCliOrc && selClienteOrc){
+    inpBuscaCliOrc.addEventListener('input', ()=>filtrarOpcoesCliente(inpBuscaCliOrc, selClienteOrc, dicaBuscaCliOrc));
+  }
+
   /* Cadastro rápido de cliente */
   const painelCli = document.getElementById('cliRapido');
   document.getElementById('btnCliRapido').onclick = ()=>{ painelCli.hidden = false; document.getElementById('crNome').focus(); };
@@ -4884,11 +4934,12 @@ function formOrcamento(id){
     };
     db.clientes.unshift(c); salvar();
     const sel = document.getElementById('selCliente');
-    const opt = document.createElement('option');
-    opt.value = c.id;
-    opt.textContent = c.nome + (c.empresa ? ' — '+c.empresa : '');
-    sel.appendChild(opt);
+    sel.innerHTML = '<option value="">— Selecione ou pesquise acima —</option>' + opcoesClienteHTML(db.clientes, c.id);
     sel.value = c.id;
+    const inpBusca = document.getElementById('buscaCliOrc');
+    if(inpBusca) inpBusca.value = '';
+    const dica = document.getElementById('dicaBuscaCliOrc');
+    if(dica) dica.textContent = 'Digite para filtrar por nome, empresa, telefone, e-mail ou CPF/CNPJ.';
     ['crNome','crEmpresa','crTel','crEmail','crCpf','crCnpj'].forEach(i=>document.getElementById(i).value='');
     painelCli.hidden = true;
     toast('Cliente cadastrado e selecionado!');
@@ -5522,12 +5573,12 @@ function formOrdem(id){
             </select></div>`:''}
           <div class="campo full"><label>Cliente * <span class="req">*</span></label>
             <div style="display:flex;flex-direction:column;gap:6px">
-              <input id="buscaCliOS" type="search" autocomplete="off" placeholder="Digite para buscar cliente por nome ou empresa..." value="${v.clienteId ? esc((clientes.find(x=>x.id===v.clienteId)||{}).nome || '') : ''}">
+              <input id="buscaCliOS" type="search" autocomplete="off" placeholder="Digite para buscar cliente por nome, empresa, telefone..." value="${v.clienteId ? esc((clientes.find(x=>x.id===v.clienteId)||{}).nome || '') : ''}">
               <select name="clienteId" id="selCliOS">
                 <option value="">— Selecione ou pesquise acima —</option>
-                ${clientes.map(c=>`<option value="${c.id}" ${v.clienteId===c.id?'selected':''}>${esc(c.nome)}${c.empresa?' — '+esc(c.empresa):''}</option>`).join('')}
+                ${opcoesClienteHTML(clientes, v.clienteId)}
               </select>
-              <div class="mini">Digite no campo acima para filtrar a lista de clientes.</div>
+              <div class="mini" id="dicaBuscaCliOS">Digite para filtrar por nome, empresa, telefone, e-mail ou CPF/CNPJ.</div>
             </div></div>
           <div class="campo"><label>Data de abertura</label><input type="date" name="data" value="${esc(v.data||hojeISO())}"></div>
           <div class="campo"><label>Prazo de entrega</label><input type="date" name="prazo" value="${esc(v.prazo||'')}"></div>
@@ -5773,27 +5824,9 @@ function formOrdem(id){
 
   const inpBuscaCliOS = document.getElementById('buscaCliOS');
   const selCliOS = document.getElementById('selCliOS');
+  const dicaBuscaCliOS = document.getElementById('dicaBuscaCliOS');
   if(inpBuscaCliOS && selCliOS){
-    inpBuscaCliOS.addEventListener('input', ()=>{
-      const t = inpBuscaCliOS.value.trim().toLowerCase();
-      let achou = false;
-      Array.from(selCliOS.options).forEach(opt=>{
-        if(opt.value===''){
-          opt.hidden = !!t;
-          return;
-        }
-        const txt = opt.textContent.toLowerCase();
-        const vis = !t || txt.includes(t);
-        opt.hidden = !vis;
-        if(vis && !achou){
-          opt.selected = true;
-          achou = true;
-        }
-      });
-      if(!achou && selCliOS.options.length>0){
-        selCliOS.selectedIndex = 0;
-      }
-    });
+    inpBuscaCliOS.addEventListener('input', ()=>filtrarOpcoesCliente(inpBuscaCliOS, selCliOS, dicaBuscaCliOS));
   }
 
   document.getElementById('fOS').onsubmit = e=>{
