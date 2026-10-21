@@ -858,6 +858,7 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
 .nuvem-status.ok{color:#6ee7b7;background:rgba(16,185,129,.14);border-color:rgba(16,185,129,.35)}
 .nuvem-status.carregando{color:#93c5fd;background:rgba(59,130,246,.14);border-color:rgba(59,130,246,.35)}
 .nuvem-status.erro{color:#fca5a5;background:rgba(239,68,68,.14);border-color:rgba(239,68,68,.35)}
+.nuvem-status.conflito{color:#fcd34d;background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.35)}
 .nuvem-status.off{color:#94a3b8;background:rgba(148,163,184,.12);border-color:rgba(148,163,184,.3)}
 .sidebar-user .btn-sair{width:100%;background:rgba(255,255,255,.08);color:#e2e8f0;border:1px solid rgba(255,255,255,.16);
   border-radius:8px;padding:8px;font-size:13px;font-family:inherit;cursor:pointer;transition:background .15s}
@@ -966,6 +967,8 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
    CRM BÁSICO — dados locais (localStorage)
    ========================================================= */
 const KEY = 'crm_basico_v1';
+const KEY_SYNC_PENDENTE = KEY + '_sync_pendente';
+const KEY_SYNC_AT = KEY + '_sync_at';
 
 /* Marca (logo) — incorporada como data URI para o app continuar sendo um único arquivo.
    Para trocar a logo: gere outro data URI e substitua o valor de LOGO_DATA_URI. */
@@ -1710,7 +1713,10 @@ function carregar(){
 let nuvemLigada = false;       /* fica true quando o login na nuvem deu certo */
 let nuvemPronta = false;       /* evita salvar de volta no primeiro carregamento */
 let nuvemTimer = null;
-let nuvemStatus = 'off';       /* off | carregando | ok | enviando | erro */
+let nuvemStatus = 'off';       /* off | carregando | ok | enviando | erro | conflito */
+let nuvemVersaoRemota = null;
+let nuvemConflito = false;
+let nuvemRevisaoLocal = 0;
 
 function setNuvemStatus(s){
   nuvemStatus = s;
@@ -1720,7 +1726,8 @@ function setNuvemStatus(s){
       carregando: {txt:'Sincronizando…',          cls:'carregando'},
       ok:         {txt:'Sincronizado',            cls:'ok'},
       enviando:   {txt:'Salvando…',               cls:'carregando'},
-      erro:       {txt:'Sem conexão — salvo aqui', cls:'erro'}
+      erro:       {txt:'Falha na sincronização',   cls:'erro'},
+      conflito:   {txt:'Conflito — escolha os dados', cls:'conflito'}
     };
     const m = mapa[s] || mapa.off;
     el.textContent = m.txt;
@@ -1728,7 +1735,24 @@ function setNuvemStatus(s){
   });
 }
 
-/* Lê os dados da nuvem (uma linha por usuário) e devolve o objeto ou null */
+function nuvemTemPendenteLocal(){
+  try{ return localStorage.getItem(KEY_SYNC_PENDENTE)==='1'; }
+  catch(e){ console.warn('Não foi possível verificar alterações pendentes de sincronização.', e); return false; }
+}
+function nuvemUltimaVersaoLocal(){
+  try{ return localStorage.getItem(KEY_SYNC_AT)||null; }
+  catch(e){ console.warn('Não foi possível ler a versão sincronizada anteriormente.', e); return null; }
+}
+function nuvemSalvarControle(pendente, atualizadoEm){
+  try{
+    if(atualizadoEm) localStorage.setItem(KEY_SYNC_AT, atualizadoEm);
+    else localStorage.removeItem(KEY_SYNC_AT);
+    if(pendente) localStorage.setItem(KEY_SYNC_PENDENTE, '1');
+    else localStorage.removeItem(KEY_SYNC_PENDENTE);
+  }catch(e){ console.warn('Não foi possível registrar o estado da sincronização.', e); }
+}
+
+/* Lê os dados e a versão remota para impedir que uma gravação antiga substitua outra. */
 async function nuvemCarregar(){
   if(!crmClient) return null;
   const { data: sess } = await crmClient.auth.getSession();
@@ -1736,51 +1760,95 @@ async function nuvemCarregar(){
   if(!uid) return null;
   const { data, error } = await crmClient
     .from('crm_state')
-    .select('dados')
+    .select('dados, atualizado_em')
     .eq('user_id', uid)
     .maybeSingle();
   if(error){ console.warn('Nuvem: falha ao ler', error); throw error; }
   if(!data || !data.dados) return null;
-  return normalizar(data.dados);
+  const dados = normalizar(data.dados);
+  if(!dados) throw new Error('Os dados recebidos da nuvem não têm um formato válido.');
+  return {dados, atualizadoEm:data.atualizado_em||null};
 }
 
-/* Grava os dados atuais na nuvem (upsert) */
+async function nuvemRegistrarConflito(){
+  nuvemConflito = true;
+  setNuvemStatus('conflito');
+  try{ await nuvemCarregar(); }
+  catch(e){ console.warn('Não foi possível atualizar os dados do conflito.', e); }
+  toast('Outra sessão alterou os dados. Nada foi sobrescrito; abra Dados e escolha como resolver a sincronização.', 'erro');
+}
+
+/* Grava somente se a versão remota ainda for a que foi carregada. */
 async function nuvemSalvarAgora(){
-  if(!nuvemLigada || !crmClient) return;
+  if(!nuvemLigada || !crmClient || nuvemConflito) return false;
   try{
     const { data: sess } = await crmClient.auth.getSession();
     const uid = sess && sess.session && sess.session.user ? sess.session.user.id : null;
-    if(!uid) return;
+    if(!uid) throw new Error('Sessão do usuário não encontrada.');
+    const revisao = nuvemRevisaoLocal;
+    const atualizadoEm = new Date().toISOString();
+    const registro = {dados:JSON.parse(JSON.stringify(db)), atualizado_em:atualizadoEm};
     setNuvemStatus('enviando');
-    const { error } = await crmClient
-      .from('crm_state')
-      .upsert({ user_id: uid, dados: db, atualizado_em: new Date().toISOString() }, { onConflict:'user_id' });
-    if(error) throw error;
+    let resultado;
+    if(nuvemVersaoRemota){
+      resultado = await crmClient.from('crm_state')
+        .update(registro)
+        .eq('user_id', uid)
+        .eq('atualizado_em', nuvemVersaoRemota)
+        .select('atualizado_em')
+        .maybeSingle();
+      if(resultado.error) throw resultado.error;
+      if(!resultado.data){
+        await nuvemRegistrarConflito();
+        return false;
+      }
+    }else{
+      resultado = await crmClient.from('crm_state')
+        .insert({user_id:uid, ...registro})
+        .select('atualizado_em')
+        .maybeSingle();
+      if(resultado.error){
+        if(resultado.error.code==='23505'){
+          await nuvemRegistrarConflito();
+          return false;
+        }
+        throw resultado.error;
+      }
+      if(!resultado.data) throw new Error('A nuvem não confirmou a gravação dos dados.');
+    }
+    nuvemVersaoRemota = resultado.data.atualizado_em||atualizadoEm;
+    const aindaPendente = revisao!==nuvemRevisaoLocal;
+    nuvemSalvarControle(aindaPendente, nuvemVersaoRemota);
     setNuvemStatus('ok');
+    if(aindaPendente) nuvemSalvarAgendado();
+    return true;
   }catch(e){
     console.warn('Nuvem: falha ao salvar', e);
     setNuvemStatus('erro');
+    return false;
   }
 }
 
 /* Agenda o envio para a nuvem (junta várias alterações seguidas) */
 function nuvemSalvarAgendado(){
-  if(!nuvemLigada) return;
+  if(!nuvemLigada || nuvemConflito) return;
   if(nuvemTimer) clearTimeout(nuvemTimer);
   nuvemTimer = setTimeout(()=>{ nuvemSalvarAgora(); }, 900);
 }
 
-function salvar(){
+function persistirDadosLocal(){
   try{
     localStorage.setItem(KEY, JSON.stringify(db));
+    return true;
   }catch(e){
-    try{
-      if(Array.isArray(db.backups) && db.backups.length){
-        db.backups = [];
-        try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e3){}
-        toast('Armazenamento cheio: limpei todos os backups internos para liberar espaço.','aviso');
-      }
-    }catch(e2){}
+    if(Array.isArray(db.backups) && db.backups.length){
+      db.backups = [];
+      try{
+        localStorage.setItem(KEY, JSON.stringify(db));
+        toast('Armazenamento cheio: backups internos removidos para liberar espaço.','aviso');
+        return true;
+      }catch(e2){ e = e2; }
+    }
     try{
       if(db.produtos){
         db.produtos = db.produtos.map(p=>{
@@ -1800,14 +1868,26 @@ function salvar(){
           return c;
         });
       }
-      try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e3){}
-      toast('Armazenamento cheio: removi fotos pesadas. Exporte um backup JSON agora.','erro');
-    }catch(e2){}
-    if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
-    return;
+      localStorage.setItem(KEY, JSON.stringify(db));
+      toast('Armazenamento cheio: fotos pesadas foram removidas. Exporte um backup JSON agora.','aviso');
+      return true;
+    }catch(e2){
+      console.error('Falha ao salvar os dados localmente.', e2||e);
+      toast('Não foi possível salvar neste aparelho. Exporte um backup assim que possível. '+String((e2||e).message||''), 'erro');
+      return false;
+    }
   }
-  if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
-  backupDiarioAuto();
+}
+
+function salvar(){
+  const persistiu = persistirDadosLocal();
+  if(crmClient) nuvemSalvarControle(true, nuvemUltimaVersaoLocal());
+  if(nuvemLigada && nuvemPronta){
+    nuvemRevisaoLocal++;
+    nuvemSalvarAgendado();
+  }
+  if(persistiu) backupDiarioAuto();
+  return persistiu;
 }
 /* Guarda automaticamente uma cópia interna por dia (sem baixar arquivo) */
 function backupDiarioAuto(){
@@ -1824,7 +1904,22 @@ function backupDiarioAuto(){
   if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
 }
 
-/* Carrega tudo da nuvem ao entrar; se ainda não houver nada lá, envia o que existe aqui */
+function aplicarDadosRemotos(remoto){
+  const anterior = db;
+  db = prepararPrimeiroUso(remoto.dados);
+  if(!persistirDadosLocal()){
+    db = anterior;
+    return false;
+  }
+  nuvemVersaoRemota = remoto.atualizadoEm;
+  nuvemConflito = false;
+  nuvemSalvarControle(false, nuvemVersaoRemota);
+  aplicarMarca();
+  render();
+  return true;
+}
+
+/* Carrega a nuvem sem descartar alterações locais que ainda não foram sincronizadas. */
 async function iniciarNuvem(){
   if(!crmClient) return;
   setNuvemStatus('carregando');
@@ -1842,15 +1937,22 @@ async function iniciarNuvem(){
     }
     return;
   }
-  if(remoto){
-    db = prepararPrimeiroUso(remoto);
-    try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){}
-    aplicarMarca();
-    render();
+  const pendente = nuvemTemPendenteLocal();
+  const ultimaVersao = nuvemUltimaVersaoLocal();
+  if(remoto && pendente && remoto.atualizadoEm!==ultimaVersao){
+    nuvemVersaoRemota = remoto.atualizadoEm;
+    nuvemLigada = true;
+    nuvemPronta = true;
+    nuvemConflito = true;
+    setNuvemStatus('conflito');
+    toast('Há alterações diferentes neste aparelho e na nuvem. Nada foi sobrescrito; abra Dados para escolher qual versão manter.', 'erro');
+    return;
+  }
+  if(remoto && !pendente){
+    if(!aplicarDadosRemotos(remoto)){ setNuvemStatus('erro'); return; }
     toast('☁️ Dados sincronizados da nuvem.', 'ok');
-  } else {
-    /* Primeiro uso na nuvem: sobe o que já existe neste aparelho */
-    db = prepararPrimeiroUso(db);
+  }else{
+    nuvemVersaoRemota = remoto ? remoto.atualizadoEm : null;
   }
   nuvemLigada = true;
   nuvemPronta = true;
@@ -8633,6 +8735,50 @@ function htmlDados(){
   </div>`;
 }
 
+async function sincronizarNuvemManual(){
+  if(!crmClient){ toast('Faça login para sincronizar.', 'erro'); return; }
+  setNuvemStatus('carregando');
+  try{
+    const remoto = await nuvemCarregar();
+    const pendente = nuvemTemPendenteLocal();
+    const ultimaVersao = nuvemUltimaVersaoLocal();
+    nuvemLigada = true;
+    nuvemPronta = true;
+    if(remoto && pendente && remoto.atualizadoEm!==ultimaVersao){
+      nuvemVersaoRemota = remoto.atualizadoEm;
+      nuvemConflito = true;
+      setNuvemStatus('conflito');
+      const manterLocal = confirm('Existem alterações diferentes neste aparelho e na nuvem.\\n\\nOK: manter os dados deste aparelho e atualizar a nuvem.\\nCancelar: baixar um backup local e usar os dados da nuvem neste aparelho.');
+      if(manterLocal){
+        nuvemConflito = false;
+        nuvemSalvarControle(true, nuvemVersaoRemota);
+        if(await nuvemSalvarAgora()) toast('☁️ Dados deste aparelho enviados para a nuvem.', 'ok');
+      }else{
+        baixar(`crm-backup-conflito-local-${hojeISO()}.json`, JSON.stringify(db,null,2), 'application/json');
+        if(aplicarDadosRemotos(remoto)){
+          setNuvemStatus('ok');
+          toast('Backup local baixado. Os dados da nuvem foram carregados neste aparelho.', 'ok');
+        }
+      }
+      return;
+    }
+    nuvemConflito = false;
+    if(remoto && !pendente){
+      if(aplicarDadosRemotos(remoto)){
+        setNuvemStatus('ok');
+        toast('☁️ Dados atualizados da nuvem.', 'ok');
+      }else setNuvemStatus('erro');
+      return;
+    }
+    nuvemVersaoRemota = remoto ? remoto.atualizadoEm : null;
+    if(await nuvemSalvarAgora()) toast('☁️ Dados enviados para a nuvem.', 'ok');
+  }catch(e){
+    console.warn('Falha na sincronização manual.', e);
+    setNuvemStatus('erro');
+    toast('Não foi possível sincronizar agora: ' + String(e && e.message ? e.message : e), 'erro');
+  }
+}
+
 function ligarDados(){
   const input = document.getElementById('arquivoImport');
   document.getElementById('btnImportar').addEventListener('click', ()=>input.click());
@@ -8709,28 +8855,7 @@ function ligarDados(){
   }
   const btnNuvem = document.querySelector('[data-act="nuvem-agora"]');
   if(btnNuvem){
-    btnNuvem.addEventListener('click', async ()=>{
-      if(!crmClient){ toast('Faça login para sincronizar.', 'erro'); return; }
-      setNuvemStatus('carregando');
-      try{
-        const remoto = await nuvemCarregar();
-        if(remoto){
-          db = prepararPrimeiroUso(remoto);
-          try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){}
-          nuvemLigada = true; nuvemPronta = true;
-          aplicarMarca(); render();
-          setNuvemStatus('ok');
-          toast('☁️ Dados atualizados da nuvem.', 'ok');
-        } else {
-          nuvemLigada = true; nuvemPronta = true;
-          await nuvemSalvarAgora();
-          toast('☁️ Dados enviados para a nuvem.', 'ok');
-        }
-      }catch(e){
-        setNuvemStatus('erro');
-        toast('Não foi possível sincronizar agora: ' + (e && e.message ? e.message : e), 'erro');
-      }
-    });
+    btnNuvem.addEventListener('click', sincronizarNuvemManual);
   }
 }
 
@@ -10970,7 +11095,8 @@ window.addEventListener('online', ()=>{
   try{
     toast('🌐 Conexão restabelecida.', 'ok');
     render();
-    if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
+    if(crmClient && !nuvemLigada) iniciarNuvem();
+    else if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
   }catch(e){}
 });
 </script>
