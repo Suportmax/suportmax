@@ -809,6 +809,13 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
 }
 .fab-novo{display:none;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));width:58px;height:58px;border-radius:50%;background:var(--prim);color:#fff;font-size:30px;box-shadow:0 12px 34px rgba(37,99,235,.4);align-items:center;justify-content:center;z-index:50}
 @media(max-width:980px){ .fab-novo{display:flex} .topbar-actions{display:none} }
+/* Botão que só aparece no celular (tema, por exemplo) */
+.only-mobile{display:none}
+@media(max-width:980px){ .only-mobile{display:inline-flex} }
+.btn-tema-mobile{width:100%;margin:0 0 10px;background:rgba(255,255,255,.08);color:#e2e8f0;
+  border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:9px;font-size:13px;
+  font-family:inherit;cursor:pointer;align-items:center;justify-content:center;gap:6px}
+.btn-tema-mobile:hover{background:rgba(59,130,246,.25);border-color:rgba(59,130,246,.5)}
 </style>
 </head>
 <body>
@@ -853,7 +860,10 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
       <button class="nav-item" data-view="catalogo"><span class="ico">📦</span><span>Catálogo</span></button>
       <button class="nav-item" data-view="dados"><span class="ico">💾</span><span>Dados</span></button>
     </nav>
-    <div class="sidebar-foot">Os dados são salvos na nuvem e sincronizados entre celular e computador. Você também pode exportar um backup na aba Dados.</div>
+    <div class="sidebar-foot">
+      <button class="btn-tema-mobile only-mobile" type="button" id="btnTemaMovel" title="Alternar tema claro/escuro">🌙 Alternar tema</button>
+      Os dados são salvos na nuvem e sincronizados entre celular e computador. Você também pode exportar um backup na aba Dados.
+    </div>
     <div class="sidebar-user" id="sidebarUser" hidden>
       <span class="u-mail" id="userEmail"></span>
       <span class="nuvem-status off" data-nuvem-status>Somente neste aparelho</span>
@@ -2350,18 +2360,47 @@ document.getElementById('btnBackupTopo').addEventListener('click', baixarBackupA
 (function(){
   const b = document.getElementById('btnTema');
   if(b) b.addEventListener('click', alternarTema);
+  const bm = document.getElementById('btnTemaMovel');
+  if(bm) bm.addEventListener('click', alternarTema);
 })();
+/* No celular o tema é escolha do próprio aparelho (fica salvo só nele), senão o celular
+   herda o tema escuro do computador pela sincronização e fica "preso" no escuro.
+   Padrão do celular: tema normal (claro). */
+const TEMA_CELULAR = 'suportmax_tema_celular';
+function ehCelular(){ return window.matchMedia('(max-width:980px)').matches; }
+function temaAtual(){
+  if(ehCelular()){
+    let v = '';
+    try{ v = localStorage.getItem(TEMA_CELULAR)||''; }catch(e){}
+    return v==='escuro' ? 'escuro' : 'claro';
+  }
+  return prefs().tema==='escuro' ? 'escuro' : 'claro';
+}
 function aplicarTema(){
-  const escuro = prefs().tema==='escuro';
+  const escuro = temaAtual()==='escuro';
   document.body.classList.toggle('tema-escuro', escuro);
+  const rot = escuro ? '☀️' : '🌙';
+  const tit = escuro ? 'Tema claro' : 'Tema escuro';
   const b = document.getElementById('btnTema');
-  if(b){ b.textContent = escuro?'☀️':'🌙'; b.title = escuro?'Tema claro':'Tema escuro'; }
+  if(b){ b.textContent = rot; b.title = tit; }
+  const bm = document.getElementById('btnTemaMovel');
+  if(bm){ bm.textContent = rot+' Alternar tema'; bm.title = tit; }
 }
 function alternarTema(){
+  if(ehCelular()){
+    const novo = temaAtual()==='escuro' ? 'claro' : 'escuro';
+    try{ localStorage.setItem(TEMA_CELULAR, novo); }catch(e){}
+    aplicarTema();
+    toast('Tema ' + (novo==='escuro'?'escuro':'claro') + ' ativado neste aparelho.');
+    return;
+  }
   prefs().tema = prefs().tema==='escuro' ? 'claro' : 'escuro';
   aplicarTema(); salvar();
   toast('Tema ' + (prefs().tema==='escuro'?'escuro':'claro') + ' ativado.');
 }
+try{
+  window.matchMedia('(max-width:980px)').addEventListener('change', ()=>aplicarTema());
+}catch(e){}
 
 function render(){
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
