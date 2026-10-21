@@ -948,7 +948,7 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
 .btn-tema-mobile:hover{background:rgba(59,130,246,.25);border-color:rgba(59,130,246,.5)}
 
 /* Sistema visual: superfícies, navegação e controles consistentes */
-:root{--bg:#f5f7fb;--borda:#e4e9f1;--prim:#2563eb;--prim-esc:#1d4ed8;--prim-cl:#eff6ff;--sombra:0 1px 2px rgba(15,23,42,.04),0 5px 18px rgba(15,23,42,.045);--radius:14px}
+:root{--bg:#eaf0f5;--painel:#f5f8fb;--borda:#dce5ee;--prim:#2563eb;--prim-esc:#1d4ed8;--prim-cl:#e6effa;--sombra:0 1px 2px rgba(15,23,42,.035),0 5px 18px rgba(15,23,42,.04);--radius:14px}
 body{font-size:14px;line-height:1.45}
 .view{max-width:1440px;padding:26px 30px 64px}
 .topbar{min-height:76px;padding:13px 30px;gap:18px}
@@ -967,7 +967,7 @@ body{font-size:14px;line-height:1.45}
 .nav-item .ico svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .nav-item .pill{background:#dc3e55;padding:2px 7px}
 .card,.stat{border-radius:var(--radius);box-shadow:var(--sombra)}
-.card-h{min-height:54px;padding:13px 18px;background:linear-gradient(180deg,rgba(248,250,252,.75),rgba(255,255,255,0))}
+.card-h{min-height:54px;padding:13px 18px;background:linear-gradient(180deg,rgba(233,240,247,.78),rgba(245,248,251,0))}
 .card-h h2,.card-h h3{font-size:14px;font-weight:750;letter-spacing:-.1px}
 .card-b{padding:10px 14px}
 .stat{position:relative;padding:15px 17px;min-height:104px;transition:transform .15s ease,box-shadow .15s ease}
@@ -1006,6 +1006,24 @@ tbody tr:hover{background:#f5f8fd}
 .cat-card{border-radius:14px}
 .cat-card-values{gap:7px;margin:10px 0}
 .cat-card-value{padding:7px 9px;border-radius:9px}
+body:not(.tema-escuro) .btn.ghost{background:#edf2f7;border-color:#d8e1eb}
+body:not(.tema-escuro) .btn.ghost:hover{background:#e4ebf3;border-color:#c8d5e2}
+body:not(.tema-escuro) .toolbar input,
+body:not(.tema-escuro) .toolbar select,
+body:not(.tema-escuro) .busca-global input,
+body:not(.tema-escuro) .campo input,
+body:not(.tema-escuro) .campo select,
+body:not(.tema-escuro) .campo textarea,
+body:not(.tema-escuro) .prod-pick,
+body:not(.tema-escuro) .picker-busca,
+body:not(.tema-escuro) .pick-item,
+body:not(.tema-escuro) .chip{background:#eef3f7;border-color:#d8e1eb}
+body:not(.tema-escuro) .toolbar input:focus,
+body:not(.tema-escuro) .busca-global input:focus,
+body:not(.tema-escuro) .campo input:focus,
+body:not(.tema-escuro) .campo select:focus,
+body:not(.tema-escuro) .campo textarea:focus{background:#f8fafc}
+body:not(.tema-escuro) .mini-stat{background:#eef3f7}
 body.tema-escuro .card-h{background:linear-gradient(180deg,rgba(15,27,46,.85),rgba(17,28,46,0))}
 body.tema-escuro .toolbar{background:var(--painel);border-color:var(--borda)}
 body.tema-escuro tbody tr:hover{background:#17263d}
