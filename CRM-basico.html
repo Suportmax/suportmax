@@ -752,7 +752,46 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
 .fab-novo{display:none;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));width:58px;height:58px;border-radius:50%;background:var(--prim);color:#fff;font-size:30px;box-shadow:0 12px 34px rgba(37,99,235,.4);align-items:center;justify-content:center;z-index:50}
 @media(max-width:980px){ .fab-novo{display:flex} .topbar-actions{display:none} }
 </style>
-</head>
+<style>
+.os-print-compact{font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:10.5pt;line-height:1.35;color:#111;padding:10mm 12mm;background:#fff}
+.os-topo{width:100%;border-collapse:collapse;margin-bottom:10px}
+.os-topo-esq{width:60%;vertical-align:top;padding:0}
+.os-topo-dir{text-align:right;vertical-align:top;padding:0}
+.os-marca{display:flex;align-items:center;gap:10px}
+.os-logo-c{height:38px;max-width:120px;object-fit:contain}
+.os-marca-nome{font-weight:800;font-size:12pt}
+.os-marca-meta{font-size:8.5pt;color:#475569}
+.os-tit{font-size:9pt;text-transform:uppercase;letter-spacing:.5pt;color:#475569}
+.os-num{font-size:16pt;font-weight:800;line-height:1}
+.os-st{margin-top:4px}
+.os-datas{margin-top:4px;font-size:9pt;color:#475569}
+.os-info{width:100%;border-collapse:collapse;margin-bottom:8px}
+.os-info-blk{width:50%;vertical-align:top;padding:8px 10px;border:1px solid #e5e7eb}
+.os-blk-tit{font-size:8pt;text-transform:uppercase;letter-spacing:.3pt;font-weight:700;color:#475569;margin-bottom:4px}
+.os-linha-suave{color:#475569;font-size:9pt}
+.os-bloco{margin:8px 0;padding:8px 10px;border:1px solid #e5e7eb}
+.os-texto{white-space:normal}
+.os-tab{width:100%;border-collapse:collapse;margin-top:2px}
+.os-tab th{background:#f1f5f9;padding:4px 6px;font-size:8pt;text-align:left;border-bottom:1px solid #e5e7eb;text-transform:uppercase;letter-spacing:.2pt}
+.os-tab td{padding:5px 6px;border-bottom:1px solid #f1f5f9;vertical-align:top}
+.os-tab .num{text-align:right;white-space:nowrap}
+.os-desc-item{font-size:8.5pt;color:#dc2626;margin-top:1px}
+.os-chk-c{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:2px 10px}
+.os-chk-i{font-size:9pt}
+.os-tot{width:100%;border-collapse:collapse;margin-top:8px;border:1px solid #e5e7eb}
+.os-tot td{padding:4px 8px;border-bottom:1px solid #f1f5f9}
+.os-tot td.num{text-align:right;font-weight:600}
+.os-tot .os-tot-geral td{font-size:11pt;font-weight:800;background:#f8fafc;border-top:1px solid #e5e7eb}
+.os-venda-c{margin-top:6px;padding:4px 8px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:9pt}
+.os-assin{width:100%;margin-top:18px;border-collapse:collapse}
+.os-assin td{width:50%;padding:0 12px;text-align:center}
+.os-linha-ass{border-bottom:1px solid #111;height:28px}
+.os-ass-t{margin-top:4px;font-size:8.5pt;color:#475569}
+.os-rodape{margin-top:10px;text-align:center;font-size:8pt;color:#64748b}
+@media print{
+  .os-print-compact{padding:8mm 9mm}
+}
+</style></head>
 <body>
 <!-- ===== Tela de login (Supabase) ===== -->
 <div class="login-screen" id="loginScreen" hidden>
@@ -1355,7 +1394,16 @@ function prefs(){ if(!db.prefs) db.prefs = baseVazia().prefs; if(!db.prefs.carto
    quitado em parcelas. O valor restante é o que está em aberto. */
 function pagamentosDe(o){ return Array.isArray(o.pagamentos) ? o.pagamentos : []; }
 function pagoOrc(o){ return pagamentosDe(o).reduce((s,p)=>s+(Number(p.valor)||0),0); }
-function abertoOrc(o){ return Math.max(0, +(totalOrc(o) - pagoOrc(o)).toFixed(2)); }
+function valorOrcVenda(o){
+  if(!o) return 0;
+  if(o.venda && typeof o.venda.valor==='number') return o.venda.valor;
+  if(o.venda && typeof o.venda.valor==='string') return Number(o.venda.valor)||0;
+  if(o.lancamentoId && db.financeiro){
+    const l = (db.financeiro.receitas||[]).find(x=>x.id===o.lancamentoId);
+    if(l) return Number(l.valor)||0;
+  }
+  return totalOrc(o);
+}\nfunction abertoOrc(o){ const tv = valorOrcVenda(o); return Math.max(0, +(tv - pagoOrc(o)).toFixed(2)); }
 function orcQuitado(o){ return totalOrc(o) > 0 && pagoOrc(o) >= totalOrc(o) - 0.005; }
 function statusFin(o){
   if(o.status!=='aprovado' && o.status!=='entregue') return 'na';
@@ -1755,7 +1803,64 @@ function rotuloPrazo(iso){
   if(d<=7) return `em ${d} dias`;
   return fmtData(iso);
 }
-/* ---------- CPF / CNPJ ---------- */
+// ICS (Google Calendar) parser simples para aniversários
+function parseICS(text){
+  const eventos = [];
+  const blocos = text.split(/BEGIN:VEVENT/i);
+  for(let i=1;i<blocos.length;i++){
+    const b = blocos[i].split(/END:VEVENT/i)[0];
+    let nome = '';
+    let data = '';
+    // SUMMARY
+    const mSum = b.match(/SUMMARY[^:]*:(.*)/i);
+    if(mSum){
+      nome = mSum[1].replace(/\\n/g,' ').replace(/\\,/g,',').replace(/\\\\/g,'\\').trim();
+    }
+    // DTSTART
+    const mDt = b.match(/DTSTART[^:]*:(\d{8})/i);
+    if(mDt){
+      const s = mDt[1];
+      data = s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8);
+    }else{
+      const mDt2 = b.match(/DTSTART[^:]*;VALUE=DATE:(\d{8})/i);
+      if(mDt2){
+        const s = mDt2[1];
+        data = s.slice(0,4)+'-'+s.slice(4,6)+'-'+s.slice(6,8);
+      }
+    }
+    if(nome && data){
+      const p = data.split('-');
+      if(p.length===3){
+        const mes = Number(p[1]), dia = Number(p[2]);
+        const hoje = new Date();
+        const nasc = new Date(hoje.getFullYear(), mes-1, dia);
+        const hoje0 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+        let diff = Math.round((nasc - hoje0)/86400000);
+        if(diff < 0) diff += 365;
+        eventos.push({nome, d:dia, m:mes, data, diff, origem:'google'});
+      }
+    }
+  }
+  return eventos;
+}
+
+async function importarAnivGoogle(){
+  const url = 'https://calendar.google.com/calendar/ical/suportmaxba%40gmail.com/private-a54791850257e05cce3f4633c4ca9851/basic.ics';
+  try{
+    toast('Importando aniversários do Google Agenda...', 'ok');
+    const resp = await fetch(url);
+    if(!resp.ok) throw new Error('Falha ao acessar');
+    const txt = await resp.text();
+    const ev = parseICS(txt);
+    if(!ev.length){ toast('Nenhum aniversário encontrado no .ics.','erro'); return; }
+    db.anivGoogle = ev;
+    salvar();
+    toast(`${ev.length} aniversariante(s) importado(s) do Google Agenda!`, 'ok');
+    if(view==='aniversarios') render();
+  }catch(e){
+    toast('Não foi possível importar. Verifique se o link está público ou exportado.','erro');
+  }
+}\n\n/* ---------- CPF / CNPJ ---------- */
 function soDigitos(s){ return String(s==null?'':s).replace(/\D/g,''); }
 function mascaraCPF(s){
   const d = soDigitos(s).slice(0,11);
@@ -2412,7 +2517,7 @@ function htmlPainel(){
 
   const orcs = listaOrcamentos();
   const orcAbertos = orcs.filter(o=>o.status==='rascunho'||o.status==='enviado');
-  const valorAprov = orcs.filter(o=>o.status==='aprovado').reduce((s,o)=>s+totalOrc(o),0);
+  const valorAprov = orcs.filter(o=>o.status==='aprovado').reduce((s,o)=>s+valorOrcVenda(o),0);
   const ultOrc = orcs.slice().sort((a,b)=>(b.criadoEm||b.data||'').localeCompare(a.criadoEm||a.data||'')).slice(0,5);
 
   if(t===0){
@@ -2438,6 +2543,19 @@ function htmlPainel(){
 
   ${cartaoLigado('resumo')?resumoMensalCard():''}
   ${cartaoLigado('caixa')?caixaCard():''}
+
+  ${(()=>{
+    const hoje = new Date();
+    const mes = hoje.getMonth()+1, diaHoje = hoje.getDate();
+    const aniv = (db.clientes||[]).filter(c=>c.nascimento).map(c=>{
+      const p=String(c.nascimento).split('-'); if(p.length<3) return null;
+      const m=Number(p[1]), d=Number(p[2]);
+      const diff = Math.ceil((new Date(hoje.getFullYear(),m-1,d)-new Date(hoje.getFullYear(),hoje.getMonth(),diaHoje))/86400000);
+      return {...c,m,d,diff};
+    }).filter(Boolean).filter(x=>x.diff>=0 && x.diff<=7).sort((a,b)=>a.diff-b.diff).slice(0,6);
+    if(!aniv.length) return '';
+    return `<div class="card" style="margin-bottom:18px"><div class="card-h"><h3>🎂 Aniversariantes próximos 7 dias</h3><button class="link" data-go="aniversarios">Ver todos →</button></div><div class="card-b">${aniv.map(c=>`<div class="linha-lista"><div class="avatar">${c.diff===0?'🎂':String(c.d).padStart(2,'0')+'/'+String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.diff===0?'Hoje':c.diff===1?'Amanhã':`Faltam ${c.diff} dias`}${c.telefone?' · '+esc(c.telefone):''}</div></div><button class="btn sm primary" data-act="cli-zap" data-id="${c.id}">💬 Parabenizar</button></div>`).join('')}</div></div>`;
+  })()}
 
   ${(()=>{
     const venc = orcamentosVencendo(5);
@@ -2511,7 +2629,7 @@ function htmlPainel(){
         <div><div class="nm">${esc(o.numero||'—')} · ${esc(nomeClienteOrc(o))}</div>
           <div class="mt">${(o.itens||[]).length} item(ns) · ${fmtData(o.data)}</div></div>
         <div class="end">
-          <span class="vl-total">${brl(totalOrc(o))}</span>
+          <span class="vl-total">${brl(valorOrcVenda(o))}</span>
           ${badgeOrc(o.status)}
         </div>
       </div>`).join('') : `<div class="vazio"><span class="big">🧾</span>Nenhum orçamento criado ainda.</div>`}
@@ -2541,7 +2659,7 @@ function resumoMensalCard(){
   const orcs = listaOrcamentos();
   const doMes = orcs.filter(o=>String(o.data||'').slice(0,7)===mes);
   const aprovMes = doMes.filter(o=>o.status==='aprovado'||o.status==='entregue');
-  const fatMes = aprovMes.reduce((s,o)=>s+totalOrc(o),0);
+  const fatMes = aprovMes.reduce((s,o)=>s+valorOrcVenda(o),0);
   const meta = Number(db.meta&&db.meta.valorMensal)||0;
   const pct = meta>0 ? Math.min(100, Math.round(fatMes/meta*100)) : 0;
   const fupMes = agendaPendentes().filter(c=>String(c.followup.data).slice(0,7)===mes).length;
@@ -2606,21 +2724,31 @@ function htmlAniversarios(){
   const hoje = new Date();
   const mes = hoje.getMonth()+1;
   const diaHoje = hoje.getDate();
-  const lista = (db.clientes||[]).filter(c=>c.nascimento).map(c=>{
+  let lista = (db.clientes||[]).filter(c=>c.nascimento).map(c=>{
     const p = String(c.nascimento).split('-');
     if(p.length<3) return null;
     const m = Number(p[1]), d = Number(p[2]);
-    const diff = (new Date(hoje.getFullYear(), m-1, d) - new Date(hoje.getFullYear(), hoje.getMonth(), diaHoje)) / 86400000;
-    return {...c, m, d, diff: Math.ceil(diff)};
-  }).filter(Boolean).sort((a,b)=> a.m!==b.m ? a.m-b.m : a.d-b.d);
+    const nasc = new Date(hoje.getFullYear(), m-1, d);
+    const hoje0 = new Date(hoje.getFullYear(), hoje.getMonth(), diaHoje);
+    let diff = Math.round((nasc - hoje0)/86400000);
+    if(diff < 0) diff += 365;
+    return {...c, m, d, diff, origem:'crm', nome: c.nome};
+  }).filter(Boolean);
+  const gcal = db.anivGoogle || [];
+  gcal.forEach(g=>{
+    const ja = lista.find(x=>x.nome.toLowerCase()===String(g.nome).toLowerCase() && x.d===g.d && x.m===g.m);
+    if(!ja) lista.push({...g, diff: g.diff>=0?g.diff:365+g.diff, origem:'google'});
+  });
+  lista = lista.sort((a,b)=> a.diff!==b.diff ? a.diff-b.diff : String(a.nome).localeCompare(String(b.nome),'pt-BR'));
   const hojeList = lista.filter(x=>x.diff===0);
   const prox = lista.filter(x=>x.diff>0 && x.diff<=30);
-  const resto = lista.filter(x=>x.diff<0 || x.diff>30);
-  return `<div class="card" style="margin-bottom:16px"><div class="card-h"><h3>🎂 Aniversariantes de hoje (${hojeList.length})</h3></div><div class="card-b">${hojeList.length?hojeList.map(c=>`<div class="linha-lista" data-abrir="${c.id}"><div class="avatar">🎂</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')} ${c.telefone? '· '+esc(c.telefone):''}</div></div><button class="btn sm primary" data-act="cli-zap" data-id="${c.id}">💬 Parabenizar</button></div>`).join(''):'<div class="vazio">Nenhum aniversariante hoje</div>'}</div></div>
-  <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>📅 Próximos 30 dias (${prox.length})</h3></div><div class="card-b">${prox.length?prox.map(c=>`<div class="linha-lista" data-abrir="${c.id}"><div class="avatar">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.diff===1?'Amanhã':`Faltam ${c.diff} dias`}${c.telefone? ' · '+esc(c.telefone):''}</div></div><button class="btn sm ghost" data-act="cli-zap" data-id="${c.id}">💬 WhatsApp</button></div>`).join(''):'<div class="vazio">Nenhum nos próximos 30 dias</div>'}</div></div>
-  <div class="card"><div class="card-h"><h3>Demais aniversariantes (${resto.length})</h3></div><div class="card-b">${resto.length?resto.map(c=>`<div class="linha-lista" data-abrir="${c.id}"><div class="avatar">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.empresa||c.telefone||''}</div></div></div>`).join(''):'<div class="vazio">Sem outros aniversariantes</div>'}</div></div>`;
+  const resto = lista.filter(x=>x.diff>30);
+  return `<div class="toolbar"><button class="btn ghost" data-act="sync-google-aniv">🔄 Sincronizar com Google Agenda (suportmaxba@gmail.com)</button></div>
+  <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>🎂 Aniversariantes de hoje (${hojeList.length})</h3></div><div class="card-b">${hojeList.length?hojeList.map(c=>`<div class="linha-lista" ${c.origem==='crm'&&c.id?`data-abrir="${c.id}"`:''}><div class="avatar">🎂</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')} ${c.origem==='google'?'· Google Agenda':(c.telefone? '· '+esc(c.telefone):'')}</div></div>${c.origem==='crm'&&c.telefone?`<button class="btn sm primary" data-act="cli-zap" data-id="${c.id}">💬 Parabenizar</button>`:(c.origem==='google'?`<span class="selo info">Google</span>`:'')}</div>`).join(''):'<div class="vazio">Nenhum aniversariante hoje</div>'}</div></div>
+  <div class="card" style="margin-bottom:16px"><div class="card-h"><h3>📅 Próximos 30 dias (${prox.length})</h3></div><div class="card-b">${prox.length?prox.map(c=>`<div class="linha-lista" ${c.origem==='crm'&&c.id?`data-abrir="${c.id}"`:''}><div class="avatar">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.diff===1?'Amanhã':`Faltam ${c.diff} dias`} ${c.origem==='google'?'· Google Agenda':(c.telefone? '· '+esc(c.telefone):'')}</div></div>${c.origem==='crm'&&c.telefone?`<button class="btn sm ghost" data-act="cli-zap" data-id="${c.id}">💬 WhatsApp</button>`:(c.origem==='google'?`<span class="selo info">Google</span>`:'')}</div>`).join(''):'<div class="vazio">Nenhum nos próximos 30 dias</div>'}</div></div>
+  <div class="card"><div class="card-h"><h3>Demais aniversariantes (${resto.length})</h3></div><div class="card-b">${resto.length?resto.map(c=>`<div class="linha-lista" ${c.origem==='crm'&&c.id?`data-abrir="${c.id}"`:''}><div class="avatar">${String(c.d).padStart(2,'0')}/${String(c.m).padStart(2,'0')}</div><div style="flex:1"><div class="nm">${esc(c.nome)}</div><div class="mt">${c.origem==='google'?'Google Agenda':(c.empresa||c.telefone||'')}</div></div></div>`).join(''):'<div class="vazio">Sem outros aniversariantes</div>'}</div></div>`;
 }
-function ligarAniversarios(){}
+function ligarAniversarios(){ const b=document.querySelector("[data-act=\"sync-google-aniv\"]"); if(b){ b.onclick=()=>{ importarAnivGoogle(); }; } }
 
 /* =========================================================
    CLIENTES
@@ -5790,55 +5918,68 @@ function osDocHTML(os){
   const em = db.emissor || emissorVazio();
   const c = buscarCli(os.clienteId);
   const pr = osProgresso(os);
+  const st = badgeOS(os.status);
   return `
-    <div class="topo">
-      <div class="marca-doc">
-        <img class="doc-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
-        <div class="marca-txt">
-          <div style="font-size:16.5px;font-weight:800">${em.nome?esc(em.nome):esc(MARCA_NOME)}</div>
-          ${em.telefone?`<div>${esc(em.telefone)}</div>`:''}
-          ${em.email?`<div>${esc(em.email)}</div>`:''}
-          ${em.doc?`<div>${esc(em.doc)}</div>`:''}
+    <div class="os-print-wrap">
+      <div class="os-head">
+        <div class="os-brand">
+          <img class="os-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
+          <div class="os-brand-txt">
+            <div class="os-brand-nome">${em.nome?esc(em.nome):esc(MARCA_NOME)}</div>
+            <div class="os-brand-meta">${[em.telefone, em.email, em.doc].filter(Boolean).map(x=>esc(x)).join(' · ')}</div>
+          </div>
+        </div>
+        <div class="os-title">
+          <div class="os-title-top">ORDEM DE SERVIÇO</div>
+          <div class="os-title-num">${esc(os.numero||'—')}</div>
+          <div class="os-title-status">${st}</div>
+          <div class="os-title-dates">Abertura: ${fmtData(os.data)}${os.prazo?` • Prazo: ${fmtData(os.prazo)}`:''}</div>
         </div>
       </div>
-      <div class="doc-titulo">
-        <div class="t">ORDEM DE SERVIÇO</div>
-        <div class="n">${esc(os.numero||'—')}</div>
-        <div style="margin-top:5px">${badgeOS(os.status)}</div>
+      <div class="os-grid">
+        <div class="os-card">
+          <div class="os-card-h">DADOS DO CLIENTE</div>
+          <div class="os-card-b">
+            <div><b>${esc(c?c.nome:nomeClienteOrdem(os))}</b>${c&&c.empresa?`<br><span style="color:#475569">${esc(c.empresa)}</span>`:''}</div>
+            ${c&&docCliente(c)?`<div style="margin-top:4px">${docCliente(c).rotulo}: ${esc(docCliente(c).valor)}</div>`:''}
+            ${c&&c.telefone?`<div style="margin-top:4px">Tel/WhatsApp: ${esc(c.telefone)}</div>`:''}
+            ${c&&c.email?`<div style="margin-top:4px">E-mail: ${esc(c.email)}</div>`:''}
+            ${c&&c.endereco?`<div style="margin-top:4px;color:#475569">${esc(c.endereco)}</div>`:''}
+          </div>
+        </div>
+        <div class="os-card">
+          <div class="os-card-h">ATENDIMENTO</div>
+          <div class="os-card-b">
+            ${os.responsavel?`<div><b>Responsável:</b> ${esc(os.responsavel)}</div>`:''}
+            ${(()=>{ const f=os.fornecedorId?buscarForn(os.fornecedorId):null; if(!f) return ''; return `<div style="margin-top:4px"><b>Fornecedor:</b> ${esc(f.nome)}${f.telefone?` • ${esc(f.telefone)}`:''}${f.contato?` • ${esc(f.contato)}`:''}</div>`; })()}
+            ${!os.responsavel && !os.fornecedorId?`<div style="color:#64748b">Não informado</div>`:''}
+          </div>
+        </div>
       </div>
-    </div>
-    <div class="doc-info">
-      <div><b>Cliente:</b> ${esc(c?c.nome:nomeClienteOrdem(os))}${c&&c.empresa?` — ${esc(c.empresa)}`:''}</div>
-      ${c&&docCliente(c)?`<div><b>${docCliente(c).rotulo}:</b> ${esc(docCliente(c).valor)}</div>`:''}
-      ${c&&c.telefone?`<div><b>Telefone:</b> ${esc(c.telefone)}</div>`:''}
-      <div><b>Abertura:</b> ${fmtData(os.data)}${os.prazo?` · <b>Prazo:</b> ${fmtData(os.prazo)}`:''}</div>
-      ${os.responsavel?`<div><b>Responsável:</b> ${esc(os.responsavel)}</div>`:''}
-      ${(()=>{ const f=os.fornecedorId?buscarForn(os.fornecedorId):null; if(!f) return ''; return `<div><b>Fornecedor:</b> ${esc(f.nome)}${f.telefone?` · ${esc(f.telefone)}`:''}${f.contato?` · ${esc(f.contato)}`:''}</div>`; })()}
-    </div>
-    ${itensOS(os).length?`<table>
-      <thead><tr><th>Descrição</th><th class="num-c">Qtd</th><th class="num-c">Valor unit.</th><th class="num-c">Total</th></tr></thead>
-      <tbody>${itensOS(os).map(i=>`<tr>
-        <td>${esc(i.desc||'—')}${itemDescV(i)>0?`<div style="color:#ef4444;font-size:11.5px">desconto: − ${brl(itemDescV(i))}${i.descTipo==='%'?` (${Number(i.descItem)||0}%)`:''}</div>`:''}</td>
-        <td class="num-c">${Number(i.qtd)||0}</td>
-        <td class="num-c">${brl(i.unit)}</td>
-        <td class="num-c">${brl(itemTotal(i))}</td>
-      </tr>`).join('')}</tbody>
-    </table>`:''}
-    ${os.descricao?`<div class="obs"><b>Serviço:</b><br>${esc(os.descricao).replace(/\n/g,'<br>')}</div>`:''}
-    ${pr.total?`<div class="obs"><b>Checklist (${pr.feito}/${pr.total} — ${pr.pct}%):</b><br>
-      ${(os.checklist||[]).map(i=>`${i.feito?'☑':'☐'} ${esc(i.tarefa)}`).join('<br>')}</div>`:''}
-    ${os.obs?`<div class="obs"><b>Observações:</b><br>${esc(os.obs)}</div>`:''}
-    <div style="margin-top:9px">
-      ${itensOS(os).length?`<div class="tot-line"><span>SUBTOTAL DOS ITENS</span><b>${brl(subtotalOS(os))}</b></div>`:''}
-      ${valorServicoOS(os)>0?`<div class="tot-line"><span>${itensOS(os).length?'SERVIÇO AVULSO':'VALOR DO SERVIÇO'}</span><b>${brl(valorServicoOS(os))}</b></div>`:''}
-      <div class="tot-line geral"><span>TOTAL DA OS</span><b>${brl(totalOS(os))}</b></div>
-    </div>
-    ${vendaDaOS(os)?`<div class="obs" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><b>Vendida:</b> ${fmtData(os.venda.data)}${os.venda.forma?` · pagamento: ${esc(os.venda.forma)}`:''}${os.venda.numero?` · pedido nº ${esc(os.venda.numero)}`:''}</div>`:''}
-    <div class="assinaturas">
-      <div>Assinatura do cliente</div>
-      <div>Responsável técnico</div>
-    </div>
-    <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())} · Ordem de serviço ${esc(os.numero||'')}</div></div>`;
+      ${os.descricao?`<div class="os-block"><div class="os-block-h">DESCRIÇÃO DO SERVIÇO</div><div class="os-block-b">${esc(os.descricao).replace(/\n/g,'<br>')}</div></div>`:''}
+      ${itensOS(os).length?`<div class="os-block"><div class="os-block-h">PRODUTOS / SERVIÇOS</div><div class="os-block-b" style="padding:0"><table class="os-table">
+        <thead><tr><th>Descrição</th><th class="num">Qtd</th><th class="num">Unitário</th><th class="num">Total</th></tr></thead>
+        <tbody>${itensOS(os).map(i=>`<tr>
+          <td>${esc(i.desc||'—')}${itemDescV(i)>0?`<div class="os-item-desc">Desconto: - ${brl(itemDescV(i))}${i.descTipo==='%'?` (${Number(i.descItem)||0}%)`:''}</div>`:''}</td>
+          <td class="num">${Number(i.qtd)||0}</td>
+          <td class="num">${brl(i.unit)}</td>
+          <td class="num"><b>${brl(itemTotal(i))}</b></td>
+        </tr>`).join('')}</tbody>
+      </table></div></div>`:''}
+      ${pr.total?`<div class="os-block"><div class="os-block-h">CHECKLIST DE EXECUÇÃO (${pr.feito}/${pr.total} • ${pr.pct}%)</div><div class="os-block-b os-check">${(os.checklist||[]).map(i=>`<div class="os-chk-item">${i.feito?'☑':'☐'} ${esc(i.tarefa)}</div>`).join('')}</div></div>`:''}
+      ${os.obs?`<div class="os-block"><div class="os-block-h">OBSERVAÇÕES</div><div class="os-block-b">${esc(os.obs).replace(/\n/g,'<br>')}</div></div>`:''}
+      <div class="os-totals">
+        ${itensOS(os).length?`<div class="os-tot-line"><span>Subtotal dos itens</span><span>${brl(subtotalOS(os))}</span></div>`:''}
+        ${valorServicoOS(os)>0?`<div class="os-tot-line"><span>${itensOS(os).length?'Serviço avulso':'Valor do serviço'}</span><span>${brl(valorServicoOS(os))}</span></div>`:''}
+        <div class="os-tot-line os-tot-geral"><span>TOTAL DA OS</span><span>${brl(totalOS(os))}</span></div>
+      </div>
+      ${vendaDaOS(os)?`<div class="os-venda"><b>✓ Vendida</b> em ${fmtData(os.venda.data)}${os.venda.forma?` • ${esc(os.venda.forma)}`:''}${os.venda.numero?` • Pedido ${esc(os.venda.numero)}`:''}</div>`:''}
+      <div class="os-ass">
+        <div class="os-ass-box"><div class="os-ass-line"></div><div class="os-ass-txt">Assinatura do cliente</div></div>
+        <div class="os-ass-box"><div class="os-ass-line"></div><div class="os-ass-txt">Responsável técnico</div></div>
+      </div>
+      <div class="os-foot">Emitido em ${fmtData(hojeISO())} • Ordem de Serviço ${esc(os.numero||'')}</div>
+    </div>`;
 }
 function verOrdem(id){
   const os = buscarOrdem(id); if(!os) return;
@@ -7613,7 +7754,7 @@ function htmlRelatorios(){
   /* Totais por status */
   const porStatus = STATUS_ORC.map(s=>{
     const lista = os.filter(o=>o.status===s.id);
-    return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a + ((o.venda && typeof o.venda.valor==='number')?o.venda.valor:((o.lancamentoId && Array.isArray(db.lancamentos))?((function(){const l=db.lancamentos.find(x=>x.id===o.lancamentoId);return l?Number(l.valor)||0:totalOrc(o);})()):totalOrc(o))),0) };
+    return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a+totalOrc(o),0) };
   });
 
   /* Comissão e meta */
