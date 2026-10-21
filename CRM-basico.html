@@ -720,6 +720,8 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
 .orc-doc .rodape-contato a{color:#334155;text-decoration:none;border-bottom:1px dotted #94a3b8}
 .orc-doc .assinaturas{display:flex;gap:44px;margin-top:52px}
 .orc-doc .assinaturas div{flex:1;border-top:1px solid #0f172a;padding-top:6px;font-size:12.3px;text-align:center;color:#334155}
+.orc-doc .ct-clausulas{line-height:1.62;font-size:13px;text-align:justify}
+.orc-doc .ct-clausulas b{letter-spacing:.4px}
 .orc-doc .assin-img{width:100%;max-width:210px;height:auto;display:block;margin:0 auto 2px}
 /* Captura de assinatura */
 .assin-area{position:relative;border:2px dashed var(--borda);border-radius:12px;background:#fff;overflow:hidden;touch-action:none}
@@ -739,6 +741,7 @@ body.tema-escuro .assin-area,body.tema-escuro .assin-preview{background:#0d1728;
   body.com-doc #areaImpressao{display:block !important}
   /* Botões de aceitar/recusar do link público não vão para o papel */
   .pub-acoes{display:none !important}
+  #pubAssBox{display:none !important}
   .pub-wrap{padding-bottom:20px !important}
   @page{margin:14mm}
 }
@@ -869,6 +872,7 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
       <button class="nav-item" data-view="ordens"><span class="ico">🛠️</span><span>Ordens de serviço</span><span class="pill" id="pillOS" style="display:none">0</span></button>
       <button class="nav-item" data-view="financeiro"><span class="ico">💰</span><span>Financeiro</span><span class="pill" id="pillFin" style="display:none">0</span></button>
       <button class="nav-item" data-view="contratos"><span class="ico">🔁</span><span>Contratos</span><span class="pill" id="pillContrato" style="display:none">0</span></button>
+      <button class="nav-item" data-view="contratosServico"><span class="ico">📜</span><span>Contratos de serviço</span></button>
       <button class="nav-item" data-view="mensagens"><span class="ico">💬</span><span>Mensagens</span></button>
       <button class="nav-item" data-view="relatorios"><span class="ico">📈</span><span>Relatórios</span></button>
       <button class="nav-item" data-view="agenda"><span class="ico">📍</span><span>Agenda de Visitas</span><span class="pill" id="pillAgenda" style="display:none">0</span></button>
@@ -948,6 +952,7 @@ const TITULOS = {
   ordens:['Ordens de serviço','Acompanhe a execução dos serviços aprovados'],
   financeiro:['Financeiro','Contas a receber, pagamentos e fluxo de caixa'],
   contratos:['Contratos e recorrência','Mensalidades, renovações e contratos ativos'],
+  contratosServico:['Contratos de serviço','Documentos prontos para o cliente assinar e a venda fechar'],
   mensagens:['Mensagens','Modelos de texto prontos para WhatsApp e e-mail'],
   relatorios:['Relatórios','Faturamento, comissões, orçamentos e ranking de itens'],
   agenda:['Agenda de Visitas','Roteiro diário para visitar clientes e marcar atendimentos'],
@@ -1412,12 +1417,14 @@ function normalizar(d){
   if(!Array.isArray(d.lancamentos)) d.lancamentos = [];
   if(!Array.isArray(d.mensagens)) d.mensagens = [];
   if(!Array.isArray(d.contratos)) d.contratos = [];
+  if(!Array.isArray(d.contratosServico)) d.contratosServico = [];
   if(!Array.isArray(d.backups)) d.backups = [];
   if(!Array.isArray(d.auditoria)) d.auditoria = [];
   if(!d.emissor || typeof d.emissor!=='object') d.emissor = emissorVazio();
   else { if(typeof d.emissor.site!=='string') d.emissor.site = ''; if(typeof d.emissor.instagram!=='string') d.emissor.instagram = ''; }
   if(typeof d.seqOrc!=='number') d.seqOrc = 0;
   if(typeof d.seqOS!=='number') d.seqOS = 0;
+  if(typeof d.seqCT!=='number') d.seqCT = 0;
   if(!d.meta || typeof d.meta!=='object') d.meta = {};
   if(typeof d.meta.comissao!=='number') d.meta.comissao = 10;
   if(typeof d.meta.valorMensal!=='number') d.meta.valorMensal = 0;
@@ -1429,7 +1436,7 @@ function normalizar(d){
   if(typeof d.prefs.densidade!=='string') d.prefs.densidade = 'normal';
   return d;
 }
-function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], lancamentos:[], mensagens:mensagemPadrao(), contratos:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
+function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], lancamentos:[], mensagens:mensagemPadrao(), contratos:[], contratosServico:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, seqCT:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
 function prefs(){ if(!db.prefs) db.prefs = baseVazia().prefs; if(!db.prefs.cartoes) db.prefs.cartoes = baseVazia().prefs.cartoes; return db.prefs; }
 
 /* ---------- Financeiro: pagamentos e contas a receber ---------- */
@@ -2480,6 +2487,9 @@ function render(){
   }else if(view==='contratos'){
     btnNovo.textContent = '＋ Novo contrato';
     btnNovo.onclick = ()=>formContrato(null);
+  }else if(view==='contratosServico'){
+    btnNovo.textContent = '＋ Novo contrato de serviço';
+    btnNovo.onclick = ()=>formContratoServico(null);
   }else if(view==='mensagens'){
     btnNovo.textContent = '＋ Nova mensagem';
     btnNovo.onclick = ()=>formMensagem(null);
@@ -2510,6 +2520,7 @@ function render(){
   else if(view==='ordens'){ el.innerHTML = htmlOrdens(); ligarOrdens(); }
   else if(view==='financeiro'){ el.innerHTML = htmlFinanceiro(); ligarFinanceiro(); }
   else if(view==='contratos'){ el.innerHTML = htmlContratos(); ligarContratos(); }
+  else if(view==='contratosServico'){ el.innerHTML = htmlContratosServico(); ligarContratosServico(); }
   else if(view==='mensagens'){ el.innerHTML = htmlMensagens(); ligarMensagens(); }
   else if(view==='relatorios'){ el.innerHTML = htmlRelatorios(); ligarRelatorios(); }
   else if(view==='agenda'){ el.innerHTML = htmlAgenda(); ligarAgenda(); }
@@ -2997,6 +3008,18 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='cont-renovar'){ const c=(db.contratos||[]).find(x=>x.id===id); if(c){ renovarContrato(c,1); salvar(); render(); toast('Contrato renovado por mais 1 mês.'); } }
   else if(btn.dataset.act==='cont-renovar-todos') renovarTodosVencidos();
   else if(btn.dataset.act==='cont-lembrete') lembreteContrato(id);
+  /* Contratos de serviço */
+  else if(btn.dataset.act==='ct-ver') verContrato(id);
+  else if(btn.dataset.act==='ct-editar') formContratoServico(id);
+  else if(btn.dataset.act==='ct-link') mostrarLinkCT(id);
+  else if(btn.dataset.act==='ct-zap') enviarZapContrato(id);
+  else if(btn.dataset.act==='ct-mail') enviarMailContrato(id);
+  else if(btn.dataset.act==='ct-assinar') formAssinaturaCT(id);
+  else if(btn.dataset.act==='ct-excluir'){
+    const ct=buscarCT(id);
+    if(ct && confirm(`Excluir o contrato ${ct.numero||''}?`)){ db.contratosServico=listaCT().filter(x=>x.id!==id); salvar(); render(); toast('Contrato excluído.'); }
+  }
+  else if(btn.dataset.act==='orc-contrato'){ formContratoServico(null, id); }
   /* Mensagens */
   else if(btn.dataset.act==='msg-editar') formMensagem(id);
   else if(btn.dataset.act==='msg-excluir') excluirMensagem(id);
@@ -3048,6 +3071,12 @@ document.getElementById('view').addEventListener('change', e=>{
   if(selContrato){
     const c = (db.contratos||[]).find(x=>x.id===selContrato.dataset.id);
     if(c){ c.status = selContrato.value; salvar(); render(); toast('Status do contrato atualizado.'); }
+    return;
+  }
+  const selCT = e.target.closest('select[data-act="ct-status"]');
+  if(selCT){
+    const ct = buscarCT(selCT.dataset.id);
+    if(ct){ ct.status = selCT.value; salvar(); render(); toast(`Contrato ${ct.numero||''} agora está "${statusCT(ct.status).label}".`); }
     return;
   }
   const sel = e.target.closest('select[data-act="orc-status"]');
@@ -4644,6 +4673,7 @@ function tabelaOrcHTML(){
         <button class="icon-btn" title="Link público para o cliente" data-act="orc-link" data-id="${o.id}">🔗</button>
         <button class="icon-btn" title="Cobrar / acompanhar por WhatsApp" data-act="orc-zap-fup" data-id="${o.id}">🔔</button>
         <button class="icon-btn${o.status==='aprovado'?' ok-on':''}" title="${o.status==='aprovado'?'Gerar ordem de serviço':'Só em orçamentos aprovados'}" data-act="orc-os" data-id="${o.id}" style="${o.status==='aprovado'?'':'opacity:.35'}">🛠️</button>
+        <button class="icon-btn" title="Gerar contrato de serviço" data-act="orc-contrato" data-id="${o.id}">📜</button>
         <button class="icon-btn${nfPendente(o)?' nf-on':''}" title="${podeMarcarNF(o)?'Nota fiscal (controle)':(precisaNF(o)?'Nota fiscal (controle)':'Só em orçamentos aprovados')}" data-act="orc-nf" data-id="${o.id}" style="${podeMarcarNF(o)||precisaNF(o)?'':'opacity:.35'}">📄</button>
         <button class="icon-btn" title="Duplicar" data-act="orc-duplicar" data-id="${o.id}">📋</button>
         <button class="icon-btn" title="Enviar por WhatsApp" data-act="orc-zap" data-id="${o.id}">💬</button>
@@ -5265,6 +5295,7 @@ function verOrc(id){
       <button type="button" class="btn ghost" data-fechar>Fechar</button>
       <button type="button" class="btn ghost" id="btnEditFromView">✏️ Editar</button>
       <button type="button" class="btn ghost" id="btnAssinarOrc">✍️ ${o.assinatura?'Ver assinatura':'Assinar'}</button>
+      <button type="button" class="btn ghost" id="btnContratoOrc">📜 Contrato</button>
       <button type="button" class="btn ghost" data-act="orc-copiar" data-id="${o.id}">📋 Copiar texto</button>
       ${(o.status==='aprovado'||o.status==='entregue')?`<button type="button" class="btn ghost" id="btnRecibo">🧾 Recibo</button>`:''}
       <button type="button" class="btn ok" data-act="orc-mail" data-id="${o.id}">✉️ E-mail</button>
@@ -5274,6 +5305,7 @@ function verOrc(id){
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
   document.getElementById('btnEditFromView').onclick = ()=>{ fecharModal(); formOrcamento(o.id); };
   document.getElementById('btnAssinarOrc').onclick = ()=>formAssinaturaOrc(o.id);
+  document.getElementById('btnContratoOrc').onclick = ()=>{ fecharModal(); formContratoServico(null, o.id); };
   document.getElementById('btnImprimir').onclick = ()=>imprimirOrc(o);
   const br = document.getElementById('btnRecibo'); if(br) br.onclick = ()=>imprimirRecibo(o.id);
   modal.querySelector('[data-act="orc-copiar"]').onclick = ()=>copiarOrc(o.id);
@@ -9552,6 +9584,920 @@ function instalarApp(){
 }
 
 /* =========================================================
+   CONTRATOS DE SERVIÇO (documento contratual para fechar a venda)
+   ========================================================= */
+const STATUS_CT = [
+  {id:'rascunho', label:'Rascunho', cls:'info'},
+  {id:'enviado',  label:'Enviado',  cls:'vence'},
+  {id:'assinado', label:'Assinado', cls:'ok'},
+  {id:'recusado', label:'Recusado', cls:'vencido'}
+];
+/* Modelo padrão do texto do contrato — editável no app (cada contrato pode ser
+   ajustado). Use {{cliente}}, {{empresa}}, {{cnpj}}, {{total}}, {{prazo}},
+   {{pagamento}}, {{garantia}} e {{data}}: são trocados automaticamente no documento. */
+const MODELO_CONTRATO_PADRAO = `CONTRATO DE PRESTAÇÃO DE SERVIÇOS
+
+Pelo presente instrumento particular, de um lado {{empresa}}, doravante denominada CONTRATANTE, e de outro lado {{cliente}}, doravante denominada CONTRATADA, resolvem celebrar o presente Contrato de Prestação de Serviços, que se regerá pelas cláusulas e condições a seguir.
+
+1. OBJETO
+1.1. Constitui objeto deste contrato a prestação, pela CONTRATANTE, dos serviços relacionados na planilha de valores deste instrumento.
+
+2. VALORES E FORMA DE PAGAMENTO
+2.1. O valor total dos serviços é de {{total}}.
+2.2. Forma de pagamento: {{pagamento}}.
+
+3. PRAZO DE EXECUÇÃO
+3.1. O prazo para execução e conclusão dos serviços é de {{prazo}}.
+
+4. GARANTIA
+4.1. Garantia concedida: {{garantia}}.
+
+5. OBRIGAÇÕES DA CONTRATANTE
+5.1. Fornecer as informações, o acesso e as condições necessárias à execução dos serviços.
+5.2. Efetuar o pagamento na forma convencionada neste instrumento.
+
+6. OBRIGAÇÕES DA CONTRATADA
+6.1. Executar os serviços com zelo, observando as boas práticas de mercado.
+6.2. Garantir a qualidade dos serviços executados durante o período de garantia.
+
+7. RESCISÃO
+7.1. Qualquer das partes poderá rescindir o presente contrato mediante aviso prévio, respeitadas as obrigações já assumidas.
+
+8. FORO
+8.1. Fica eleito o foro da comarca de Lauro de Freitas/BA para dirimir as controvérsias oriundas deste contrato.
+
+Lauro de Freitas/BA, {{data}}.`;
+
+function listaCT(){ if(!Array.isArray(db.contratosServico)) db.contratosServico = []; return db.contratosServico; }
+function buscarCT(id){ return listaCT().find(c=>c.id===id); }
+function novoNumeroCT(){ const n=(Number(db.seqCT)||0)+1; db.seqCT=n; return 'CT-'+new Date().getFullYear()+'-'+String(n).padStart(4,'0'); }
+function statusCT(id){ return STATUS_CT.find(s=>s.id===id) || STATUS_CT[0]; }
+function seloCT(c){ const s=statusCT(c.status); return `<span class="selo ${s.cls||'info'}">${esc(s.label)}</span>`; }
+function ctSubtotal(c){ return (c.itens||[]).reduce((s,i)=>s+itemTotal(i),0); }
+function ctFrete(c){ return Math.max(0, Number(c.frete)||0); }
+function ctDescGeral(c){
+  const d=Math.max(0, Number(c.desconto)||0); if(!d) return 0;
+  const base=ctSubtotal(c)+ctFrete(c);
+  return (c.descGeralTipo||'R$')==='%' ? base*(d/100) : d;
+}
+function totalCT(c){ return Math.max(0, ctSubtotal(c)+ctFrete(c)-ctDescGeral(c)); }
+function nomeClienteCT(c){ const cl=buscarCli(c.clienteId); return cl?cl.nome:(c.clienteNome||'Cliente'); }
+function modeloContratoTexto(){ return (db.prefs&&db.prefs.contratoModelo) || MODELO_CONTRATO_PADRAO; }
+/* Texto final do contrato: troca os marcadores {{...}} pelos dados reais */
+function textoContratoFinal(c){
+  const em=db.emissor||{};
+  const mapa={
+    cliente:nomeClienteCT(c), empresa:em.nome||MARCA_NOME, cnpj:em.doc||'',
+    total:brl(totalCT(c)), prazo:c.prazo||'a combinar', pagamento:c.pagamento||'a combinar',
+    garantia:c.garantia||'conforme combinado', data:fmtData(c.data||hojeISO()),
+    endereco:em.endereco||'', telefone:em.telefone||'', email:em.email||''
+  };
+  let t = (c.clausulas==null || c.clausulas==='') ? modeloContratoTexto() : String(c.clausulas);
+  Object.keys(mapa).forEach(k=>{ t=t.split('{{'+k+'}}').join(mapa[k]); });
+  return t;
+}
+function ctRascunho(orc){
+  const o=orc||null;
+  return {
+    id:null, numero:'', orcamentoId:o?o.id:'', clienteId:o?o.clienteId:'', clienteNome:o?nomeClienteOrc(o):'',
+    data:hojeISO(), status:'rascunho',
+    itens:o?(o.itens||[]).map(i=>Object.assign({},i)):[],
+    frete:o?freteOrc(o):0,
+    desconto:o?Number(o.desconto)||0:0,
+    descGeralTipo:o?(o.descGeralTipo||'R$'):'R$',
+    prazo:'', pagamento:'', garantia:'',
+    clausulas:modeloContratoTexto(), assinatura:null, criadoEm:agoraDT()
+  };
+}
+function itemCTHTML(it){
+  return `<tr data-item="${it.id}">
+    <td data-label="Descrição"><input data-campo="desc" maxlength="160" value="${esc(it.desc||'')}" placeholder="Descrição do serviço"></td>
+    <td data-label="Qtd" class="col-qtd num"><input data-campo="qtd" type="number" min="0" step="0.01" value="${Number(it.qtd)||0}"></td>
+    <td data-label="Valor unit. R$" class="col-unit num"><input data-campo="unit" type="number" min="0" step="0.01" value="${Number(it.unit)||0}"></td>
+    <td class="col-tot num" data-tot>${brl(itemTotal(it))}</td>
+    <td class="col-rm"><button type="button" class="icon-btn del" data-rm-item title="Remover item">🗑</button></td>
+  </tr>`;
+}
+
+/* ---------- Documento do contrato ---------- */
+function contratoDocHTML(c){
+  const em=db.emissor||emissorVazio();
+  const cli=buscarCli(c.clienteId);
+  const orc=c.orcamentoId?buscarOrc(c.orcamentoId):null;
+  const corpo=textoContratoFinal(c);
+  return `
+    <div class="topo">
+      <div class="marca-doc">
+        <img class="doc-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
+        <div class="marca-txt">
+          <div style="font-size:16.5px;font-weight:800">${em.nome?esc(em.nome):esc(MARCA_NOME)}</div>
+          ${em.telefone?`<div>${esc(em.telefone)}</div>`:''}
+          ${em.email?`<div>${esc(em.email)}</div>`:''}
+          ${em.endereco?`<div>${esc(em.endereco)}</div>`:''}
+          ${em.doc?`<div>${esc(em.doc)}</div>`:''}
+        </div>
+      </div>
+      <div class="emissor">
+        <div class="num">CONTRATO ${esc(c.numero||'')}</div>
+        <div style="color:#64748b;font-size:13px;margin-top:3px">Emitido em ${fmtData(c.data)}</div>
+        ${orc?`<div style="color:#64748b;font-size:13px">Orçamento ${esc(orc.numero||'')}</div>`:''}
+        <div style="margin-top:7px">${seloCT(c)}</div>
+      </div>
+    </div>
+
+    <div class="duas">
+      <div class="bloco">
+        <h4>Contratante</h4>
+        <b>${esc(nomeClienteCT(c))}</b>
+        ${cli&&cli.empresa?`<div>${esc(cli.empresa)}</div>`:''}
+        ${docCliente(cli)?`<div>${docCliente(cli).rotulo}: ${esc(docCliente(cli).valor)}</div>`:''}
+        ${cli&&cli.telefone?`<div>${esc(cli.telefone)}</div>`:''}
+        ${cli&&cli.email?`<div>${esc(cli.email)}</div>`:''}
+        ${!cli&&c.clienteNome?`<div>${esc(c.clienteNome)}</div>`:''}
+      </div>
+      <div class="bloco" style="text-align:right">
+        <h4>Condições</h4>
+        <div>Emissão: ${fmtData(c.data)}</div>
+        ${c.prazo?`<div>Prazo: ${esc(c.prazo)}</div>`:''}
+        ${c.pagamento?`<div>Pagamento: ${esc(c.pagamento)}</div>`:''}
+        <div>Itens: ${(c.itens||[]).length}</div>
+      </div>
+    </div>
+
+    ${(c.itens||[]).length?`<table>
+      <thead><tr><th>Descrição</th><th class="num-c">Qtd</th><th class="num-c">Valor unit.</th><th class="num-c">Total</th></tr></thead>
+      <tbody>
+        ${(c.itens||[]).map(i=>`<tr>
+          <td>${esc(i.desc||'—')}</td>
+          <td class="num-c">${Number(i.qtd)||0}</td>
+          <td class="num-c">${brl(i.unit)}</td>
+          <td class="num-c">${brl(itemTotal(i))}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`:''}
+
+    <div style="margin-top:9px">
+      <div class="tot-line"><span>Subtotal</span><b>${brl(ctSubtotal(c))}</b></div>
+      ${ctFrete(c)>0?`<div class="tot-line"><span>Frete / instalação</span><b>+ ${brl(ctFrete(c))}</b></div>`:''}
+      ${ctDescGeral(c)>0?`<div class="tot-line"><span>Desconto geral${c.descGeralTipo==='%'?` (${Number(c.desconto)||0}%)`:''}</span><b>− ${brl(ctDescGeral(c))}</b></div>`:''}
+      <div class="tot-line geral"><span>TOTAL DO CONTRATO</span><b>${brl(totalCT(c))}</b></div>
+    </div>
+
+    ${corpo?`<div class="obs ct-clausulas"><b>CLÁUSULAS DO CONTRATO</b><br>${esc(corpo).replace(/\n/g,'<br>')}</div>`:''}
+
+    <div class="assinaturas">
+      <div>${c.assinatura
+        ? `<img class="assin-img" src="${c.assinatura.img}" alt="Assinatura de ${esc(c.assinatura.nome||'cliente')}">
+           <div style="margin-top:2px"><b>${esc(c.assinatura.nome||'')}</b></div>
+           <div style="font-size:10.5px;color:#64748b">Assinado digitalmente em ${fmtData(c.assinatura.data)}</div>`
+        : 'Assinatura do contratante'}</div>
+      <div>Responsável pela prestação</div>
+    </div>
+    <div class="rodape-doc">
+      ${(em.telefone||em.email||em.site||em.instagram)?`<div class="rodape-contato">
+        ${em.telefone?`<span>📞 <a href="tel:${esc(soDigitos(em.telefone))}">${esc(em.telefone)}</a></span>`:''}
+        ${em.email?`<span>✉️ <a href="mailto:${esc(String(em.email).trim())}">${esc(em.email)}</a></span>`:''}
+        ${em.site?`<span>🌐 <a href="${esc(urlComHttp(em.site))}" target="_blank" rel="noopener">${esc(em.site)}</a></span>`:''}
+        ${em.instagram?`<span>📷 <a href="${esc(urlComHttp(urlInstagram(em.instagram)))}" target="_blank" rel="noopener">${esc(em.instagram)}</a></span>`:''}
+      </div>`:''}
+      <div>Emitido em ${fmtData(hojeISO())} · ${esc(c.numero||'')}</div>
+    </div>`;
+}
+function imprimirContrato(id){
+  const c=buscarCT(id); if(!c) return;
+  imprimirDoc(contratoDocHTML(c));
+}
+
+/* ---------- Formulário do contrato ---------- */
+function formContratoServico(id, orcId){
+  const ct0 = id?buscarCT(id):null;
+  if(id && !ct0) return;
+  const orc = orcId?buscarOrc(orcId):null;
+  const v = ct0 ? JSON.parse(JSON.stringify(ct0)) : ctRascunho(orc);
+  if(!Array.isArray(v.itens)) v.itens=[];
+  const clientes = db.clientes.slice();
+  const cliNome = (clientes.find(x=>x.id===v.clienteId)||{}).nome || '';
+  abrirModal(`
+    <form id="fCT">
+      <div class="modal-h"><h2>📜 ${ct0?'Editar contrato '+(ct0.numero||''):'Novo contrato de serviço'}</h2><button type="button" class="x" data-fechar>×</button></div>
+      <div class="modal-b">
+        <div class="form-grid">
+          <div class="campo full">
+            <label>Cliente * <span class="req">*</span></label>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <input id="buscaCliCT" type="search" autocomplete="off" placeholder="Digite para buscar cliente por nome, empresa, telefone..." value="${esc(cliNome)}">
+              <select name="clienteId" id="selClienteCT">
+                <option value="">— Selecione ou pesquise acima —</option>
+                ${opcoesClienteHTML(clientes, v.clienteId)}
+              </select>
+              <div class="mini" id="dicaBuscaCliCT">Digite para filtrar por nome, empresa, telefone, e-mail ou CPF/CNPJ.</div>
+            </div>
+          </div>
+          ${orc?`<div class="campo full"><div class="mini" style="background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;border-radius:8px;padding:8px 10px">📎 Gerado a partir do orçamento <b>${esc(orc.numero||'')}</b> — os itens e o total já vieram preenchidos.</div></div>`:''}
+          <div class="campo"><label>Data do contrato</label><input type="date" name="data" value="${esc(v.data||hojeISO())}"></div>
+          <div class="campo"><label>Status</label>
+            <select name="status">${STATUS_CT.map(s=>`<option value="${s.id}" ${(v.status||'rascunho')===s.id?'selected':''}>${s.label}</option>`).join('')}</select>
+          </div>
+          <div class="campo"><label>Frete / deslocamento (R$)</label><input type="number" name="frete" min="0" step="0.01" value="${Number(v.frete)||0}"></div>
+          <div class="campo"><label>Desconto geral</label>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input type="number" name="desconto" min="0" step="0.01" value="${Number(v.desconto)||0}" style="flex:1;min-width:0">
+              <select name="descGeralTipo" style="width:70px;flex:0 0 auto">
+                <option value="R$" ${(v.descGeralTipo||'R$')==='R$'?'selected':''}>R$</option>
+                <option value="%" ${v.descGeralTipo==='%'?'selected':''}>%</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="subtitulo">📦 Serviços do contrato</div>
+          <div class="campo full">
+            <div class="itens-wrap">
+              <table class="itens">
+                <thead><tr>
+                  <th>Descrição</th>
+                  <th class="col-qtd num">Qtd</th><th class="col-unit num">Valor unit. R$</th>
+                  <th class="col-tot num">Total</th><th class="col-rm"></th>
+                </tr></thead>
+                <tbody id="ctItens">${v.itens.map(itemCTHTML).join('')}</tbody>
+              </table>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:9px;flex-wrap:wrap">
+              <button type="button" class="btn ghost sm" id="ctAddItem">＋ Adicionar item</button>
+              ${orc?`<button type="button" class="btn ghost sm" id="ctCopiarOrc">📋 Recarregar itens do orçamento ${esc(orc.numero||'')}</button>`:''}
+            </div>
+            <div class="totais">
+              <span class="linha">Subtotal: <b id="ctSub">—</b></span>
+              <span class="linha">Frete/instalação: <b id="ctFrete">—</b></span>
+              <span class="linha">Desconto geral: <b id="ctDesc">—</b></span>
+              <span class="linha geral">Total do contrato: <b id="ctTot">—</b></span>
+            </div>
+          </div>
+
+          <div class="campo"><label>Prazo de execução</label><input name="prazo" maxlength="160" placeholder="Ex.: 7 dias úteis após aprovação" value="${esc(v.prazo||'')}"></div>
+          <div class="campo"><label>Forma de pagamento</label><input name="pagamento" maxlength="160" placeholder="Ex.: 50% na aprovação e 50% na entrega" value="${esc(v.pagamento||'')}"></div>
+          <div class="campo full"><label>Garantia</label><input name="garantia" maxlength="160" placeholder="Ex.: 90 dias de garantia nos serviços executados" value="${esc(v.garantia||'')}"></div>
+
+          <div class="subtitulo">📝 Texto do contrato (cláusulas)</div>
+          <div class="campo full">
+            <textarea name="clausulas" rows="16" style="min-height:260px;font-size:13.5px;line-height:1.55">${esc(v.clausulas||modeloContratoTexto())}</textarea>
+            <div class="mini">No documento, <b>{{cliente}}</b>, <b>{{empresa}}</b>, <b>{{cnpj}}</b>, <b>{{total}}</b>, <b>{{prazo}}</b>, <b>{{pagamento}}</b>, <b>{{garantia}}</b> e <b>{{data}}</b> são trocados automaticamente.</div>
+            <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap">
+              <button type="button" class="btn ghost sm" id="ctSalvarModelo">⭐ Salvar este texto como padrão</button>
+              <button type="button" class="btn ghost sm" id="ctRestaurarModelo">↩ Voltar ao texto padrão</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-f" style="flex-wrap:wrap">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="button" class="btn ghost" id="ctSalvarImprimir">🖨️ Salvar e imprimir</button>
+        <button type="button" class="btn ok" id="ctSalvarZap">💬 Salvar e enviar</button>
+        <button type="submit" class="btn primary">💾 Salvar contrato</button>
+      </div>
+    </form>`, true);
+
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  const f = document.getElementById('fCT');
+  const sel = document.getElementById('selClienteCT');
+  const inpBusca = document.getElementById('buscaCliCT');
+  const dica = document.getElementById('dicaBuscaCliCT');
+  if(inpBusca && sel) inpBusca.addEventListener('input', ()=>filtrarOpcoesCliente(inpBusca, sel, dica));
+  const tbody = document.getElementById('ctItens');
+  const elFrete = f.querySelector('[name="frete"]');
+  const elDesc = f.querySelector('[name="desconto"]');
+  const elDescTipo = f.querySelector('[name="descGeralTipo"]');
+  const elClaus = f.querySelector('[name="clausulas"]');
+
+  function lerItem(tr){
+    const it=v.itens.find(x=>x.id===tr.dataset.item); if(!it) return null;
+    it.desc = tr.querySelector('[data-campo="desc"]').value;
+    it.qtd = Math.max(0, Number(tr.querySelector('[data-campo="qtd"]').value)||0);
+    it.unit = Math.max(0, Number(tr.querySelector('[data-campo="unit"]').value)||0);
+    return it;
+  }
+  function atualizarTotais(){
+    const sub=v.itens.reduce((s,i)=>s+itemTotal(i),0);
+    const frete=Math.max(0, Number(elFrete.value)||0);
+    const d=Math.max(0, Number(elDesc.value)||0);
+    const base=sub+frete;
+    const desc=elDescTipo.value==='%' ? base*(d/100) : d;
+    document.getElementById('ctSub').textContent=brl(sub);
+    document.getElementById('ctFrete').textContent=frete>0 ? ('+ '+brl(frete)) : brl(0);
+    document.getElementById('ctDesc').textContent=desc>0 ? ('− '+brl(desc)+(elDescTipo.value==='%'?` (${d}%)`:'')) : brl(0);
+    document.getElementById('ctTot').textContent=brl(Math.max(0, base-desc));
+  }
+  function repintar(){ tbody.innerHTML=v.itens.map(itemCTHTML).join(''); atualizarTotais(); }
+  tbody.addEventListener('input', e=>{
+    const tr=e.target.closest('tr[data-item]'); if(!tr) return;
+    const it=lerItem(tr); if(!it) return;
+    const cel=tr.querySelector('[data-tot]'); if(cel) cel.textContent=brl(itemTotal(it));
+    atualizarTotais();
+  });
+  tbody.addEventListener('click', e=>{
+    const b=e.target.closest('[data-rm-item]'); if(!b) return;
+    const tr=b.closest('tr[data-item]'); if(!tr) return;
+    v.itens=v.itens.filter(x=>x.id!==tr.dataset.item);
+    repintar();
+  });
+  document.getElementById('ctAddItem').onclick=()=>{ v.itens.push({id:uid(), produtoId:'', desc:'', qtd:1, unit:0, descItem:0, descTipo:'%'}); repintar(); };
+  elFrete.addEventListener('input', atualizarTotais);
+  elDesc.addEventListener('input', atualizarTotais);
+  elDescTipo.addEventListener('change', atualizarTotais);
+  const btnCopiar=document.getElementById('ctCopiarOrc');
+  if(btnCopiar) btnCopiar.onclick=()=>{
+    if(!orc) return;
+    v.itens=(orc.itens||[]).map(i=>Object.assign({},i));
+    repintar(); toast('Itens recarregados do orçamento.');
+  };
+  document.getElementById('ctSalvarModelo').onclick=()=>{
+    db.prefs = db.prefs || {};
+    db.prefs.contratoModelo = elClaus.value;
+    salvar(); toast('Texto do contrato salvo como padrão.');
+  };
+  document.getElementById('ctRestaurarModelo').onclick=()=>{
+    if(!confirm('Trocar o texto atual pelo modelo padrão?')) return;
+    elClaus.value = MODELO_CONTRATO_PADRAO;
+  };
+  atualizarTotais();
+
+  function coletar(){
+    const clienteId=sel.value;
+    if(!clienteId){ toast('Escolha o cliente do contrato.','erro'); return null; }
+    const cli=buscarCli(clienteId);
+    return {
+      clienteId, clienteNome: cli?cli.nome:'', orcamentoId: v.orcamentoId||'',
+      data: f.querySelector('[name="data"]').value || hojeISO(),
+      status: f.querySelector('[name="status"]').value || 'rascunho',
+      itens: v.itens,
+      frete: Math.max(0, Number(elFrete.value)||0),
+      desconto: Math.max(0, Number(elDesc.value)||0),
+      descGeralTipo: elDescTipo.value,
+      prazo: f.querySelector('[name="prazo"]').value.trim(),
+      pagamento: f.querySelector('[name="pagamento"]').value.trim(),
+      garantia: f.querySelector('[name="garantia"]').value.trim(),
+      clausulas: elClaus.value
+    };
+  }
+  function salvarCT(){
+    const dados=coletar(); if(!dados) return null;
+    let alvo = ct0;
+    if(alvo){ Object.assign(alvo, dados); }
+    else{
+      alvo = Object.assign({id:uid(), numero:novoNumeroCT(), criadoEm:agoraDT(), assinatura:null}, dados);
+      listaCT().unshift(alvo);
+    }
+    salvar();
+    return alvo;
+  }
+  f.onsubmit = e=>{
+    e.preventDefault();
+    const alvo=salvarCT(); if(!alvo) return;
+    fecharModal();
+    view='contratosServico'; render();
+    verContrato(alvo.id);
+    toast(`Contrato ${alvo.numero} salvo.`);
+  };
+  document.getElementById('ctSalvarImprimir').onclick=()=>{
+    const alvo=salvarCT(); if(!alvo) return;
+    fecharModal();
+    view='contratosServico'; render();
+    imprimirContrato(alvo.id);
+    toast(`Contrato ${alvo.numero} salvo.`);
+  };
+  document.getElementById('ctSalvarZap').onclick=()=>{
+    const alvo=salvarCT(); if(!alvo) return;
+    fecharModal();
+    view='contratosServico'; render();
+    verContrato(alvo.id);
+    enviarZapContrato(alvo.id);
+  };
+}
+
+/* ---------- Ver contrato ---------- */
+function verContrato(id){
+  const c=buscarCT(id); if(!c) return;
+  espelharDoc(contratoDocHTML(c));   /* Ctrl+P no PC imprime só o contrato, sem botões por cima do preço */
+  abrirModal(`
+    <div class="modal-h"><h2>📜 Contrato ${esc(c.numero||'')}</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b" style="background:#f1f5f9">
+      <div class="orc-doc" style="border:1px solid var(--borda);border-radius:12px;padding:24px;box-shadow:var(--sombra)">${contratoDocHTML(c)}</div>
+    </div>
+    <div class="modal-f" style="flex-wrap:wrap">
+      <button type="button" class="btn ghost" data-fechar>Fechar</button>
+      <button type="button" class="btn ghost" id="ctVerEditar">✏️ Editar</button>
+      <button type="button" class="btn ghost" id="ctVerAssinar">✍️ ${c.assinatura?'Ver assinatura':'Assinar'}</button>
+      <button type="button" class="btn ghost" id="ctVerCopiar">📋 Copiar texto</button>
+      <button type="button" class="btn ghost" id="ctVerLink">🔗 Link</button>
+      <button type="button" class="btn ok" id="ctVerMail">✉️ E-mail</button>
+      <button type="button" class="btn ok" id="ctVerZap">💬 WhatsApp</button>
+      <button type="button" class="btn primary" id="ctVerImprimir">🖨️ Imprimir / PDF</button>
+    </div>`, true);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  document.getElementById('ctVerEditar').onclick=()=>{ fecharModal(); formContratoServico(c.id); };
+  document.getElementById('ctVerAssinar').onclick=()=>formAssinaturaCT(c.id);
+  document.getElementById('ctVerImprimir').onclick=()=>imprimirContrato(c.id);
+  document.getElementById('ctVerLink').onclick=()=>mostrarLinkCT(c.id);
+  document.getElementById('ctVerCopiar').onclick=()=>copiarTexto(textoContratoZap(c));
+  document.getElementById('ctVerMail').onclick=()=>enviarMailContrato(c.id);
+  document.getElementById('ctVerZap').onclick=()=>enviarZapContrato(c.id);
+}
+
+/* ---------- Assinatura do contrato ---------- */
+function formAssinaturaCT(id){
+  const c=buscarCT(id); if(!c) return;
+  const jaTem=!!c.assinatura;
+  abrirModal(`
+    <div class="modal-h"><h2>✍️ Assinatura do contrato ${esc(c.numero||'')}</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      ${jaTem?`<div class="aviso-assinado">✅ Contrato assinado por <b>${esc(c.assinatura.nome||'cliente')}</b> em ${fmtData(c.assinatura.data)}.</div>
+        <div class="assin-preview"><img src="${c.assinatura.img}" alt="Assinatura"></div>
+        <p style="font-size:13px;color:var(--suave);margin-top:10px">Você pode apagar a assinatura atual e assinar novamente (ex.: para corrigir).</p>`:''}
+      <p style="font-size:13.5px;color:var(--suave);margin:0 0 10px">Peça para o cliente <b>assinar com o dedo</b> (celular) ou com o mouse (computador) no espaço abaixo. A assinatura fica salva no contrato e aparece na impressão.</p>
+      <div class="campo" style="margin-bottom:10px">
+        <label for="ctAssNome">Nome de quem assina</label>
+        <input id="ctAssNome" maxlength="120" placeholder="Ex.: João da Silva" value="${esc(c.assinatura?c.assinatura.nome:nomeClienteCT(c))}">
+      </div>
+      <div class="assin-area">
+        <canvas id="ctAssCanvas" width="700" height="220"></canvas>
+        <div class="assin-dica" id="ctAssDica">Assine aqui</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center">
+        <button type="button" class="btn ghost sm" id="ctAssLimpar">🧽 Limpar</button>
+        <label class="btn ghost sm" style="cursor:pointer;display:inline-flex;align-items:center;gap:6px">📎 Enviar foto da assinatura
+          <input type="file" id="ctAssArquivo" accept="image/*" style="display:none">
+        </label>
+        <span style="font-size:12.5px;color:var(--suave);align-self:center">Se o cliente assinou no celular e mandou a foto pelo WhatsApp, use "Enviar foto".</span>
+      </div>
+    </div>
+    <div class="modal-f" style="flex-wrap:wrap">
+      <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+      ${jaTem?`<button type="button" class="btn danger" id="ctAssRemover">🗑️ Remover assinatura</button>`:''}
+      <button type="button" class="btn primary" id="ctAssSalvar">💾 Salvar assinatura</button>
+    </div>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+
+  const cv = document.getElementById('ctAssCanvas');
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle='#0f172a'; ctx.lineWidth=2.6; ctx.lineCap='round'; ctx.lineJoin='round';
+  let desenhou=false, desenhando=false, ultimo=null;
+  const pos=(ev)=>{
+    const r=cv.getBoundingClientRect();
+    const p=ev.touches?(ev.touches[0]||ev.changedTouches[0]):ev;
+    return {x:(p.clientX-r.left)*(cv.width/r.width), y:(p.clientY-r.top)*(cv.height/r.height)};
+  };
+  const iniciar=(ev)=>{ ev.preventDefault(); desenhando=true; ultimo=pos(ev); if(!desenhou){ const d=document.getElementById('ctAssDica'); if(d) d.style.display='none'; } };
+  const mover=(ev)=>{
+    if(!desenhando) return;
+    ev.preventDefault();
+    const p=pos(ev);
+    ctx.beginPath(); ctx.moveTo(ultimo.x, ultimo.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    ultimo=p; desenhou=true;
+  };
+  const parar=()=>{ desenhando=false; };
+  cv.addEventListener('mousedown', iniciar);
+  cv.addEventListener('mousemove', mover);
+  cv.addEventListener('mouseup', parar);
+  cv.addEventListener('mouseleave', parar);
+  cv.addEventListener('touchstart', iniciar, {passive:false});
+  cv.addEventListener('touchmove', mover, {passive:false});
+  cv.addEventListener('touchend', parar);
+  document.getElementById('ctAssLimpar').onclick=()=>{
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,cv.width,cv.height);
+    desenhou=false;
+    const d=document.getElementById('ctAssDica'); if(d) d.style.display='';
+  };
+  const arq=document.getElementById('ctAssArquivo');
+  arq.onchange=()=>{
+    const file=arq.files&&arq.files[0]; if(!file) return;
+    const fr=new FileReader();
+    fr.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,cv.width,cv.height);
+        const f2=Math.min(cv.width/img.width, cv.height/img.height, 1);
+        const dw=img.width*f2, dh=img.height*f2;
+        ctx.drawImage(img,(cv.width-dw)/2,(cv.height-dh)/2,dw,dh);
+        desenhou=true;
+        const d=document.getElementById('ctAssDica'); if(d) d.style.display='none';
+        toast('Foto da assinatura carregada — clique em Salvar.');
+      };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  };
+  const remover=document.getElementById('ctAssRemover');
+  if(remover) remover.onclick=()=>{
+    if(!confirm('Remover a assinatura deste contrato?')) return;
+    delete c.assinatura; salvar(); fecharModal(); render(); toast('Assinatura removida.');
+  };
+  document.getElementById('ctAssSalvar').onclick=()=>{
+    if(!desenhou){ toast('Peça para o cliente assinar antes de salvar.','erro'); return; }
+    const nome=document.getElementById('ctAssNome').value.trim();
+    if(!nome){ toast('Informe o nome de quem assina.','erro'); return; }
+    c.assinatura={ nome, data:hojeISO(), img:cv.toDataURL('image/png') };
+    if(c.status==='rascunho' || c.status==='enviado') c.status='assinado';
+    salvar(); fecharModal(); render(); toast('Assinatura salva no contrato.');
+  };
+}
+
+/* ---------- Envio: WhatsApp, e-mail e link ---------- */
+function ctParaLink(c){
+  const em=db.emissor||{};
+  const tx = String(c.clausulas==null||c.clausulas==='' ? modeloContratoTexto() : c.clausulas);
+  const dados={
+    n:c.numero, em:em.nome||MARCA_NOME, et:em.telefone||'', ee:em.email||'', ed:em.endereco||'', ec:em.doc||'',
+    cl:nomeClienteCT(c), dt:c.data,
+    it:(c.itens||[]).map(i=>({d:i.desc,q:Number(i.qtd)||0,u:Number(i.unit)||0})),
+    fr:ctFrete(c), dg:ctDescGeral(c), dgt:c.descGeralTipo||'R$', dgv:Number(c.desconto)||0, tt:totalCT(c),
+    pr:c.prazo||'', pg:c.pagamento||'', ga:c.garantia||'',
+    tx: tx.length>3000 ? tx.slice(0,3000)+'…' : tx
+  };
+  return linkBase() + '#ct=' + b64url(JSON.stringify(dados));
+}
+function decodificarLinkCT(enc){
+  try{
+    let b=decodeURIComponent(String(enc||'')).replace(/-/g,'+').replace(/_/g,'/');
+    while(b.length%4) b+='=';
+    return JSON.parse(decodeURIComponent(escape(atob(b))));
+  }catch(e){ return null; }
+}
+function textoContratoZap(c){
+  const primeiro=String(nomeClienteCT(c)).trim().split(/\s+/)[0]||'';
+  const L=[];
+  L.push(`Olá${primeiro?', '+primeiro:''}! 👋`);
+  L.push('');
+  L.push(`Segue o *CONTRATO DE SERVIÇOS ${c.numero||''}* da *${(db.emissor||{}).nome||MARCA_NOME}*:`);
+  L.push('');
+  (c.itens||[]).forEach(i=>L.push(`• ${i.desc||'Serviço'} — ${Number(i.qtd)||0} × ${brl(i.unit)} = ${brl(itemTotal(i))}`));
+  if(ctFrete(c)>0) L.push(`• Frete/instalação: + ${brl(ctFrete(c))}`);
+  if(ctDescGeral(c)>0) L.push(`• Desconto: − ${brl(ctDescGeral(c))}`);
+  L.push(`*TOTAL: ${brl(totalCT(c))}*`);
+  L.push('');
+  if(c.prazo) L.push(`*Prazo:* ${c.prazo}`);
+  if(c.pagamento) L.push(`*Pagamento:* ${c.pagamento}`);
+  if(c.garantia) L.push(`*Garantia:* ${c.garantia}`);
+  const tx=textoContratoFinal(c);
+  if(tx){
+    L.push('');
+    L.push(tx.length>1400 ? tx.slice(0,1400)+'… (texto completo no link abaixo)' : tx);
+  }
+  L.push('');
+  L.push(`📄 *Leia e assine pelo link:* ${ctParaLink(c)}`);
+  L.push('');
+  L.push('Qualquer dúvida é só me chamar! 🙂');
+  return L.join('\n');
+}
+function linkZapContrato(c){
+  const cli=buscarCli(c.clienteId);
+  let tel=String((cli&&cli.telefone)||'').replace(/\D/g,'');
+  if(tel && tel.length<=11) tel='55'+tel;
+  return (tel?'https://wa.me/'+tel+'?text=':'https://wa.me/?text=')+encodeURIComponent(textoContratoZap(c));
+}
+function enviarZapContrato(id){
+  const c=buscarCT(id); if(!c) return;
+  const cli=buscarCli(c.clienteId);
+  if(!((cli&&cli.telefone)||'').trim()){ toast('Este cliente não tem telefone cadastrado.','erro'); return; }
+  window.open(linkZapContrato(c),'_blank','noopener');
+}
+function linkMailContrato(c){
+  const cli=buscarCli(c.clienteId);
+  const email=String((cli&&cli.email)||'').trim().replace(/\s/g,'');
+  if(!email) return null;
+  const assunto=`Contrato de serviços ${c.numero||''} — ${brl(totalCT(c))}`;
+  return 'mailto:'+email+'?subject='+encodeURIComponent(assunto)+'&body='+encodeURIComponent(textoContratoZap(c));
+}
+function enviarMailContrato(id){
+  const c=buscarCT(id); if(!c) return;
+  const l=linkMailContrato(c);
+  if(!l){ toast('Este cliente não tem e-mail cadastrado.','erro'); return; }
+  window.location.href=l;
+}
+function mostrarLinkCT(id){
+  const c=buscarCT(id); if(!c) return;
+  const link=ctParaLink(c);
+  copiarTexto(link);
+  const qr=qrDataURL(link,4);
+  abrirModal(`
+    <div class="modal-h"><h2>🔗 Link do contrato ${esc(c.numero||'')}</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      <p style="font-size:13.5px;color:var(--suave);margin:0 0 8px">Envie este link ao cliente. Ele abre o contrato no celular, com o texto completo, e pode <b>assinar com o dedo</b> — depois é só baixar a assinatura e mandar de volta no WhatsApp.</p>
+      <div class="link-box">
+        <input id="linkCTPub" readonly value="${esc(link)}">
+        <button class="btn ghost sm" id="btnCopiarLinkCT">📋 Copiar</button>
+      </div>
+      ${qr?`<div class="qr-box"><img src="${qr}" alt="QR Code do contrato"><div class="mini">Aponte a câmera do celular para abrir</div></div>`:''}
+    </div>
+    <div class="modal-f" style="flex-wrap:wrap">
+      <button type="button" class="btn ghost" data-fechar>Fechar</button>
+      <button type="button" class="btn ghost" id="btnAbrirLinkCT">🔎 Abrir link</button>
+      <button type="button" class="btn ok" id="btnLinkZapCT">💬 Enviar pelo WhatsApp</button>
+    </div>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  document.getElementById('btnCopiarLinkCT').onclick=()=>copiarTexto(link);
+  document.getElementById('btnAbrirLinkCT').onclick=()=>window.open(link,'_blank','noopener');
+  document.getElementById('btnLinkZapCT').onclick=()=>{
+    const cli=buscarCli(c.clienteId);
+    let tel=String((cli&&cli.telefone)||'').replace(/\D/g,'');
+    if(tel && tel.length<=11) tel='55'+tel;
+    const msg=`Segue o contrato ${c.numero||''} para você ler e assinar: ${link}`;
+    window.open((tel?'https://wa.me/'+tel+'?text=':'https://wa.me/?text=')+encodeURIComponent(msg),'_blank','noopener');
+  };
+}
+
+/* ---------- Lista / tela de contratos ---------- */
+let filtroCT = { busca:'', status:'todos' };
+function contratosCTFiltrados(){
+  const t=String(filtroCT.busca||'').trim().toLowerCase();
+  return listaCT().filter(c=>{
+    if(filtroCT.status!=='todos' && c.status!==filtroCT.status) return false;
+    if(!t) return true;
+    const cli=buscarCli(c.clienteId);
+    const alvo=[c.numero, c.clienteNome, cli&&cli.nome, cli&&cli.empresa, cli&&cli.telefone, c.prazo, c.pagamento].filter(Boolean).join(' ').toLowerCase();
+    return alvo.indexOf(t)>=0;
+  });
+}
+function htmlContratosServico(){
+  const todos=listaCT();
+  const ass=todos.filter(c=>c.status==='assinado');
+  const env=todos.filter(c=>c.status==='enviado');
+  const rasc=todos.filter(c=>c.status==='rascunho');
+  const rec=todos.filter(c=>c.status==='recusado');
+  const valorAss=ass.reduce((s,c)=>s+totalCT(c),0);
+  return `
+  <div class="grid-stats">
+    ${stat('Contratos', todos.length, '📜')}
+    ${stat('Assinados', ass.length, '✅')}
+    ${stat('Enviados', env.length, '⏳', env.length>0)}
+    ${stat('Valor assinado', brl(valorAss), '💵')}
+  </div>
+
+  <div class="toolbar">
+    <div class="busca"><input id="buscaCT" placeholder="Buscar por número, cliente, telefone..." value="${esc(filtroCT.busca)}"></div>
+    <select class="filtro" id="fStatusCT">
+      <option value="todos" ${filtroCT.status==='todos'?'selected':''}>Todos (${todos.length})</option>
+      <option value="rascunho" ${filtroCT.status==='rascunho'?'selected':''}>📝 Rascunhos (${rasc.length})</option>
+      <option value="enviado" ${filtroCT.status==='enviado'?'selected':''}>⏳ Enviados (${env.length})</option>
+      <option value="assinado" ${filtroCT.status==='assinado'?'selected':''}>✅ Assinados (${ass.length})</option>
+      <option value="recusado" ${filtroCT.status==='recusado'?'selected':''}>✖ Recusados (${rec.length})</option>
+    </select>
+    <button class="btn ghost" id="btnImprimirCT" title="Imprimir a lista de contratos que está na tela">🖨️ Imprimir</button>
+  </div>
+
+  <div class="contagem" id="contCT"></div>
+  <div class="tabela-wrap"><table>
+    <thead><tr><th>Contrato</th><th>Cliente</th><th>Total</th><th>Status</th><th style="text-align:right">Ações</th></tr></thead>
+    <tbody id="tabelaCT"></tbody>
+  </table></div>
+
+  <div class="nota-rodape" style="background:#eff6ff;border-color:#bfdbfe;color:#1e3a8a">
+    <b>Como usar:</b> abra um <b>🧾 Orçamento</b> e toque em <b>📜</b> — o contrato já nasce preenchido com os itens, o total e as condições. Depois é só enviar por <b>💬 WhatsApp</b>, <b>✉️ e-mail</b> ou <b>🔗 link</b> para o cliente assinar no celular.
+  </div>`;
+}
+function atualizarTabelaCT(){
+  const tbody=document.getElementById('tabelaCT'); if(!tbody) return;
+  const todos=listaCT();
+  const l=contratosCTFiltrados();
+  const cont=document.getElementById('contCT');
+  if(cont) cont.textContent = todos.length ? `${l.length} de ${todos.length} contrato(s)` : 'Nenhum contrato ainda';
+  if(!todos.length){
+    tbody.innerHTML=`<tr><td colspan="5"><div class="vazio"><span class="big">📜</span>Nenhum contrato ainda.<br>Abra um orçamento e toque em <b>📜</b> para gerar o contrato.</div></td></tr>`;
+    return;
+  }
+  if(!l.length){
+    tbody.innerHTML=`<tr><td colspan="5"><div class="vazio"><span class="big">🔍</span>Nenhum contrato encontrado para essa busca/filtro.</div></td></tr>`;
+    return;
+  }
+  tbody.innerHTML=l.map(c=>{
+    const cli=buscarCli(c.clienteId);
+    const orc=c.orcamentoId?buscarOrc(c.orcamentoId):null;
+    return `<tr>
+    <td>
+      <div class="nm">${esc(c.numero||'—')}</div>
+      <div class="mt">${fmtData(c.data)} · ${(c.itens||[]).length} item(ns)</div>
+      <div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">${seloCT(c)}${c.assinatura?`<span class="selo ok" title="Assinado por ${esc(c.assinatura.nome||'cliente')} em ${fmtData(c.assinatura.data)}">✍️ assinado</span>`:''}${orc?`<span class="selo info">🧾 ${esc(orc.numero||'')}</span>`:''}</div>
+    </td>
+    <td>
+      <div class="nm">${esc(nomeClienteCT(c))}</div>
+      <div class="mt">${esc((cli&&cli.empresa)||c.clienteNome||'')}</div>
+    </td>
+    <td class="vl-total">${brl(totalCT(c))}</td>
+    <td>
+      <select class="filtro" style="min-width:118px;padding:6px 8px" data-act="ct-status" data-id="${c.id}" title="Mudar status">
+        ${STATUS_CT.map(s=>`<option value="${s.id}" ${c.status===s.id?'selected':''}>${s.label}</option>`).join('')}
+      </select>
+    </td>
+    <td>
+      <div class="acoes">
+        <button class="icon-btn" title="Ver / Imprimir" data-act="ct-ver" data-id="${c.id}">👁️</button>
+        <button class="icon-btn" title="Link para o cliente assinar" data-act="ct-link" data-id="${c.id}">🔗</button>
+        <button class="icon-btn" title="Enviar por WhatsApp" data-act="ct-zap" data-id="${c.id}">💬</button>
+        <button class="icon-btn" title="Enviar por e-mail" data-act="ct-mail" data-id="${c.id}">✉️</button>
+        <button class="icon-btn" title="Assinar" data-act="ct-assinar" data-id="${c.id}">✍️</button>
+        <button class="icon-btn" title="Editar" data-act="ct-editar" data-id="${c.id}">✏️</button>
+        <button class="icon-btn del" title="Excluir" data-act="ct-excluir" data-id="${c.id}">🗑️</button>
+      </div>
+    </td>
+  </tr>`;
+  }).join('');
+}
+function ligarContratosServico(){
+  const b=document.getElementById('buscaCT');
+  if(b) b.addEventListener('input', ()=>{ filtroCT.busca=b.value; atualizarTabelaCT(); });
+  const s=document.getElementById('fStatusCT');
+  if(s) s.addEventListener('change', ()=>{ filtroCT.status=s.value; atualizarTabelaCT(); });
+  const imp=document.getElementById('btnImprimirCT');
+  if(imp) imp.onclick=()=>imprimirListaContratos();
+  atualizarTabelaCT();
+}
+function imprimirListaContratos(){
+  const l=contratosCTFiltrados();
+  if(!l.length){ toast('Nenhum contrato para imprimir.','erro'); return; }
+  const linhas=l.map(c=>`<tr>
+    <td>${esc(c.numero||'—')}</td>
+    <td>${esc(nomeClienteCT(c))}</td>
+    <td>${fmtData(c.data)}</td>
+    <td>${esc(statusCT(c.status).label)}</td>
+    <td class="num-c">${brl(totalCT(c))}</td>
+  </tr>`).join('');
+  imprimirDoc(`
+    <div class="topo">
+      <div class="marca-doc">
+        <img class="doc-logo" src="${LOGO_DATA_URI}" alt="">
+        <div class="marca-txt"><div style="font-size:16.5px;font-weight:800">${esc((db.emissor||{}).nome||MARCA_NOME)}</div></div>
+      </div>
+      <div class="emissor"><div class="num">CONTRATOS DE SERVIÇO</div><div style="color:#64748b;font-size:13px;margin-top:3px">Emitido em ${fmtData(hojeISO())}</div></div>
+    </div>
+    <table>
+      <thead><tr><th>Contrato</th><th>Cliente</th><th>Data</th><th>Status</th><th class="num-c">Total</th></tr></thead>
+      <tbody>${linhas}</tbody>
+    </table>
+    <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())}</div></div>`);
+}
+
+/* =========================================================
+   PÁGINA PÚBLICA DO CONTRATO (?/#ct=...)
+   ========================================================= */
+function htmlContratoPublico(d){
+  const em=db.emissor||{};
+  const itens=(d.it||[]).map(i=>`<tr><td>${esc(i.d||'—')}</td><td class="num">${Number(i.q)||0}</td><td class="num">${brl(i.u)}</td><td class="num">${brl((Number(i.q)||0)*(Number(i.u)||0))}</td></tr>`).join('');
+  const sub=(d.it||[]).reduce((s,i)=>s+(Number(i.q)||0)*(Number(i.u)||0),0);
+  const tx=String(d.tx||'');
+  return `<div class="pub-wrap">
+    <div class="orc-doc" style="border:1px solid var(--borda);border-radius:14px;padding:26px;box-shadow:var(--sombra);background:#fff">
+      <div class="topo">
+        <div class="marca-doc">
+          <img class="doc-logo" src="${LOGO_DATA_URI}" alt="">
+          <div class="marca-txt">
+            <div style="font-size:16.5px;font-weight:800">${esc(d.em||em.nome||MARCA_NOME)}</div>
+            ${d.et||em.telefone?`<div>${esc(d.et||em.telefone)}</div>`:''}
+            ${d.ee||em.email?`<div>${esc(d.ee||em.email)}</div>`:''}
+            ${d.ed||em.endereco?`<div>${esc(d.ed||em.endereco)}</div>`:''}
+            ${d.ec||em.doc?`<div>${esc(d.ec||em.doc)}</div>`:''}
+          </div>
+        </div>
+        <div class="doc-titulo"><div class="t">CONTRATO</div><div class="n">${esc(d.n||'')}</div></div>
+      </div>
+      <div class="doc-info">
+        <div><b>Cliente:</b> ${esc(d.cl||'')}</div>
+        <div><b>Data:</b> ${fmtData(d.dt)}</div>
+      </div>
+      ${itens?`<table><thead><tr><th>Item</th><th class="num">Qtd</th><th class="num">Valor</th><th class="num">Total</th></tr></thead><tbody>${itens}</tbody></table>`:''}
+      <div style="margin-top:9px">
+        <div class="tot-line"><span>Subtotal</span><b>${brl(sub)}</b></div>
+        ${d.fr>0?`<div class="tot-line"><span>Frete / instalação</span><b>+ ${brl(d.fr)}</b></div>`:''}
+        ${d.dg>0?`<div class="tot-line"><span>Desconto${d.dgt==='%'?` (${d.dgv}%)`:''}</span><b>− ${brl(d.dg)}</b></div>`:''}
+        <div class="tot-line geral"><span>TOTAL DO CONTRATO</span><b>${brl(d.tt)}</b></div>
+      </div>
+      ${d.pr?`<div class="obs"><b>Prazo:</b> ${esc(d.pr)}</div>`:''}
+      ${d.pg?`<div class="obs"><b>Pagamento:</b> ${esc(d.pg)}</div>`:''}
+      ${d.ga?`<div class="obs"><b>Garantia:</b> ${esc(d.ga)}</div>`:''}
+      ${tx?`<div class="obs ct-clausulas"><b>CLÁUSULAS DO CONTRATO</b><br>${esc(tx).replace(/\n/g,'<br>')}</div>`:''}
+      <div class="pub-acoes">
+        <div class="pub-acoes-info"><span>Total do contrato</span><b>${brl(d.tt)}</b></div>
+        <button class="btn primary" id="pubAssinar">✍️ Assinar contrato</button>
+        <button class="btn ghost" id="pubImprimir">🖨️ Salvar em PDF</button>
+      </div>
+      <div class="rodape-doc">Contrato ${esc(d.n||'')} — ${esc(d.em||em.nome||MARCA_NOME)}</div>
+    </div>
+
+    <div id="pubAssBox" hidden style="margin-top:14px;border:1px solid var(--borda);border-radius:14px;padding:22px;background:#fff;box-shadow:var(--sombra)">
+      <h3 style="margin:0 0 6px">✍️ Assine o contrato</h3>
+      <p style="font-size:13.5px;color:var(--suave);margin:0 0 10px">Assine com o dedo (celular) ou com o mouse no espaço abaixo.</p>
+      <div class="campo" style="margin-bottom:10px">
+        <label for="pubAssNome">Nome de quem assina</label>
+        <input id="pubAssNome" maxlength="120" value="${esc(d.cl||'')}">
+      </div>
+      <div class="assin-area">
+        <canvas id="pubAssCanvas" width="700" height="220"></canvas>
+        <div class="assin-dica" id="pubAssDica">Assine aqui</div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+        <button class="btn ghost sm" id="pubAssLimpar">🧽 Limpar</button>
+        <button class="btn primary" id="pubAssSalvar">💾 Confirmar assinatura</button>
+      </div>
+      <div id="pubAssOk" hidden style="margin-top:14px">
+        <div class="aviso-assinado">✅ Assinatura registrada!</div>
+        <div class="assin-preview"><img id="pubAssImg" src="" alt="Assinatura"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button class="btn ok" id="pubAssBaixar">⬇️ Baixar minha assinatura</button>
+          <button class="btn ok" id="pubAssZap">💬 Avisar no WhatsApp</button>
+        </div>
+        <p style="font-size:12.5px;color:var(--suave);margin:8px 0 0">Baixe a assinatura e envie para a ${esc(d.em||em.nome||MARCA_NOME)} pelo WhatsApp — ou, se estiver com a empresa, assine direto no atendimento.</p>
+      </div>
+    </div>
+  </div>`;
+}
+function iniciarContratoPublico(d){
+  const box=document.getElementById('pubAssBox');
+  const b=document.getElementById('pubAssinar');
+  if(b) b.onclick=()=>{
+    if(!box) return;
+    box.hidden=false;
+    setTimeout(()=>box.scrollIntoView({behavior:'smooth',block:'center'}), 60);
+  };
+  const imp=document.getElementById('pubImprimir');
+  if(imp) imp.onclick=()=>window.print();
+
+  const cv=document.getElementById('pubAssCanvas');
+  if(!cv) return;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle='#0f172a'; ctx.lineWidth=2.6; ctx.lineCap='round'; ctx.lineJoin='round';
+  let desenhou=false, desenhando=false, ultimo=null;
+  const pos=(ev)=>{
+    const r=cv.getBoundingClientRect();
+    const p=ev.touches?(ev.touches[0]||ev.changedTouches[0]):ev;
+    return {x:(p.clientX-r.left)*(cv.width/r.width), y:(p.clientY-r.top)*(cv.height/r.height)};
+  };
+  const iniciar=(ev)=>{ ev.preventDefault(); desenhando=true; ultimo=pos(ev); if(!desenhou){ const dd=document.getElementById('pubAssDica'); if(dd) dd.style.display='none'; } };
+  const mover=(ev)=>{
+    if(!desenhando) return;
+    ev.preventDefault();
+    const p=pos(ev);
+    ctx.beginPath(); ctx.moveTo(ultimo.x, ultimo.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+    ultimo=p; desenhou=true;
+  };
+  const parar=()=>{ desenhando=false; };
+  cv.addEventListener('mousedown', iniciar);
+  cv.addEventListener('mousemove', mover);
+  cv.addEventListener('mouseup', parar);
+  cv.addEventListener('mouseleave', parar);
+  cv.addEventListener('touchstart', iniciar, {passive:false});
+  cv.addEventListener('touchmove', mover, {passive:false});
+  cv.addEventListener('touchend', parar);
+  const lim=document.getElementById('pubAssLimpar');
+  if(lim) lim.onclick=()=>{
+    ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,cv.width,cv.height);
+    desenhou=false;
+    const dd=document.getElementById('pubAssDica'); if(dd) dd.style.display='';
+  };
+  const salvarAss=document.getElementById('pubAssSalvar');
+  if(salvarAss) salvarAss.onclick=()=>{
+    if(!desenhou){ toast('Assine no espaço acima antes de confirmar.','erro'); return; }
+    const nome=(document.getElementById('pubAssNome')||{}).value||'';
+    const img=cv.toDataURL('image/png');
+    const elImg=document.getElementById('pubAssImg');
+    if(elImg) elImg.src=img;
+    const ok=document.getElementById('pubAssOk'); if(ok) ok.hidden=false;
+    salvarAss.disabled=true;
+    toast('Assinatura registrada!');
+  };
+  const baixar=document.getElementById('pubAssBaixar');
+  if(baixar) baixar.onclick=()=>{
+    const el=document.getElementById('pubAssImg');
+    if(!el||!el.src) return;
+    const a=document.createElement('a');
+    a.href=el.src;
+    a.download='assinatura-contrato-'+String(d.n||'contrato').replace(/[^\w-]/g,'')+'.png';
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+  const zap=document.getElementById('pubAssZap');
+  if(zap) zap.onclick=()=>{
+    const em=db.emissor||{};
+    let tel=String(d.et||em.telefone||'').replace(/\D/g,'');
+    if(tel && tel.length<=11) tel='55'+tel;
+    const msg=`Olá! Acabei de assinar o contrato ${d.n||''} no valor de ${brl(d.tt)}. Segue minha assinatura.`;
+    window.open((tel?'https://wa.me/'+tel+'?text=':'https://wa.me/?text=')+encodeURIComponent(msg),'_blank','noopener');
+  };
+}
+function verificarContratoPublico(){
+  const m=(location.hash||'').match(/ct=([^&]+)/);
+  if(!m) return false;
+  const dados=decodificarLinkCT(m[1]);
+  if(!dados || !dados.n) return false;
+  const login=document.getElementById('loginScreen'); if(login) login.hidden=true;
+  const app=document.getElementById('appCrm'); if(app) app.hidden=true;
+  document.body.classList.add('modo-publico');
+  const host=document.getElementById('areaImpressao');
+  host.hidden=false;
+  host.innerHTML=htmlContratoPublico(dados);
+  iniciarContratoPublico(dados);
+  document.title='Contrato '+(dados.n||'')+' — SUPORT MAX';
+  return true;
+}
+
+/* =========================================================
    PÁGINA PÚBLICA DO ORÇAMENTO (?/#orc=...)
    ========================================================= */
 /* Cartão de compartilhamento: título limpo "ORÇAMENTO SUPORT MAX" + o nº do orçamento na descrição */
@@ -9589,9 +10535,13 @@ registrarServiceWorker();
 iniciarNotificacoes();
 iniciarAtalhos();
 try{
-  if(!verificarOrcPublico()){
-    iniciarBuscaGlobal();
-    initAuth();
+  if(!verificarContratoPublico()){
+    if(!verificarOrcPublico()){
+      iniciarBuscaGlobal();
+      initAuth();
+    }else{
+      iniciarBuscaGlobal();
+    }
   }else{
     iniciarBuscaGlobal();
   }
