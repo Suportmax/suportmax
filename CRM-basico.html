@@ -16,6 +16,8 @@
   --radius:12px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
+/* o atributo hidden sempre vence o display das classes (ex.: .app{display:flex}) */
+[hidden]{display:none !important}
 body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;background:var(--bg);color:var(--texto);font-size:14.5px;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
 button{cursor:pointer;border:none;background:none}
@@ -241,7 +243,29 @@ body.tema-escuro .pick-item:hover{background:#0f1c30}
 .cat-item{display:flex;gap:10px;align-items:flex-start}
 body.tema-escuro .foto-prod-prev{background:#0d1728}
 .pub-wrap{max-width:900px;margin:0 auto;padding:20px}
-.pub-acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+/* Ações (aceitar / não aceitar) — sempre visíveis, sem precisar rolar a página */
+.pub-acoes{
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  margin-top:16px;position:sticky;bottom:0;z-index:5;
+  background:#fff;padding:12px 0 14px;
+  border-top:1px solid var(--borda);
+  box-shadow:0 -8px 20px rgba(15,23,42,.10);
+}
+.pub-acoes .btn{flex:1 1 200px;justify-content:center;padding:13px 18px;font-size:14.5px;min-height:48px}
+.pub-acoes-info{display:flex;flex-direction:column;gap:1px;margin-right:auto;padding-right:14px;white-space:nowrap}
+.pub-acoes-info span{font-size:11px;color:var(--suave);text-transform:uppercase;letter-spacing:.5px;font-weight:700}
+.pub-acoes-info b{font-size:19px;color:var(--prim-esc);line-height:1.1}
+@media (max-width:640px){
+  .pub-wrap{padding:12px 12px 178px}
+  .pub-acoes{
+    position:fixed;left:0;right:0;bottom:0;margin:0;
+    padding:10px 12px calc(12px + env(safe-area-inset-bottom));
+    border-top:1px solid var(--borda);
+    box-shadow:0 -6px 20px rgba(15,23,42,.20);
+  }
+  .pub-acoes-info{flex:1 0 100%;margin:0 0 9px;padding:0;text-align:center;align-items:center}
+  .pub-acoes .btn{flex:1 1 0;padding:14px 8px;font-size:14px}
+}
 
 /* ===== Metas / comissão ===== */
 .meta-barra{height:12px;border-radius:99px;background:#e2e8f0;overflow:hidden;margin-top:8px}
@@ -6820,6 +6844,7 @@ function htmlOrcPublico(d){
       </div>
       ${d.ob?`<div class="obs"><b>Condições:</b><br>${esc(d.ob)}</div>`:''}
       <div class="pub-acoes">
+        <div class="pub-acoes-info"><span>Total do orçamento</span><b>${brl(d.tt)}</b></div>
         <button class="btn primary" id="pubAceitar">✅ Aceitar orçamento</button>
         <button class="btn ghost" id="pubRecusar">✖ Não aceitar</button>
       </div>
@@ -9268,7 +9293,8 @@ try{
     iniciarBuscaGlobal();
   }
 }catch(e){ try{ initAuth(); }catch(_){} }
-if(backupVencido()) setTimeout(talvezAvisarBackup, 3000);
+/* não nagging de backup no link público do orçamento (o cliente não usa o CRM) */
+if(!document.body.classList.contains('modo-publico') && backupVencido()) setTimeout(talvezAvisarBackup, 3000);
 /* Avisa quando a conexão cai/volta e tenta sincronizar na volta */
 window.addEventListener('offline', ()=>{ try{ setNuvemStatus('erro'); render(); }catch(e){} });
 window.addEventListener('online', ()=>{
