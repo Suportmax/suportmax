@@ -648,6 +648,18 @@ body.tema-escuro .tarefa-locais span{background:#0f1b2e;color:#cbd5e1}
 .overlay.open{display:flex}
 #overlay2{z-index:70}
 .modal{background:var(--painel);color:var(--texto);border-radius:16px;width:100%;max-width:600px;box-shadow:0 25px 60px rgba(15,23,42,.35);animation:pop .18s ease}
+.modal.produto-compacto{max-width:520px;max-height:calc(100dvh - 32px);display:flex;flex-direction:column;overflow:hidden}
+.overlay.produto-overlay{align-items:center;padding:16px}
+.produto-compacto .modal-h,.produto-compacto .modal-f{flex:0 0 auto}
+.produto-compacto .modal-h{position:sticky;top:0;z-index:2;background:var(--painel);padding:12px 18px}
+.produto-compacto .modal-b{padding:14px 18px;overflow-y:auto;overscroll-behavior:contain}
+.produto-compacto .modal-f{position:sticky;bottom:0;z-index:2;padding:10px 18px}
+.produto-compacto .form-grid{gap:10px}
+.produto-compacto .campo{gap:4px}
+.produto-compacto .campo input,.produto-compacto .campo select{padding:9px 10px}
+.prod-avancado{grid-column:1/-1;border:1px solid var(--borda);border-radius:10px;overflow:hidden}
+.prod-avancado summary{padding:10px 12px;cursor:pointer;font-size:12.5px;font-weight:650;color:var(--prim);background:var(--bg)}
+.prod-avancado-conteudo{padding:12px;display:grid;gap:12px}
 @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 .modal-h{padding:18px 22px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:10px}
 .modal-h h2{font-size:16.5px;font-weight:700}
@@ -858,6 +870,14 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
   .nav-item{padding:13px 14px;font-size:15px}
   .nav-item .ico{font-size:18px}
   .logo-img{max-width:200px}
+}
+@media(max-width:560px){
+  .overlay.produto-overlay{align-items:flex-end;padding:8px}
+  .modal.produto-compacto{max-height:calc(100dvh - 16px);border-radius:14px}
+  .produto-compacto .modal-h,.produto-compacto .modal-b,.produto-compacto .modal-f{padding-left:14px;padding-right:14px}
+  .produto-compacto .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .produto-compacto .campo.full,.produto-compacto .prod-avancado{grid-column:1/-1}
+  .produto-compacto .campo label{font-size:11.8px}
 }
 @media(max-width:980px){
   /* Busca e ações permanecem disponíveis sem ocupar a primeira linha do cabeçalho. */
@@ -2649,7 +2669,7 @@ function focarPrimeiro(modalEl){
   requestAnimationFrame(()=>alvo.focus());
 }
 function abrirModal(html, wide){ focoAnteriorModal=document.activeElement; modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); focarPrimeiro(modal); }
-function fecharModal(){ const devolver=focoAnteriorModal; focoAnteriorModal=null; overlay.classList.remove('open'); modal.classList.remove('wide'); modal.innerHTML=''; limparEspelho(); fecharModal2(); if(devolver&&devolver.isConnected) requestAnimationFrame(()=>devolver.focus()); }
+function fecharModal(){ const devolver=focoAnteriorModal; focoAnteriorModal=null; overlay.classList.remove('open','produto-overlay'); modal.classList.remove('wide','produto-compacto'); modal.innerHTML=''; limparEspelho(); fecharModal2(); if(devolver&&devolver.isConnected) requestAnimationFrame(()=>devolver.focus()); }
 /* Segunda camada de modal (ex.: seletor de produto sobre o formulário do orçamento) */
 function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); focarPrimeiro(modal2); }
 function fecharModal2(){ overlay2.classList.remove('open'); modal2.classList.remove('wide'); modal2.innerHTML=''; if(overlay.classList.contains('open')) focarPrimeiro(modal); }
@@ -6927,24 +6947,29 @@ function formProduto(id){
       <div class="modal-h"><h2>${p?'✏️ Editar item':'＋ Novo produto / serviço'}</h2><button type="button" class="x" data-fechar>×</button></div>
       <div class="modal-b">
         <div class="form-grid">
-          <div class="campo full"><label>Nome <span class="req">*</span></label><input name="nome" required maxlength="100" value="${esc(v.nome)}" placeholder="Ex.: Formatação com backup" autofocus></div>
+          <div class="campo full"><label>Nome <span class="req">*</span></label><input name="nome" required maxlength="100" value="${esc(v.nome)}" placeholder="Ex.: Formatação com backup" autofocus enterkeyhint="next"></div>
           <div class="campo"><label>Unidade</label><select name="un">${UN.map(u=>`<option ${v.un===u?'selected':''}>${u}</option>`).join('')}</select></div>
           <div class="campo"><label>Fornecedor</label><select name="fornecedorId"><option value="">— Nenhum —</option>${listaFornecedores().map(f=>`<option value="${f.id}" ${v.fornecedorId===f.id?'selected':''}>${esc(f.nome)}</option>`).join('')}</select></div>
-          <div class="campo"><label>Custo (R$)</label><input name="custo" type="number" min="0" step="0.01" value="${Number(v.custo)||0}"></div>
-          <div class="campo"><label>Preço de venda (R$)</label><input name="preco" type="number" min="0" step="0.01" value="${Number(v.preco)||0}"></div>
-          <div class="campo full"><label>Descrição padrão (texto do orçamento)</label><input name="desc" maxlength="160" value="${esc(v.desc||'')}"></div>
-          <div class="campo full">
-            <label>Foto do item (opcional)</label>
-            <div class="foto-prod">
-              <div class="foto-prod-prev" id="fotoPrev">${v.foto?`<img src="${v.foto}" alt="Foto do item">`:'<span class="foto-vazio">📷</span>'}</div>
-              <div class="foto-prod-acoes">
-                <input type="file" id="fotoArquivo" accept="image/*" hidden>
-                <button type="button" class="btn ghost sm" id="fotoEscolher">📷 Escolher foto</button>
-                <button type="button" class="btn ghost sm" id="fotoRemover" ${v.foto?'':'hidden'}>🗑️ Remover</button>
-                <div class="mini" style="margin-top:6px">A imagem é reduzida e salva no próprio CRM (sem servidor externo).</div>
+          <div class="campo"><label>Custo (R$)</label><input name="custo" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(v.custo)||0}"></div>
+          <div class="campo"><label>Preço de venda (R$)</label><input name="preco" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(v.preco)||0}"></div>
+          <details class="prod-avancado">
+            <summary>Descrição e foto <span class="mini">(opcional)</span></summary>
+            <div class="prod-avancado-conteudo">
+              <div class="campo"><label>Descrição padrão para orçamento</label><input name="desc" maxlength="160" value="${esc(v.desc||'')}"></div>
+              <div class="campo">
+                <label>Foto do item</label>
+                <div class="foto-prod">
+                  <div class="foto-prod-prev" id="fotoPrev">${v.foto?`<img src="${v.foto}" alt="Foto do item">`:'<span class="foto-vazio">📷</span>'}</div>
+                  <div class="foto-prod-acoes">
+                    <input type="file" id="fotoArquivo" accept="image/*" hidden>
+                    <button type="button" class="btn ghost sm" id="fotoEscolher">📷 Escolher foto</button>
+                    <button type="button" class="btn ghost sm" id="fotoRemover" ${v.foto?'':'hidden'}>🗑️ Remover</button>
+                    <div class="mini" style="margin-top:6px">A imagem é reduzida e salva no próprio CRM.</div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          </details>
           <div class="campo full"><div class="info-resumo" id="resMargem"></div></div>
         </div>
       </div>
@@ -6952,7 +6977,8 @@ function formProduto(id){
         <button type="button" class="btn ghost" data-fechar>Cancelar</button>
         <button type="submit" class="btn primary">${p?'Salvar alterações':'Adicionar ao catálogo'}</button>
       </div>
-    </form>`, true);
+    </form>`, false);
+  modal.classList.add('produto-compacto'); overlay.classList.add('produto-overlay');
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
   function calcMargem(){
     const custo = Number(modal.querySelector('[name="custo"]').value)||0;
