@@ -109,6 +109,14 @@ a{color:var(--prim)}
 
 /* ---------- Toolbar / tabela ---------- */
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+/* Abas (Orçamentos / Arquivados) */
+.abas-orc{display:flex;gap:8px;margin:0 0 14px;flex-wrap:wrap}
+.aba-btn{display:inline-flex;align-items:center;gap:8px;background:var(--painel);border:1px solid var(--borda);
+  color:var(--suave);padding:9px 14px;border-radius:10px;font-size:13.5px;font-weight:650;cursor:pointer;font-family:inherit}
+.aba-btn:hover{border-color:var(--prim);color:var(--texto)}
+.aba-btn.on{background:var(--prim);border-color:var(--prim);color:#fff}
+.aba-btn .qtd{background:rgba(15,23,42,.12);border-radius:20px;padding:1px 8px;font-size:11.5px;font-weight:700}
+.aba-btn.on .qtd{background:rgba(255,255,255,.25)}
 .busca{position:relative;flex:1;min-width:220px}
 .busca input{width:100%;padding:10px 14px 10px 38px;border:1px solid var(--borda);border-radius:10px;background:#fff;outline:none;transition:.15s}
 .busca input:focus{border-color:var(--prim);box-shadow:0 0 0 3px var(--prim-cl)}
@@ -1353,7 +1361,7 @@ function aplicarFotosCatalogo(){ return aplicarFotosCatalogoEm(db); }
 let db = carregar();
 let view = 'painel';
 let filtro = {busca:'', status:'todos', ordenar:'nome'};
-let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos'};
+let filtroOrc = {busca:'', status:'todos', nf:'todos', venc:'todos', aba:'ativos'};
 let filtroOS = {busca:'', status:'todos', fornecedor:'', rapido:'todas'};
 let filtroCat = {busca:'', margem:'todos'};
 let filtroAgenda = {busca:'', periodo:'todos', prioridade:'todas', ordenar:'data', modo:'lista'};
@@ -2151,6 +2159,35 @@ function badgeOrc(id){ const s=statusOrc(id); return `<span class="badge" style=
 function listaOrcamentos(){ return db.orcamentos || (db.orcamentos=[]); }
 function listaProdutos(){ return db.produtos || (db.produtos=[]); }
 function buscarOrc(id){ return listaOrcamentos().find(o=>o.id===id); }
+/* ---------- Arquivamento de orçamentos ----------
+   Quando o serviço (ordem de serviço) é concluído ou vendido, o orçamento ligado é
+   arquivado automaticamente e passa a ficar na aba "Arquivados", onde pode ser pesquisado. */
+function orcArquivado(o){ return !!(o && o.arquivado); }
+function orcsAtivos(){ return listaOrcamentos().filter(o=>!orcArquivado(o)); }
+function orcsArquivados(){ return listaOrcamentos().filter(o=>orcArquivado(o)); }
+function arquivarOrcamento(os, motivo){
+  const orc = os && os.orcamentoId ? buscarOrc(os.orcamentoId) : null;
+  if(!orc || orcArquivado(orc)) return false;
+  orc.arquivado = true;
+  orc.arquivadoEm = agoraDT();
+  orc.arquivadoMotivo = motivo || 'Serviço concluído';
+  orc.arquivadoOS = os.numero || '';
+  auditar('orcamento', `Orçamento ${orc.numero||''} arquivado — ${orc.arquivadoMotivo}`);
+  return true;
+}
+function desarquivarOrcamento(o){
+  if(!o) return;
+  o.arquivado = false;
+  o.arquivadoEm = '';
+  o.arquivadoMotivo = '';
+  o.arquivadoOS = '';
+  auditar('orcamento', `Orçamento ${o.numero||''} devolvido para a lista de orçamentos`);
+}
+function seloArquivado(o){
+  if(!orcArquivado(o)) return '';
+  const quando = o.arquivadoEm ? fmtDT(o.arquivadoEm) : '';
+  return `<span class="selo info" title="${esc(o.arquivadoMotivo||'Serviço concluído')}${quando?' — '+esc(quando):''}${o.arquivadoOS?' — OS '+esc(o.arquivadoOS):''}">📦 arquivado</span>`;
+}
 function buscarProd(id){ return listaProdutos().find(p=>p.id===id); }
 function itemBruto(i){ return (Number(i.qtd)||0)*(Number(i.unit)||0); }
 function itemDescV(i){
@@ -2876,6 +2913,22 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='orc-link') mostrarLinkOrc(id);
   else if(btn.dataset.act==='orc-os') converterOrcEmOS(id);
   else if(btn.dataset.act==='orc-zap-fup') enviarFollowupZap(id);
+  else if(btn.dataset.act==='orc-arquivar'){
+    const o = buscarOrc(id); if(!o) return;
+    o.arquivado = true;
+    o.arquivadoEm = agoraDT();
+    o.arquivadoMotivo = 'Arquivado manualmente';
+    o.arquivadoOS = (osDeOrcamento(o.id)||{}).numero || '';
+    auditar('orcamento', `Orçamento ${o.numero||''} arquivado manualmente`);
+    salvar(); render();
+    toast(`Orçamento ${o.numero||''} movido para Arquivados.`);
+  }
+  else if(btn.dataset.act==='orc-desarquivar'){
+    const o = buscarOrc(id); if(!o) return;
+    desarquivarOrcamento(o);
+    salvar(); render();
+    toast(`Orçamento ${o.numero||''} devolvido para a lista de orçamentos.`);
+  }
   else if(btn.dataset.act==='os-ver') verOrdem(id);
   else if(btn.dataset.act==='os-venda') converterOSemVenda(id);
   else if(btn.dataset.act==='os-comprovante') verComprovanteOS(id);
@@ -2966,7 +3019,19 @@ document.getElementById('view').addEventListener('change', e=>{
     const antes = os.status;
     os.status = selOrdem.value;
     os.atualizadoEm = agoraDT();
-    if(os.status==='concluida' && antes!=='concluida') posVendaOS(os);
+    if(os.status==='concluida' && antes!=='concluida'){
+      posVendaOS(os);
+      if(arquivarOrcamento(os, 'Serviço concluído')){
+        auditar('ordem', `Orçamento vinculado à ordem ${os.numero} arquivado automaticamente`);
+        salvar();
+        render();
+        toast(`Ordem ${os.numero} concluída — o orçamento foi movido para Arquivados.`, 'ok');
+        return;
+      }
+    }
+    if(os.status==='vendida' && antes!=='vendida'){
+      arquivarOrcamento(os, 'Serviço vendido');
+    }
     auditar('ordem', `Ordem ${os.numero} → ${statusOS(os.status).label}`);
     salvar(); render();
     toast(`Ordem ${os.numero} agora está "${statusOS(os.status).label}".`);
@@ -4457,7 +4522,9 @@ function adiarFollowup(id, dias){
    ========================================================= */
 function listaOrcFiltrada(){
   const q = filtroOrc.busca.trim().toLowerCase();
+  const abaArquivados = filtroOrc.aba==='arquivados';
   return listaOrcamentos().filter(o=>{
+    if(orcArquivado(o) !== abaArquivados) return false;
     const okS = filtroOrc.status==='todos' || o.status===filtroOrc.status;
     if(!okS) return false;
     if(filtroOrc.nf==='pendentes' && !nfPendente(o)) return false;
@@ -4465,30 +4532,46 @@ function listaOrcFiltrada(){
     if(filtroOrc.venc==='vencendo'){ const v=validadeInfo(o); if(!v || v.dias<0 || v.dias>5) return false; }
     if(filtroOrc.venc==='vencidos'){ const v=validadeInfo(o); if(!v || v.dias>=0) return false; }
     if(!q) return true;
-    return [o.numero, nomeClienteOrc(o), o.obs].some(v=>String(v||'').toLowerCase().includes(q));
+    return [o.numero, nomeClienteOrc(o), o.obs, o.arquivadoOS, (buscarCli(o.clienteId)||{}).telefone]
+      .some(v=>String(v||'').toLowerCase().includes(q));
   }).sort((a,b)=>String(b.criadoEm||b.data||'').localeCompare(String(a.criadoEm||a.data||'')));
 }
 
 function htmlOrcamentos(){
-  const orcs = listaOrcamentos();
+  const orcs = orcsAtivos();
+  const arquivados = orcsArquivados();
+  const abaArquivados = filtroOrc.aba==='arquivados';
   const abertos = orcs.filter(o=>o.status==='rascunho'||o.status==='enviado');
   const aprovados = orcs.filter(o=>o.status==='aprovado');
   const recusados = orcs.filter(o=>o.status==='recusado');
   const valorAberto = abertos.reduce((s,o)=>s+totalOrc(o),0);
   const valorAprov = aprovados.reduce((s,o)=>s+totalOrc(o),0);
+  const valorArquivado = arquivados.reduce((s,o)=>s+totalOrc(o),0);
   return `
   <div class="grid-stats">
-    ${stat('Orçamentos', orcs.length, '🧾')}
-    ${stat('Em aberto', abertos.length, '📤')}
-    ${stat('Valor em aberto', brl(valorAberto), '⏳')}
-    ${stat('Aprovados', aprovados.length, '✅')}
-    ${stat('Valor aprovado', brl(valorAprov), '💰')}
-    ${stat('Recusados', recusados.length, '❌')}
-    ${stat('Vencendo / vencidos', orcamentosVencendo(5).length, '⏳', orcamentosVencendo(5).length>0)}
+    ${abaArquivados ? `
+      ${stat('Arquivados', arquivados.length, '📦')}
+      ${stat('Valor arquivado', brl(valorArquivado), '💰')}
+      ${stat('Serviços concluídos', arquivados.filter(o=>o.arquivadoOS).length, '🛠️')}
+      ${stat('Aprovados', arquivados.filter(o=>o.status==='aprovado').length, '✅')}
+    ` : `
+      ${stat('Orçamentos', orcs.length, '🧾')}
+      ${stat('Em aberto', abertos.length, '📤')}
+      ${stat('Valor em aberto', brl(valorAberto), '⏳')}
+      ${stat('Aprovados', aprovados.length, '✅')}
+      ${stat('Valor aprovado', brl(valorAprov), '💰')}
+      ${stat('Recusados', recusados.length, '❌')}
+      ${stat('Vencendo / vencidos', orcamentosVencendo(5).length, '⏳', orcamentosVencendo(5).length>0)}
+    `}
+  </div>
+
+  <div class="abas-orc">
+    <button class="aba-btn${abaArquivados?'':' on'}" data-aba-orc="ativos">🧾 Orçamentos <span class="qtd">${orcs.length}</span></button>
+    <button class="aba-btn${abaArquivados?' on':''}" data-aba-orc="arquivados">📦 Arquivados <span class="qtd">${arquivados.length}</span></button>
   </div>
 
   <div class="toolbar">
-    <div class="busca"><input id="buscaOrc" placeholder="Buscar por número, cliente ou observação..." value="${esc(filtroOrc.busca)}"></div>
+    <div class="busca"><input id="buscaOrc" placeholder="${abaArquivados?'Buscar nos arquivados por número, cliente, OS ou observação...':'Buscar por número, cliente ou observação...'}" value="${esc(filtroOrc.busca)}"></div>
     <select class="filtro" id="fStatusOrc">
       <option value="todos">Todos os status</option>
       ${STATUS_ORC.map(s=>`<option value="${s.id}" ${filtroOrc.status===s.id?'selected':''}>${s.label}</option>`).join('')}
@@ -4503,8 +4586,8 @@ function htmlOrcamentos(){
       <option value="vencendo" ${filtroOrc.venc==='vencendo'?'selected':''}>⏳ Vencendo (5 dias)</option>
       <option value="vencidos" ${filtroOrc.venc==='vencidos'?'selected':''}>🔴 Vencidos</option>
     </select>
-    <button class="btn ghost" id="btnCatalogo">📦 Catálogo de produtos</button>
-    <button class="btn primary" id="btnNovoOrc">＋ Novo orçamento</button>
+    ${abaArquivados?'':'<button class="btn ghost" id="btnCatalogo">📦 Catálogo de produtos</button>'}
+    ${abaArquivados?'':'<button class="btn primary" id="btnNovoOrc">＋ Novo orçamento</button>'}
   </div>
 
   <div class="contagem" id="contagemOrc"></div>
@@ -4520,10 +4603,11 @@ function htmlOrcamentos(){
 }
 
 function tabelaOrcHTML(){
-  const todos = listaOrcamentos();
+  const abaArquivados = filtroOrc.aba==='arquivados';
+  const todos = abaArquivados ? orcsArquivados() : orcsAtivos();
   const l = listaOrcFiltrada();
   if(!todos.length){
-    return `<tr><td colspan="6"><div class="vazio"><span class="big">🧾</span>Nenhum orçamento criado ainda.<br>Clique em <b>＋ Novo orçamento</b> para criar o primeiro.</div></td></tr>`;
+    return `<tr><td colspan="6"><div class="vazio"><span class="big">${abaArquivados?'📦':'🧾'}</span>${abaArquivados?'Nenhum orçamento arquivado ainda.<br>Quando um serviço for concluído, o orçamento é arquivado aqui.':'Nenhum orçamento criado ainda.<br>Clique em <b>＋ Novo orçamento</b> para criar o primeiro.'}</div></td></tr>`;
   }
   if(!l.length){
     return `<tr><td colspan="6"><div class="vazio"><span class="big">🔍</span>Nenhum orçamento encontrado para essa busca/filtro.</div></td></tr>`;
@@ -4532,7 +4616,8 @@ function tabelaOrcHTML(){
     <td>
       <div class="nm">${esc(o.numero||'—')}</div>
       <div class="mt">${fmtData(o.data)}${o.validade?` · válido até ${fmtData(o.validade)}`:''} · ${(o.itens||[]).length} item(ns)</div>
-      <div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">${seloValidade(o)}${precisaNF(o)?badgeNF(o):''}${o.assinatura?`<span class="selo info" title="Assinado por ${esc(o.assinatura.nome||'cliente')} em ${fmtData(o.assinatura.data)}">✍️ assinado</span>`:''}${osDeOrcamento(o.id)?`<span class="selo info">🛠️ ${esc(osDeOrcamento(o.id).numero)}</span>`:''}</div>
+      <div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap">${seloValidade(o)}${precisaNF(o)?badgeNF(o):''}${o.assinatura?`<span class="selo info" title="Assinado por ${esc(o.assinatura.nome||'cliente')} em ${fmtData(o.assinatura.data)}">✍️ assinado</span>`:''}${osDeOrcamento(o.id)?`<span class="selo info">🛠️ ${esc(osDeOrcamento(o.id).numero)}</span>`:''}${seloArquivado(o)}</div>
+      ${abaArquivados && o.arquivadoMotivo?`<div class="mt">${esc(o.arquivadoMotivo)}${o.arquivadoEm?' · '+esc(fmtDT(o.arquivadoEm)):''}</div>`:''}
     </td>
     <td>
       <div class="nm">${esc(nomeClienteOrc(o))}</div>
@@ -4556,6 +4641,9 @@ function tabelaOrcHTML(){
         <button class="icon-btn" title="Enviar por WhatsApp" data-act="orc-zap" data-id="${o.id}">💬</button>
         <button class="icon-btn" title="Usar modelo de mensagem" data-act="orc-modelo" data-id="${o.id}">📝</button>
         <button class="icon-btn" title="Editar" data-act="orc-editar" data-id="${o.id}">✏️</button>
+        ${abaArquivados
+          ? `<button class="icon-btn" title="Devolver para a lista de orçamentos" data-act="orc-desarquivar" data-id="${o.id}">↩️</button>`
+          : `<button class="icon-btn" title="Arquivar (sai da lista e vai para Arquivados)" data-act="orc-arquivar" data-id="${o.id}">📦</button>`}
         <button class="icon-btn del" title="Excluir" data-act="orc-excluir" data-id="${o.id}">🗑️</button>
       </div>
     </td>
@@ -4570,14 +4658,26 @@ function ligarOrcamentos(){
   if(fNF) fNF.addEventListener('change', e=>{ filtroOrc.nf = e.target.value; atualizarTabelaOrc(); });
   const fVenc = document.getElementById('fVencOrc');
   if(fVenc) fVenc.addEventListener('change', e=>{ filtroOrc.venc = e.target.value; atualizarTabelaOrc(); });
-  document.getElementById('btnNovoOrc').addEventListener('click', ()=>formOrcamento(null));
-  document.getElementById('btnCatalogo').addEventListener('click', catalogoProdutos);
+  document.querySelectorAll('[data-aba-orc]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      filtroOrc.aba = btn.dataset.abaOrc;
+      render();
+    });
+  });
+  const btnNovo = document.getElementById('btnNovoOrc');
+  if(btnNovo) btnNovo.addEventListener('click', ()=>formOrcamento(null));
+  const btnCat = document.getElementById('btnCatalogo');
+  if(btnCat) btnCat.addEventListener('click', catalogoProdutos);
   atualizarTabelaOrc();
 }
 function atualizarTabelaOrc(){
   document.getElementById('tabelaOrc').innerHTML = tabelaOrcHTML();
   const n = listaOrcFiltrada().length;
-  document.getElementById('contagemOrc').textContent = `${n} de ${listaOrcamentos().length} orçamento(s) exibido(s)`;
+  const total = filtroOrc.aba==='arquivados' ? orcsArquivados().length : orcsAtivos().length;
+  const el = document.getElementById('contagemOrc');
+  if(el) el.textContent = filtroOrc.aba==='arquivados'
+    ? `${n} de ${total} orçamento(s) arquivado(s) exibido(s)`
+    : `${n} de ${total} orçamento(s) exibido(s)`;
 }
 
 /* ---------- Itens ---------- */
@@ -5892,12 +5992,17 @@ function formOrdem(id){
       checklist:v.checklist,
       itens
     };
-    if(os){ Object.assign(os, dados); toast('Ordem de serviço atualizada.'); }
+    let osSalvo;
+    if(os){ Object.assign(os, dados); osSalvo = os; toast('Ordem de serviço atualizada.'); }
     else{
-      listaOrdens().unshift({id:uid(), criadoEm:agoraDT(), numero:novoNumeroOS(),
-        orcamentoId:v.orcamentoId||'', ...dados});
+      osSalvo = {id:uid(), criadoEm:agoraDT(), numero:novoNumeroOS(),
+        orcamentoId:v.orcamentoId||'', ...dados};
+      listaOrdens().unshift(osSalvo);
       toast('Ordem de serviço criada!');
     }
+    /* Serviço concluído/vendido: o orçamento vinculado vai para a aba Arquivados */
+    if(osSalvo.status==='concluida') arquivarOrcamento(osSalvo, 'Serviço concluído');
+    else if(osSalvo.status==='vendida') arquivarOrcamento(osSalvo, 'Serviço vendido');
     salvar(); fecharModal(); view='ordens'; render();
   };
 }
@@ -6043,9 +6148,10 @@ function converterOSemVenda(id){
     os.status = 'vendida';
     os.venda = {id:uid(), numero, data, valor, forma, obs, lancamentoId:lanc.id, emitidoEm:agoraDT()};
     os.atualizadoEm = agoraDT();
+    const arquivado = arquivarOrcamento(os, 'Serviço vendido');
     auditar('ordem', `Ordem ${os.numero} convertida em venda — ${brl(valor)} (${forma||'forma não informada'}) · pedido ${numero}`);
     salvar(); fecharModal(); render();
-    toast('Venda registrada! Comprovante pronto para imprimir.','ok');
+    toast(arquivado ? 'Venda registrada! Comprovante pronto para imprimir. O orçamento foi movido para Arquivados.' : 'Venda registrada! Comprovante pronto para imprimir.','ok');
     setTimeout(()=>verComprovanteOS(os.id), 80);
   };
 }
