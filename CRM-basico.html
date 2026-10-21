@@ -269,8 +269,9 @@ body.tema-escuro .lanc-linha{background:#0d1728}
 body.tema-escuro .prod-pick,body.tema-escuro .picker-busca,body.tema-escuro .chip,body.tema-escuro .pick-item{background:#0d1728}
 body.tema-escuro .pick-item:hover{background:#0f1c30}
 .cat-item{display:flex;gap:10px;align-items:flex-start}
-.cat-cards{display:none}
-.cat-card{background:var(--painel);border:1px solid var(--borda);border-radius:12px;padding:13px;box-shadow:var(--sombra)}
+.cat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,290px),1fr));gap:12px}
+.cat-card{background:var(--painel);border:1px solid var(--borda);border-radius:14px;padding:15px;box-shadow:var(--sombra);transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.cat-card:hover{transform:translateY(-2px);border-color:var(--primaria);box-shadow:0 8px 24px rgba(15,23,42,.09)}
 .cat-card-top{display:flex;align-items:flex-start;gap:10px;min-width:0}
 .cat-card-top .cat-foto{width:48px;height:48px}
 .cat-card-main{flex:1;min-width:0}
@@ -281,11 +282,11 @@ body.tema-escuro .pick-item:hover{background:#0f1c30}
 .cat-card-value span{display:block;font-size:10.5px;color:var(--suave);text-transform:uppercase;font-weight:700;letter-spacing:.3px}
 .cat-card-value b{display:block;margin-top:2px;font-size:13px;overflow-wrap:anywhere}
 .cat-card-actions{display:flex;justify-content:flex-end;gap:7px;border-top:1px solid var(--borda);padding-top:9px}
+.cat-card-values .cat-card-value:nth-child(2){background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.18)}
+.cat-card-values .cat-card-value:nth-child(2) b{color:var(--primaria);font-size:15px}
+#catalogoTabelaWrap{display:none}
 body.tema-escuro .cat-card-value{background:#0d1728}
-@media(max-width:760px){
-  #catalogoTabelaWrap{display:none}
-  .cat-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));gap:10px}
-}
+@media(max-width:420px){.cat-cards{grid-template-columns:1fr}.cat-card{padding:12px}}
 body.tema-escuro .foto-prod-prev{background:#0d1728}
 .pub-wrap{max-width:900px;margin:0 auto;padding:20px}
 /* Ações (aceitar / não aceitar) — sempre visíveis, sem precisar rolar a página */
