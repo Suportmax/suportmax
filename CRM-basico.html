@@ -7613,7 +7613,7 @@ function htmlRelatorios(){
   /* Totais por status */
   const porStatus = STATUS_ORC.map(s=>{
     const lista = os.filter(o=>o.status===s.id);
-    return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a+totalOrc(o),0) };
+    return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a + ((o.venda && typeof o.venda.valor==='number')?o.venda.valor:((o.lancamentoId && Array.isArray(db.lancamentos))?((function(){const l=db.lancamentos.find(x=>x.id===o.lancamentoId);return l?Number(l.valor)||0:totalOrc(o);})()):totalOrc(o))),0) };
   });
 
   /* Comissão e meta */
