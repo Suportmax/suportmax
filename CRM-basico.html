@@ -946,6 +946,93 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
   border:1px solid rgba(255,255,255,.16);border-radius:8px;padding:9px;font-size:13px;
   font-family:inherit;cursor:pointer;align-items:center;justify-content:center;gap:6px}
 .btn-tema-mobile:hover{background:rgba(59,130,246,.25);border-color:rgba(59,130,246,.5)}
+
+/* Sistema visual: superfícies, navegação e controles consistentes */
+:root{--bg:#f5f7fb;--borda:#e4e9f1;--prim:#2563eb;--prim-esc:#1d4ed8;--prim-cl:#eff6ff;--sombra:0 1px 2px rgba(15,23,42,.04),0 5px 18px rgba(15,23,42,.045);--radius:14px}
+body{font-size:14px;line-height:1.45}
+.view{max-width:1440px;padding:26px 30px 64px}
+.topbar{min-height:76px;padding:13px 30px;gap:18px}
+.topbar h1{font-size:20px;letter-spacing:-.25px}
+.topbar .sub{margin-top:2px;font-size:12.5px}
+.sidebar{background:#111b2d}
+.logo{padding:18px 16px}
+.logo-img{max-width:190px}
+.nav{padding:12px 11px 18px;gap:3px}
+.nav-label{padding:14px 12px 5px;color:#718096;font-size:10px;font-weight:800;letter-spacing:1px}
+.nav-item{min-height:42px;padding:6px 10px;gap:10px;border:1px solid transparent;border-radius:10px;color:#a8b3c5;font-size:13.2px}
+.nav-item:hover{background:#1b2940;color:#f1f5f9}
+.nav-item.active{background:#1c355a;border-color:#284b7b;color:#fff;box-shadow:inset 3px 0 #60a5fa}
+.nav-item .ico{width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;color:#9aabc3}
+.nav-item.active .ico{color:#93c5fd}
+.nav-item .ico svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.nav-item .pill{background:#dc3e55;padding:2px 7px}
+.card,.stat{border-radius:var(--radius);box-shadow:var(--sombra)}
+.card-h{min-height:54px;padding:13px 18px;background:linear-gradient(180deg,rgba(248,250,252,.75),rgba(255,255,255,0))}
+.card-h h2,.card-h h3{font-size:14px;font-weight:750;letter-spacing:-.1px}
+.card-b{padding:10px 14px}
+.stat{position:relative;padding:15px 17px;min-height:104px;transition:transform .15s ease,box-shadow .15s ease}
+.stat:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(15,23,42,.08)}
+.stat .ico{width:34px;height:34px;display:grid;place-items:center;float:right;border-radius:10px;background:var(--prim-cl);font-size:17px;opacity:1}
+.stat .lbl{font-size:11px;letter-spacing:.55px;color:#64748b}
+.stat .val{font-size:25px;letter-spacing:-.65px;margin-top:9px}
+.grid-stats{gap:12px;margin-bottom:18px}
+.dashboard-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+.painel-acoes{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px;padding:12px 14px;background:var(--painel);border:1px solid var(--borda);border-radius:12px;box-shadow:var(--sombra)}
+.painel-acoes>span{display:flex;flex-direction:column;gap:2px}
+.painel-acoes b{font-size:13px}
+.painel-acoes small{color:var(--suave);font-size:11.5px}
+.painel-acoes>div{display:flex;gap:8px;flex-wrap:wrap}
+.painel-atencao{margin-bottom:18px;border-color:#f2d38a}
+.painel-alertas{display:grid;gap:8px}
+.painel-alertas>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.painel-alertas .link-btn{margin-left:auto}
+.toolbar{gap:8px;margin-bottom:12px;padding:10px;background:var(--painel);border:1px solid var(--borda);border-radius:12px;box-shadow:var(--sombra)}
+.toolbar .busca{min-width:min(260px,100%)}
+.toolbar input,.toolbar select,.busca-global input,.campo input,.campo select,.campo textarea{min-height:40px;border-radius:9px}
+.toolbar .btn{min-height:40px}
+.tabela-wrap{border-radius:12px;box-shadow:var(--sombra)}
+table{border-spacing:0}
+th{position:sticky;top:0;z-index:2;padding:11px 13px;background:#f7f9fc;font-size:10.5px;letter-spacing:.65px}
+td{padding:10px 13px;font-size:13px}
+tbody tr{transition:background .12s ease}
+tbody tr:hover{background:#f5f8fd}
+.linha-lista{padding:9px 10px}
+.linha-lista+.linha-lista{border-top:1px solid #edf0f5}
+.avatar,.hist-ico{flex-shrink:0}
+.btn{min-height:38px;border-radius:9px}
+.btn.sm{min-height:30px}
+.icon-btn{width:32px;height:32px;border-radius:8px}
+.badge,.selo,.prio{letter-spacing:.1px}
+.cat-card{border-radius:14px}
+.cat-card-values{gap:7px;margin:10px 0}
+.cat-card-value{padding:7px 9px;border-radius:9px}
+body.tema-escuro .card-h{background:linear-gradient(180deg,rgba(15,27,46,.85),rgba(17,28,46,0))}
+body.tema-escuro .toolbar{background:var(--painel);border-color:var(--borda)}
+body.tema-escuro tbody tr:hover{background:#17263d}
+body.tema-escuro .stat .ico{background:#17263d}
+@media(max-width:900px){
+  .view{padding:18px 16px 58px}
+  .nav-label{padding-top:12px}
+}
+@media(max-width:560px){
+  .view{padding:14px 12px 76px}
+  .topbar{min-height:64px;padding:10px 12px;gap:9px}
+  .topbar h1{font-size:18px}
+  .grid-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin-bottom:13px}
+  .dashboard-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .painel-acoes{align-items:stretch;flex-direction:column}
+  .painel-acoes>div{display:grid;grid-template-columns:1fr 1fr}
+  .painel-acoes .btn{justify-content:center;white-space:normal;text-align:center;line-height:1.2}
+  .stat{min-height:88px;padding:12px}
+  .stat .val{font-size:21px;margin-top:7px}
+  .stat .ico{width:29px;height:29px;font-size:15px}
+  .toolbar{padding:8px;gap:7px}
+  .toolbar .busca{flex:1 0 100%;min-width:0}
+  .toolbar select.filtro{flex:1 1 44%;min-width:0}
+  .toolbar .btn{flex:1 1 auto;justify-content:center}
+  .card-h{padding:12px 14px}
+  .card-b{padding:8px 10px}
+}
 </style>
 </head>
 <body>
@@ -978,19 +1065,23 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
       <img class="logo-img" alt="SUPORT MAX" id="logoTopo">
     </div>
     <nav class="nav">
-      <button class="nav-item active" data-view="painel"><span class="ico">📊</span><span>Painel</span></button>
-      <button class="nav-item" data-view="clientes"><span class="ico">👥</span><span>Clientes</span></button>
-      <button class="nav-item" data-view="orcamentos"><span class="ico">🧾</span><span>Orçamentos</span></button>
-      <button class="nav-item" data-view="ordens"><span class="ico">🛠️</span><span>Ordens de serviço</span><span class="pill" id="pillOS" style="display:none">0</span></button>
-      <button class="nav-item" data-view="financeiro"><span class="ico">💰</span><span>Financeiro</span><span class="pill" id="pillFin" style="display:none">0</span></button>
-      <button class="nav-item" data-view="contratos"><span class="ico">🔁</span><span>Contratos</span><span class="pill" id="pillContrato" style="display:none">0</span></button>
-      <button class="nav-item" data-view="contratosServico"><span class="ico">📜</span><span>Contratos de serviço</span></button>
-      <button class="nav-item" data-view="mensagens"><span class="ico">💬</span><span>Mensagens</span></button>
-      <button class="nav-item" data-view="relatorios"><span class="ico">📈</span><span>Relatórios</span></button>
-      <button class="nav-item" data-view="agenda"><span class="ico">📍</span><span>Agenda de Visitas</span><span class="pill" id="pillAgenda" style="display:none">0</span></button>
-      <button class="nav-item" data-view="tarefas"><span class="ico">✅</span><span>Tarefas da semana</span><span class="pill" id="pillTarefas" style="display:none">0</span></button>
-      <button class="nav-item" data-view="catalogo"><span class="ico">📦</span><span>Catálogo</span></button>
-      <button class="nav-item" data-view="dados"><span class="ico">💾</span><span>Dados</span></button>
+      <div class="nav-label">VISÃO GERAL</div>
+      <button class="nav-item active" data-view="painel"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/></svg></span><span>Painel</span></button>
+      <div class="nav-label">GESTÃO</div>
+      <button class="nav-item" data-view="clientes"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span>Clientes</span></button>
+      <button class="nav-item" data-view="orcamentos"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13h8M8 17h8"/></svg></span><span>Orçamentos</span></button>
+      <button class="nav-item" data-view="ordens"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a5 5 0 0 0-6.4 6.4L3 18l3 3 5.3-5.3a5 5 0 0 0 6.4-6.4L15 12l-3-3z"/></svg></span><span>Ordens de serviço</span><span class="pill" id="pillOS" style="display:none">0</span></button>
+      <button class="nav-item" data-view="financeiro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20M16 15h2M6 5V3h12v2"/></svg></span><span>Financeiro</span><span class="pill" id="pillFin" style="display:none">0</span></button>
+      <button class="nav-item" data-view="contratos"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/></svg></span><span>Contratos</span><span class="pill" id="pillContrato" style="display:none">0</span></button>
+      <button class="nav-item" data-view="contratosServico"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13l2 2 5-5M8 18h8"/></svg></span><span>Contratos de serviço</span></button>
+      <div class="nav-label">RELACIONAMENTO</div>
+      <button class="nav-item" data-view="mensagens"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg></span><span>Mensagens</span></button>
+      <button class="nav-item" data-view="relatorios"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M8 16v-5M13 16V6M18 16v-8"/></svg></span><span>Relatórios</span></button>
+      <button class="nav-item" data-view="agenda"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span>Agenda de Visitas</span><span class="pill" id="pillAgenda" style="display:none">0</span></button>
+      <button class="nav-item" data-view="tarefas"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span><span>Tarefas da semana</span><span class="pill" id="pillTarefas" style="display:none">0</span></button>
+      <div class="nav-label">SISTEMA</div>
+      <button class="nav-item" data-view="catalogo"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.3 7l8.7 5 8.7-5M12 22V12"/></svg></span><span>Catálogo</span></button>
+      <button class="nav-item" data-view="dados"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg></span><span>Dados</span></button>
     </nav>
     <div class="sidebar-foot">
       <button class="btn-tema-mobile only-mobile" type="button" id="btnTemaMovel" title="Alternar tema claro/escuro">🌙 Alternar tema</button>
@@ -2852,9 +2943,7 @@ function render(){
    ========================================================= */
 function htmlPainel(){
   const t = db.clientes.length;
-  const novos = db.clientes.filter(c=>c.status==='novo').length;
   const negoc = db.clientes.filter(c=>['negociando','orcamento','visita'].includes(stageNormal(c.status))).length;
-  const fechados = db.clientes.filter(c=>c.status==='fechado').length;
   const vencidos = db.clientes.filter(c=>c.followup && c.followup.data && diasAte(c.followup.data)<0).length;
   const fups = db.clientes.filter(c=>c.followup && c.followup.data)
     .sort((a,b)=>{
@@ -2871,61 +2960,44 @@ function htmlPainel(){
 
   const orcs = listaOrcamentos();
   const orcAbertos = orcs.filter(o=>o.status==='rascunho'||o.status==='enviado');
-  const valorAprov = orcs.filter(o=>o.status==='aprovado').reduce((s,o)=>s+totalOrc(o),0);
-  const osVendidas = listaOrdens().filter(o=>o.status==='vendida');
-  const valorVendasOS = osVendidas.reduce((s,o)=>s+valorVendaOS(o),0);
   const ultOrc = orcs.slice().sort((a,b)=>(b.criadoEm||b.data||'').localeCompare(a.criadoEm||a.data||'')).slice(0,5);
+  const atencao = (()=>{
+    const venc = orcamentosVencendo(5);
+    const nfp = listaOrcamentos().filter(nfPendente);
+    const osab = listaOrdens().filter(o=>!['concluida','cancelada','vendida'].includes(o.status));
+    if(!venc.length && !nfp.length && !osab.length) return '';
+    if(!cartaoLigado('atencao')) return '';
+    return `<div class="card painel-atencao">
+      <div class="card-h"><h2>Precisa da sua atenção</h2></div>
+      <div class="card-b painel-alertas">
+        ${venc.length?`<div><span class="selo vence">⏳ ${venc.length} orçamento(s) vencendo/vencido(s)</span><span class="mini">${venc.slice(0,3).map(o=>esc(o.numero)).join(' · ')}</span><button class="link-btn" data-go="orcamentos">Ver →</button></div>`:''}
+        ${nfp.length?`<div><span class="selo vence">📄 ${nfp.length} NF pendente(s) de emissão</span><button class="link-btn" data-go="orcamentos">Ver →</button></div>`:''}
+        ${osab.length?`<div><span class="selo info">🛠️ ${osab.length} ordem(ns) de serviço em aberto</span><button class="link-btn" data-go="ordens">Ver →</button></div>`:''}
+      </div>
+    </div>`;
+  })();
+  const atalhosPainel = `<div class="painel-acoes"><span><b>Atalhos rápidos</b><small>Acesse as ações mais usadas</small></span><div><button class="btn primary" type="button" data-act="dash-orc">＋ Novo orçamento</button><button class="btn ghost" type="button" data-act="dash-os">＋ Nova ordem de serviço</button></div></div>`;
 
   if(t===0){
-    return `<div class="grid-stats">${stat('Total de clientes','0','👥')}${stat('Em negociação','0','🤝')}${stat('Fechados','0','✅')}${stat('Follow-ups vencidos','0','⏰')}</div>
+    return `${atalhosPainel}<div class="grid-stats dashboard-kpis">${stat('Total de clientes','0','👥')}${stat('Em negociação','0','🤝')}${stat('Orçamentos em aberto',orcAbertos.length,'🧾')}${stat('Follow-ups vencidos','0','⏰')}</div>
+      ${atencao}
       <div class="card"><div class="vazio" style="padding:50px 20px">
         <span class="big">🚀</span><b>Bem-vindo ao seu CRM!</b><br><br>
         Você ainda não tem clientes cadastrados.<br>Clique em <b>＋ Novo cliente</b> para começar ou importe seus dados na aba <b>Dados</b>.
       </div></div>`;
   }
 
-  return `
-  <div class="grid-stats">
+  return `${atalhosPainel}
+  <div class="grid-stats dashboard-kpis">
     ${stat('Total de clientes', t, '👥')}
     ${stat('Em negociação', negoc, '🤝')}
-    ${stat('Fechados', fechados, '✅')}
-    ${stat('Novos', novos, '✨')}
-    ${stat('Follow-ups vencidos', vencidos, '⏰', vencidos>0)}
     ${stat('Orçamentos em aberto', orcAbertos.length, '🧾')}
-    ${stat('Valor aprovado', brl(valorAprov), '💰')}
-    ${stat('Vendas de OS', brl(valorVendasOS), '🧾')}
-    ${stat('NF pendentes', qtdNFPendentes(), '📄', qtdNFPendentes()>0)}
-    ${stat('Vencendo / vencidos', orcamentosVencendo(5).length, '⏳', orcamentosVencendo(5).length>0)}
+    ${stat('Follow-ups vencidos', vencidos, '⏰', vencidos>0)}
   </div>
 
+  ${atencao}
   ${cartaoLigado('resumo')?resumoMensalCard():''}
   ${cartaoLigado('caixa')?caixaCard():''}
-
-  ${(()=>{
-    const venc = orcamentosVencendo(5);
-    const nfp = listaOrcamentos().filter(nfPendente);
-    const osab = listaOrdens().filter(o=>!['concluida','cancelada','vendida'].includes(o.status));
-    if(!venc.length && !nfp.length && !osab.length) return '';
-    if(!cartaoLigado('atencao')) return '';
-    return `<div class="card" style="margin-bottom:18px;border-color:#fde68a">
-      <div class="card-h"><h2>⚠️ Precisa da sua atenção</h2></div>
-      <div class="card-b" style="display:grid;gap:10px">
-        ${venc.length?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <span class="selo vence">⏳ ${venc.length} orçamento(s) vencendo/vencido(s)</span>
-          <span style="font-size:12.8px;color:var(--suave)">${venc.slice(0,3).map(o=>esc(o.numero)).join(' · ')}</span>
-          <button class="link-btn" data-go="orcamentos">Ver →</button>
-        </div>`:''}
-        ${nfp.length?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <span class="selo vence">📄 ${nfp.length} NF pendente(s) de emissão</span>
-          <button class="link-btn" data-go="orcamentos">Ver →</button>
-        </div>`:''}
-        ${osab.length?`<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <span class="selo info">🛠️ ${osab.length} ordem(ns) de serviço em aberto</span>
-          <button class="link-btn" data-go="ordens">Ver →</button>
-        </div>`:''}
-      </div>
-    </div>`;
-  })()}
 
   <div class="cols">
     ${cartaoLigado('followups')?`<div class="card">
@@ -3222,6 +3294,8 @@ document.getElementById('view').addEventListener('click', e=>{
 
   const btn = e.target.closest('[data-act]');
   if(!btn) return;
+  if(btn.dataset.act==='dash-orc'){ formOrcamento(null); return; }
+  if(btn.dataset.act==='dash-os'){ formOrdem(null); return; }
   const id = btn.dataset.id;
   if(btn.dataset.act==='editar') formCliente(id);
   else if(btn.dataset.act==='historico') formHistorico(id);
