@@ -861,6 +861,7 @@ function stageNormal(id){ return STAGE_APELIDOS[id] || id; }
 const TITULOS = {
   painel:['Painel','Visão geral do seu negócio'],
   clientes:['Clientes','Cadastro e acompanhamento dos seus clientes'],
+  aniversarios:['Aniversários','Aniversariantes do mês'],
   orcamentos:['Orçamentos','Crie orçamentos com produtos, totais e impressão'],
   ordens:['Ordens de serviço','Acompanhe a execução dos serviços aprovados'],
   financeiro:['Financeiro','Contas a receber, pagamentos e fluxo de caixa'],
@@ -1354,21 +1355,7 @@ function prefs(){ if(!db.prefs) db.prefs = baseVazia().prefs; if(!db.prefs.carto
    quitado em parcelas. O valor restante é o que está em aberto. */
 function pagamentosDe(o){ return Array.isArray(o.pagamentos) ? o.pagamentos : []; }
 function pagoOrc(o){ return pagamentosDe(o).reduce((s,p)=>s+(Number(p.valor)||0),0); }
-function valorOrcVenda(o){
-  if(!o) return 0;
-  if(o.venda && typeof o.venda.valor === 'number') return o.venda.valor;
-  if(o.venda && typeof o.venda.valor === 'string') return Number(o.venda.valor)||0;
-  if(o.lancamentoId && db.financeiro){
-    const l = (db.financeiro.receitas||[]).find(x=>x.id===o.lancamentoId);
-    if(l) return Number(l.valor)||0;
-  }
-  if(o.lancamentoId && Array.isArray(db.lancamentos)){
-    const l = db.lancamentos.find(x=>x.id===o.lancamentoId);
-    if(l) return Number(l.valor)||0;
-  }
-  return totalOrc(o);
-}
-function abertoOrc(o){ const tv = valorOrcVenda(o); return Math.max(0, +(tv - pagoOrc(o)).toFixed(2)); }
+function abertoOrc(o){ return Math.max(0, +(totalOrc(o) - pagoOrc(o)).toFixed(2)); }
 function orcQuitado(o){ return totalOrc(o) > 0 && pagoOrc(o) >= totalOrc(o) - 0.005; }
 function statusFin(o){
   if(o.status!=='aprovado' && o.status!=='entregue') return 'na';
@@ -2425,7 +2412,7 @@ function htmlPainel(){
 
   const orcs = listaOrcamentos();
   const orcAbertos = orcs.filter(o=>o.status==='rascunho'||o.status==='enviado');
-  const valorAprov = orcs.filter(o=>o.status==='aprovado').reduce((s,o)=>s+valorOrcVenda(o),0);
+  const valorAprov = orcs.filter(o=>o.status==='aprovado').reduce((s,o)=>s+totalOrc(o),0);
   const ultOrc = orcs.slice().sort((a,b)=>(b.criadoEm||b.data||'').localeCompare(a.criadoEm||a.data||'')).slice(0,5);
 
   if(t===0){
@@ -2524,7 +2511,7 @@ function htmlPainel(){
         <div><div class="nm">${esc(o.numero||'—')} · ${esc(nomeClienteOrc(o))}</div>
           <div class="mt">${(o.itens||[]).length} item(ns) · ${fmtData(o.data)}</div></div>
         <div class="end">
-          <span class="vl-total">${brl(valorOrcVenda(o))}</span>
+          <span class="vl-total">${brl(totalOrc(o))}</span>
           ${badgeOrc(o.status)}
         </div>
       </div>`).join('') : `<div class="vazio"><span class="big">🧾</span>Nenhum orçamento criado ainda.</div>`}
@@ -2554,7 +2541,7 @@ function resumoMensalCard(){
   const orcs = listaOrcamentos();
   const doMes = orcs.filter(o=>String(o.data||'').slice(0,7)===mes);
   const aprovMes = doMes.filter(o=>o.status==='aprovado'||o.status==='entregue');
-  const fatMes = aprovMes.reduce((s,o)=>s+valorOrcVenda(o),0);
+  const fatMes = aprovMes.reduce((s,o)=>s+totalOrc(o),0);
   const meta = Number(db.meta&&db.meta.valorMensal)||0;
   const pct = meta>0 ? Math.min(100, Math.round(fatMes/meta*100)) : 0;
   const fupMes = agendaPendentes().filter(c=>String(c.followup.data).slice(0,7)===mes).length;
@@ -7034,12 +7021,12 @@ function listaFinFiltrada(){
 }
 function tabelaFinHTML(){
   const l = listaFinFiltrada();
-  const totalGeral = l.reduce((s,o)=>s+(typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o)),0);
+  const totalGeral = l.reduce((s,o)=>s+totalOrc(o),0);
   if(!listaOrcamentos().filter(o=>statusFin(o)!=='na').length)
     return `<tr><td colspan="7"><div class="vazio"><span class="big">💰</span>Nenhum orçamento aprovado ainda.<br>Aprove um orçamento para acompanhar o recebimento.</div></td></tr>`;
   if(!l.length) return `<tr><td colspan="7"><div class="vazio"><span class="big">🔍</span>Nenhum título encontrado.</div></td></tr>`;
   return l.map(o=>{
-    const st = statusFin(o), ab = abertoOrc(o), pg = pagoOrc(o), tot = (typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o));
+    const st = statusFin(o), ab = abertoOrc(o), pg = pagoOrc(o), tot = totalOrc(o);
     const venc = vencidoOrc(o);
     const rot = st==='pago'?'✅ Quitado':(st==='parcial'?'🟡 Parcial':'🔵 Em aberto');
     return `<tr>
@@ -7070,7 +7057,7 @@ function formPagamento(orcId){
   <div class="modal-h"><h2>💵 Registrar pagamento</h2><button type="button" class="x" data-fechar>×</button></div>
   <div class="modal-b">
     <div class="info-orc">${esc(o.numero||'—')} · ${esc(nomeClienteOrc(o))}</div>
-    <div class="resumo-mini">Total ${brl(typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(ab)}</b></div>
+    <div class="resumo-mini">Total ${brl(totalOrc(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(ab)}</b></div>
     <form id="fPgto">
       <div class="linha-campos">
         <div class="campo"><label>Valor (R$)</label><input type="number" step="0.01" min="0" name="valor" value="${ab.toFixed(2)}" required></div>
@@ -7598,7 +7585,6 @@ function htmlRelatorios(){
     if(!lucroMeses[chave]) return;
     const rec = totalOrc(o);
     const cus = custoOrc(o);
-    const rec = typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o);
     lucroMeses[chave].receita += rec;
     lucroMeses[chave].custo += cus;
     lucroMeses[chave].lucro += (rec - cus);
@@ -7627,7 +7613,7 @@ function htmlRelatorios(){
   /* Totais por status */
   const porStatus = STATUS_ORC.map(s=>{
     const lista = os.filter(o=>o.status===s.id);
-    return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a+(typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o)),0) };
+    return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a+totalOrc(o),0) };
   });
 
   /* Comissão e meta */
@@ -7635,7 +7621,7 @@ function htmlRelatorios(){
   const valorComissao = totalAprov * comissaoPct/100;
   const metaMensal = Number((db.meta||{}).valorMensal)||0;
   const mesAtualChave = new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
-  const faturamentoMes = listaOrcamentos().filter(o=>o.status==='aprovado' && String(o.data||'').slice(0,7)===mesAtualChave).reduce((s,o)=>s+(typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o)),0);
+  const faturamentoMes = listaOrcamentos().filter(o=>o.status==='aprovado' && String(o.data||'').slice(0,7)===mesAtualChave).reduce((s,o)=>s+totalOrc(o),0);
   const metaPct = metaMensal>0 ? Math.min(100, Math.round(faturamentoMes/metaMensal*100)) : 0;
 
   const opcoesStatus = ['<option value="todos">Todos os status</option>', ...STATUS_ORC.map(s=>`<option value="${s.id}" ${relFiltro.status===s.id?'selected':''}>${s.label}</option>`)].join('');
@@ -7748,7 +7734,7 @@ function htmlRelatorios(){
         <div class="rel-linha">
           <span class="rel-nome">${esc(o.numero||'')} · ${esc(nomeClienteOrc(o))}</span>
           ${seloValidade(o)}
-          <b class="rel-valor">${brl((typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o)))}</b>
+          <b class="rel-valor">${brl(totalOrc(o))}</b>
         </div>`).join('')}</div>` : `<div class="vazio"><span class="big">✅</span>Nenhum orçamento vencendo nos próximos dias.</div>`; })()}
     </div>
   </div>
