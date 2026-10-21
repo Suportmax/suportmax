@@ -638,13 +638,34 @@ body.tema-escuro .atalho-linha kbd{background:#0f172a;color:#e2e8f0}
 .link-btn{color:var(--prim);font-weight:600;font-size:12.5px}
 .link-btn:hover{text-decoration:underline}
 .itens-wrap{overflow-x:auto;border:1px solid var(--borda);border-radius:10px;background:#fff}
-table.itens{min-width:790px}
+table.itens{width:100%;min-width:790px;table-layout:fixed}
 table.itens th{padding:9px 10px;font-size:11px}
 table.itens td{padding:7px 8px;vertical-align:middle}
 table.itens input,table.itens select{width:100%;padding:7px 9px;border:1px solid var(--borda);border-radius:8px;outline:none;background:#fff;min-width:0}
 table.itens input:focus,table.itens select:focus{border-color:var(--prim);box-shadow:0 0 0 3px var(--prim-cl)}
 table.itens .num{text-align:right;white-space:nowrap}
-.col-qtd{width:76px}.col-unit{width:112px}.col-tot{width:112px}.col-rm{width:42px}.col-desc-item{width:130px}
+.col-qtd{width:76px}.col-unit{width:112px}.col-tot{width:104px}.col-rm{width:38px}.col-desc-item{width:124px}
+/* nome longo do produto NÃO empurra mais as outras colunas (o campo Qtd fica sempre à vista) */
+table.itens .cat-foto{width:32px;height:32px}
+table.itens .prod-pick{overflow:hidden}
+
+/* Espaço estreito (celular): cada item vira um cartão — Qtd e valor sempre à vista */
+.itens-wrap.compacto{overflow-x:visible}
+.itens-wrap.compacto table.itens{width:100%;min-width:0;display:block}
+.itens-wrap.compacto table.itens thead{display:none}
+.itens-wrap.compacto table.itens tbody{display:block}
+.itens-wrap.compacto table.itens tr{display:flex;flex-wrap:wrap;gap:8px 10px;position:relative;
+  border:1px solid var(--borda);border-radius:12px;padding:32px 10px 8px;margin:0 0 10px;background:#fff}
+.itens-wrap.compacto table.itens td{display:block;width:100%;padding:0;border:none}
+.itens-wrap.compacto table.itens td::before{content:attr(data-label);display:block;font-size:10.5px;
+  font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--suave);margin-bottom:4px}
+.itens-wrap.compacto table.itens td.col-qtd,
+.itens-wrap.compacto table.itens td.col-unit,
+.itens-wrap.compacto table.itens td.col-desc-item,
+.itens-wrap.compacto table.itens td.col-tot{width:calc(50% - 5px)}
+.itens-wrap.compacto table.itens td.col-rm{position:absolute;top:6px;right:6px;width:auto;padding:0}
+.itens-wrap.compacto table.itens td.col-rm::before{content:none}
+.itens-wrap.compacto table.itens td.col-tot{font-weight:700}
 .val-total{font-weight:750;font-size:13.2px}
 .totais{display:flex;justify-content:flex-end;gap:24px;margin-top:6px;flex-wrap:wrap;align-items:baseline}
 .totais .linha{font-size:13.3px;color:var(--suave)}
@@ -4579,11 +4600,11 @@ function itemOrcHTML(it){
   const rotulo = p ? `${esc(p.nome)}` : '— Escolher produto —';
   const subRot = p ? `${brl(p.preco)}` : 'Buscar no catálogo';
   return `<tr data-item="${it.id}">
-    <td><div style="display:flex;gap:6px;align-items:center">${p&&p.foto?`<img class="cat-foto" data-foto-item src="${p.foto}" alt="">`:'<span data-foto-item></span>'}<button type="button" class="prod-pick ${p?'':'vazio'}" data-campo="produto" data-prod-id="${esc(it.produtoId||'')}" title="Escolher produto do catálogo"><span class="pp-nome">${rotulo}</span><span class="pp-sub">${subRot}</span><span class="pp-seta">🔍</span></button></div></td>
-    <td><input data-campo="desc" maxlength="160" value="${esc(it.desc)}" placeholder="Descrição do item"></td>
-    <td class="col-qtd"><input data-campo="qtd" type="number" min="0" step="0.01" value="${Number(it.qtd)||0}"></td>
-    <td class="col-unit"><input data-campo="unit" type="number" min="0" step="0.01" value="${Number(it.unit)||0}"></td>
-    <td class="col-desc-item">
+    <td data-label="Produto / serviço"><div style="display:flex;gap:6px;align-items:center">${p&&p.foto?`<img class="cat-foto" data-foto-item src="${p.foto}" alt="">`:'<span data-foto-item></span>'}<button type="button" class="prod-pick ${p?'':'vazio'}" data-campo="produto" data-prod-id="${esc(it.produtoId||'')}" title="${p?esc(p.nome):'Escolher produto do catálogo'}"><span class="pp-nome">${rotulo}</span><span class="pp-sub">${subRot}</span><span class="pp-seta">🔍</span></button></div></td>
+    <td data-label="Descrição"><input data-campo="desc" maxlength="160" value="${esc(it.desc)}" placeholder="Descrição do item"></td>
+    <td class="col-qtd" data-label="Qtd"><input data-campo="qtd" type="number" min="0" step="0.01" value="${Number(it.qtd)||0}"></td>
+    <td class="col-unit" data-label="Valor unit. R$"><input data-campo="unit" type="number" min="0" step="0.01" value="${Number(it.unit)||0}"></td>
+    <td class="col-desc-item" data-label="Desc. item">
       <div style="display:flex;gap:4px;align-items:center">
         <input data-campo="descItem" type="number" min="0" step="0.01" value="${Number(it.descItem)||0}" style="min-width:0;flex:1" title="Desconto neste item">
         <select data-campo="descTipo" title="Tipo de desconto" style="width:52px;flex:0 0 auto">
@@ -4592,9 +4613,19 @@ function itemOrcHTML(it){
         </select>
       </div>
     </td>
-    <td class="col-tot num val-total" data-tot>${brl(itemTotal(it))}${dv>0?`<div class="mt" style="color:var(--erro)">− ${brl(dv)}</div>`:''}</td>
+    <td class="col-tot num val-total" data-tot data-label="Total">${brl(itemTotal(it))}${dv>0?`<div class="mt" style="color:var(--erro)">− ${brl(dv)}</div>`:''}</td>
     <td class="col-rm"><button type="button" class="icon-btn del" data-rm-item title="Remover item">🗑</button></td>
   </tr>`;
+}
+/* Itens do orçamento/OS: quando o espaço é estreito (celular) cada item vira um cartão,
+   para o campo Qtd e o valor unitário continuarem sempre à vista (sem rolagem lateral). */
+function aplicarLayoutItens(wrap){
+  if(!wrap) return;
+  const checar = ()=>{ try{ wrap.classList.toggle('compacto', wrap.clientWidth < 780); }catch(e){} };
+  checar();
+  try{
+    if(!wrap.__ro && window.ResizeObserver){ wrap.__ro = new ResizeObserver(checar); wrap.__ro.observe(wrap); }
+  }catch(e){}
 }
 
 /* ---------- Formulário de orçamento ---------- */
@@ -4719,6 +4750,7 @@ function formOrcamento(id){
 
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
   if(o) document.getElementById('btnVerOrc').onclick = ()=>{ fecharModal(); verOrc(o.id); };
+  aplicarLayoutItens(modal.querySelector('.itens-wrap'));
 
   const tbody = document.getElementById('itensTbody');
   const descontoEl = modal.querySelector('[name="desconto"]');
@@ -5570,6 +5602,7 @@ function formOrdem(id){
 
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
   if(os) document.getElementById('btnVerOS').onclick = ()=>{ fecharModal(); verOrdem(os.id); };
+  aplicarLayoutItens(modal.querySelector('.itens-wrap'));
 
   const listaCheck = document.getElementById('listaCheck');
   function renderCheck(){
