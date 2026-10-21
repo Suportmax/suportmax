@@ -520,6 +520,43 @@ body.tema-escuro .ff-etapa{background:#0d1728}
 .menu-pop button:hover{background:#f1f5f9}
 .secao-agenda h3 .link-btn{margin-left:auto;font-size:11.5px;text-transform:none;letter-spacing:0}
 
+/* ===== Tarefas da semana (locais que atendo) ===== */
+.tarefa-topo{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:14px 16px;margin-top:16px}
+.tarefa-topo-info{display:flex;flex-direction:column;gap:3px;min-width:220px;flex:1}
+.tarefa-topo-info b{font-size:14px}
+.tarefa-topo-info span{font-size:12.6px;color:var(--suave)}
+.tarefa-semana{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.tarefa-semana .sem-titulo{font-size:14.5px;font-weight:750;min-width:180px;text-align:center}
+.tarefa-dia{background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);margin-top:12px;overflow:hidden}
+.tarefa-dia.hoje{border-color:var(--prim);box-shadow:0 0 0 2px rgba(37,99,235,.12)}
+.td-h{display:flex;align-items:center;gap:10px;padding:11px 14px;background:#f8fafc;border-bottom:1px solid var(--borda);flex-wrap:wrap}
+.tarefa-dia.hoje .td-h{background:#eff6ff}
+.td-nome{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.td-nome b{font-size:14.2px}
+.td-nome span{font-size:12.6px;color:var(--suave)}
+.td-cnt{font-size:11.5px;font-weight:700;color:#334155;background:#e2e8f0;border-radius:20px;padding:2px 9px}
+.td-body{padding:6px 14px 12px}
+.tarefa-item{display:flex;gap:11px;align-items:flex-start;padding:10px 2px;border-bottom:1px dashed var(--borda)}
+.tarefa-item:last-child{border-bottom:0}
+.tk-check{flex:0 0 auto;width:24px;height:24px;border-radius:7px;border:1.6px solid var(--borda);background:#fff;color:transparent;font-size:13px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.tk-check:hover{border-color:var(--prim);color:var(--prim)}
+.tarefa-item.feita .tk-check{background:#10b981;border-color:#10b981;color:#fff}
+.tk-info{flex:1;min-width:0}
+.tk-titulo{font-size:13.8px;font-weight:650;word-break:break-word}
+.tarefa-item.feita .tk-titulo{text-decoration:line-through;color:var(--suave)}
+.tk-linha{display:flex;gap:12px;flex-wrap:wrap;font-size:12.6px;color:var(--suave);margin-top:3px}
+.tk-end{font-size:12.6px;color:#475569;margin-top:2px}
+.tk-obs{font-size:12.6px;color:var(--suave);margin-top:3px;font-style:italic}
+.tk-acoes{display:flex;gap:5px;flex-wrap:wrap;flex:0 0 auto}
+.td-vazio{font-size:12.8px;color:var(--suave);padding:8px 2px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.td-vazio button{border:0;background:transparent;color:var(--prim);font-weight:700;font-size:12.8px;cursor:pointer;padding:0}
+.td-vazio button:hover{text-decoration:underline}
+.tarefa-locais{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
+.tarefa-locais span{font-size:12.2px;background:#f1f5f9;border:1px solid var(--borda);border-radius:20px;padding:3px 10px;color:#334155}
+body.tema-escuro .td-h{background:#0f1b2e}
+body.tema-escuro .tarefa-dia.hoje .td-h{background:#132244}
+body.tema-escuro .tarefa-locais span{background:#0f1b2e;color:#cbd5e1}
+
 /* ===== Calendário da agenda ===== */
 .cal{background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:14px;margin-top:16px}
 .cal-topo{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
@@ -876,6 +913,7 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
       <button class="nav-item" data-view="mensagens"><span class="ico">💬</span><span>Mensagens</span></button>
       <button class="nav-item" data-view="relatorios"><span class="ico">📈</span><span>Relatórios</span></button>
       <button class="nav-item" data-view="agenda"><span class="ico">📍</span><span>Agenda de Visitas</span><span class="pill" id="pillAgenda" style="display:none">0</span></button>
+      <button class="nav-item" data-view="tarefas"><span class="ico">✅</span><span>Tarefas da semana</span><span class="pill" id="pillTarefas" style="display:none">0</span></button>
       <button class="nav-item" data-view="catalogo"><span class="ico">📦</span><span>Catálogo</span></button>
       <button class="nav-item" data-view="dados"><span class="ico">💾</span><span>Dados</span></button>
     </nav>
@@ -956,6 +994,7 @@ const TITULOS = {
   mensagens:['Mensagens','Modelos de texto prontos para WhatsApp e e-mail'],
   relatorios:['Relatórios','Faturamento, comissões, orçamentos e ranking de itens'],
   agenda:['Agenda de Visitas','Roteiro diário para visitar clientes e marcar atendimentos'],
+  tarefas:['Tarefas da semana','Locais que você atende durante a semana, dia por dia'],
   catalogo:['Catálogo','Produtos, serviços, fornecedores, estoque e margem'],
   dados:['Dados','Backup, importação e configurações']
 };
@@ -1418,6 +1457,7 @@ function normalizar(d){
   if(!Array.isArray(d.mensagens)) d.mensagens = [];
   if(!Array.isArray(d.contratos)) d.contratos = [];
   if(!Array.isArray(d.contratosServico)) d.contratosServico = [];
+  if(!Array.isArray(d.tarefas)) d.tarefas = [];
   if(!Array.isArray(d.backups)) d.backups = [];
   if(!Array.isArray(d.auditoria)) d.auditoria = [];
   if(!d.emissor || typeof d.emissor!=='object') d.emissor = emissorVazio();
@@ -1436,7 +1476,7 @@ function normalizar(d){
   if(typeof d.prefs.densidade!=='string') d.prefs.densidade = 'normal';
   return d;
 }
-function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], lancamentos:[], mensagens:mensagemPadrao(), contratos:[], contratosServico:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, seqCT:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
+function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], lancamentos:[], mensagens:mensagemPadrao(), contratos:[], contratosServico:[], tarefas:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, seqCT:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
 function prefs(){ if(!db.prefs) db.prefs = baseVazia().prefs; if(!db.prefs.cartoes) db.prefs.cartoes = baseVazia().prefs.cartoes; return db.prefs; }
 
 /* ---------- Financeiro: pagamentos e contas a receber ---------- */
@@ -2466,6 +2506,11 @@ function render(){
   const pillOS = document.getElementById('pillOS');
   if(pillOS){ pillOS.style.display = osAbertas ? '' : 'none'; pillOS.textContent = osAbertas; }
 
+  /* contador de tarefas pendentes (hoje e próximos dias) */
+  const pendTarefas = listaTarefas().filter(t=>!t.feito && t.data && diasAte(t.data)<=6).length;
+  const pillTarefas = document.getElementById('pillTarefas');
+  if(pillTarefas){ pillTarefas.style.display = pendTarefas ? '' : 'none'; pillTarefas.textContent = pendTarefas; }
+
   const nVenc = contasReceber().filter(c=>c.vencido).length;
   const pillFin = document.getElementById('pillFin');
   if(pillFin){ pillFin.style.display = nVenc ? '' : 'none'; pillFin.textContent = nVenc; }
@@ -2490,6 +2535,9 @@ function render(){
   }else if(view==='contratosServico'){
     btnNovo.textContent = '＋ Novo contrato de serviço';
     btnNovo.onclick = ()=>formContratoServico(null);
+  }else if(view==='tarefas'){
+    btnNovo.textContent = '＋ Nova tarefa';
+    btnNovo.onclick = ()=>formTarefa(null);
   }else if(view==='mensagens'){
     btnNovo.textContent = '＋ Nova mensagem';
     btnNovo.onclick = ()=>formMensagem(null);
@@ -2524,6 +2572,7 @@ function render(){
   else if(view==='mensagens'){ el.innerHTML = htmlMensagens(); ligarMensagens(); }
   else if(view==='relatorios'){ el.innerHTML = htmlRelatorios(); ligarRelatorios(); }
   else if(view==='agenda'){ el.innerHTML = htmlAgenda(); ligarAgenda(); }
+  else if(view==='tarefas'){ el.innerHTML = htmlTarefas(); ligarTarefas(); }
   else if(view==='catalogo'){ el.innerHTML = htmlCatalogo(); ligarCatalogo(); }
   else if(view==='dados'){ el.innerHTML = htmlDados(); ligarDados(); }
   /* mantém os indicadores de nuvem em dia após redesenhar a tela */
@@ -3020,6 +3069,23 @@ document.getElementById('view').addEventListener('click', e=>{
     if(ct && confirm(`Excluir o contrato ${ct.numero||''}?`)){ db.contratosServico=listaCT().filter(x=>x.id!==id); salvar(); render(); toast('Contrato excluído.'); }
   }
   else if(btn.dataset.act==='orc-contrato'){ formContratoServico(null, id); }
+  /* Tarefas da semana */
+  else if(btn.dataset.act==='tarefa-novo'){ formTarefa(null, btn.dataset.data||''); }
+  else if(btn.dataset.act==='tarefa-editar'){ formTarefa(id); }
+  else if(btn.dataset.act==='tarefa-feito'){ concluirTarefa(id); }
+  else if(btn.dataset.act==='tarefa-mapa'){ mapaTarefa(id); }
+  else if(btn.dataset.act==='tarefa-zap'){ zapTarefa(id); }
+  else if(btn.dataset.act==='tarefa-imprimir'){ imprimirRoteiroSemana(); }
+  else if(btn.dataset.act==='tarefa-todas'){ verTodasTarefas(); }
+  else if(btn.dataset.act==='tarefa-excluir'){
+    const t=buscarTarefa(id);
+    if(t && confirm(`Excluir a tarefa "${t.titulo||''}"?`)){
+      db.tarefas=listaTarefas().filter(x=>x.id!==id);
+      salvar(); render();
+      if(modal && modal.querySelector('[data-act="tarefa-editar"]')) verTodasTarefas();
+      toast('Tarefa excluída.');
+    }
+  }
   /* Mensagens */
   else if(btn.dataset.act==='msg-editar') formMensagem(id);
   else if(btn.dataset.act==='msg-excluir') excluirMensagem(id);
@@ -10332,6 +10398,353 @@ function imprimirListaContratos(){
       <thead><tr><th>Contrato</th><th>Cliente</th><th>Data</th><th>Status</th><th class="num-c">Total</th></tr></thead>
       <tbody>${linhas}</tbody>
     </table>
+    <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())}</div></div>`);
+}
+
+/* =========================================================
+   TAREFAS DA SEMANA (locais que eu atendo durante a semana)
+   ========================================================= */
+const DIAS_SEMANA = [
+  {dow:'Seg', nome:'Segunda-feira'},
+  {dow:'Ter', nome:'Terça-feira'},
+  {dow:'Qua', nome:'Quarta-feira'},
+  {dow:'Qui', nome:'Quinta-feira'},
+  {dow:'Sex', nome:'Sexta-feira'},
+  {dow:'Sáb', nome:'Sábado'},
+  {dow:'Dom', nome:'Domingo'}
+];
+let filtroTarefas = { busca:'', estado:'todas' };
+
+function listaTarefas(){ if(!Array.isArray(db.tarefas)) db.tarefas = []; return db.tarefas; }
+function buscarTarefa(id){ return listaTarefas().find(t=>t.id===id); }
+/* Semana começa na segunda-feira (a de trabalho) */
+function inicioSemanaTarefas(){
+  const h=new Date();
+  const d=new Date(h.getFullYear(), h.getMonth(), h.getDate());
+  const off=Number(sessionStorage.getItem('crm_sem_tar_off')||0);
+  const dif=(d.getDay()===0) ? -6 : (1-d.getDay());
+  d.setDate(d.getDate()+dif+off);
+  return d;
+}
+function semanaTarefasLabel(){
+  const ini=inicioSemanaTarefas();
+  const fim=new Date(ini); fim.setDate(fim.getDate()+6);
+  return `${fmtData(isoDeData(ini))} — ${fmtData(isoDeData(fim))}`;
+}
+function tarefasDaSemana(){
+  const ini=inicioSemanaTarefas();
+  const fim=new Date(ini); fim.setDate(fim.getDate()+6);
+  const a=isoDeData(ini), b=isoDeData(fim);
+  return listaTarefas()
+    .filter(t=>t.data && t.data>=a && t.data<=b)
+    .sort((x,y)=> String(x.hora||'99:99').localeCompare(String(y.hora||'99:99')) || String(x.titulo||'').localeCompare(String(y.titulo||'')));
+}
+function tarefasFiltradas(){
+  const q=String(filtroTarefas.busca||'').trim().toLowerCase();
+  return tarefasDaSemana().filter(t=>{
+    if(filtroTarefas.estado==='pendentes' && t.feito) return false;
+    if(filtroTarefas.estado==='feitas' && !t.feito) return false;
+    if(q){
+      const cli=buscarCli(t.clienteId);
+      const alvo=[t.titulo,t.local,t.endereco,t.obs,cli&&cli.nome,cli&&cli.empresa].filter(Boolean).join(' ').toLowerCase();
+      if(alvo.indexOf(q)<0) return false;
+    }
+    return true;
+  });
+}
+function itemTarefaHTML(t){
+  const cli=buscarCli(t.clienteId);
+  return `<div class="tarefa-item ${t.feito?'feita':''}">
+    <button class="tk-check" data-act="tarefa-feito" data-id="${t.id}" title="${t.feito?'Desmarcar':'Marcar como feita'}">✓</button>
+    <div class="tk-info">
+      <div class="tk-titulo">${esc(t.titulo||'Sem título')}</div>
+      <div class="tk-linha">
+        ${t.hora?`<span>⏰ ${esc(t.hora)}</span>`:''}
+        ${t.local?`<span>📍 ${esc(t.local)}</span>`:''}
+        ${cli?`<span>👤 ${esc(cli.nome)}${cli.empresa?' · '+esc(cli.empresa):''}</span>`:''}
+      </div>
+      ${t.endereco?`<div class="tk-end">🏠 ${esc(t.endereco)}</div>`:''}
+      ${t.obs?`<div class="tk-obs">${esc(t.obs)}</div>`:''}
+      ${t.feito&&t.feitoEm?`<div class="tk-obs">✅ concluída em ${fmtData(t.feitoEm)}</div>`:''}
+    </div>
+    <div class="tk-acoes">
+      ${t.endereco?`<button class="icon-btn" data-act="tarefa-mapa" data-id="${t.id}" title="Abrir no mapa">🗺️</button>`:''}
+      ${(cli&&cli.telefone)?`<button class="icon-btn" data-act="tarefa-zap" data-id="${t.id}" title="WhatsApp do cliente">💬</button>`:''}
+      <button class="icon-btn" data-act="tarefa-editar" data-id="${t.id}" title="Editar">✏️</button>
+      <button class="icon-btn del" data-act="tarefa-excluir" data-id="${t.id}" title="Excluir">🗑️</button>
+    </div>
+  </div>`;
+}
+function htmlTarefas(){
+  const ini=inicioSemanaTarefas();
+  const sem=tarefasDaSemana();
+  const lista=tarefasFiltradas();
+  const pend=sem.filter(t=>!t.feito).length;
+  const feitas=sem.filter(t=>t.feito).length;
+  const locais=[...new Set(sem.map(t=>String(t.local||'').trim()).filter(Boolean))];
+  const hojeKey=hojeISO();
+
+  const stats=`<div class="grid-stats">
+    ${stat('Tarefas na semana', sem.length, '✅')}
+    ${stat('Pendentes', pend, '⏳', pend>0)}
+    ${stat('Concluídas', feitas, '🎉')}
+    ${stat('Locais atendidos', locais.length, '📍')}
+  </div>`;
+
+  const topo=`<div class="tarefa-topo">
+    <div class="tarefa-topo-info">
+      <b>Meus locais da semana</b>
+      <span>Anote os lugares que você vai atender, o dia e o serviço — e marque com um clique quando terminar.</span>
+      ${locais.length?`<div class="tarefa-locais">${locais.map(l=>`<span>📍 ${esc(l)}</span>`).join('')}</div>`:''}
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <div class="tarefa-semana">
+        <button class="cal-nav" data-t-sem="prev" title="Semana anterior">‹</button>
+        <span class="sem-titulo">${semanaTarefasLabel()}</span>
+        <button class="cal-nav" data-t-sem="next" title="Próxima semana">›</button>
+        <button class="btn ghost sm" data-t-sem="hoje">Esta semana</button>
+      </div>
+      <button class="btn ghost" data-act="tarefa-todas">📋 Todas</button>
+      <button class="btn ghost" data-act="tarefa-imprimir">🖨️ Imprimir roteiro</button>
+      <button class="btn primary" data-act="tarefa-novo">＋ Nova tarefa</button>
+    </div>
+  </div>`;
+
+  const toolbar=`<div class="toolbar" style="margin-top:14px">
+    <div class="busca"><input id="buscaTarefa" placeholder="Buscar por local, serviço, cliente, endereço..." value="${esc(filtroTarefas.busca)}"></div>
+    <select class="filtro" id="fEstadoTarefa">
+      <option value="todas" ${filtroTarefas.estado==='todas'?'selected':''}>Todas (${sem.length})</option>
+      <option value="pendentes" ${filtroTarefas.estado==='pendentes'?'selected':''}>⏳ Pendentes (${pend})</option>
+      <option value="feitas" ${filtroTarefas.estado==='feitas'?'selected':''}>✅ Concluídas (${feitas})</option>
+    </select>
+    <div class="contagem" style="margin-left:auto">${lista.length} de ${sem.length} tarefa(s)</div>
+  </div>`;
+
+  if(!sem.length){
+    return stats+topo+toolbar+`<div class="card" style="margin-top:16px"><div class="vazio" style="padding:46px 20px"><span class="big">✅</span>Nenhuma tarefa nesta semana!<br><br>
+      Toque em <b>＋ Nova tarefa</b> para anotar o local que você vai atender, o dia e o serviço.</div></div>`;
+  }
+
+  /* agrupado por dia (segunda a domingo) */
+  let html='';
+  for(let i=0;i<7;i++){
+    const d=new Date(ini.getFullYear(), ini.getMonth(), ini.getDate()+i);
+    const key=isoDeData(d);
+    const doDia=lista.filter(t=>t.data===key);
+    const doDiaTodos=sem.filter(t=>t.data===key);
+    const pDia=doDiaTodos.filter(t=>!t.feito).length;
+    html+=`<div class="tarefa-dia ${key===hojeKey?'hoje':''}">
+      <div class="td-h">
+        <div class="td-nome"><b>${DIAS_SEMANA[i].nome}</b><span>${fmtData(key)}</span>${key===hojeKey?'<span class="selo info">hoje</span>':''}</div>
+        ${doDiaTodos.length?`<span class="td-cnt">${pDia?`${pDia} pendente(s)`:`${doDiaTodos.length} concluída(s)`}</span>`:''}
+        <button class="link-btn" style="margin-left:auto;font-size:12px" data-act="tarefa-novo" data-data="${key}">＋ adicionar</button>
+      </div>
+      <div class="td-body">
+        ${doDia.length
+          ? doDia.map(itemTarefaHTML).join('')
+          : `<div class="td-vazio">Nenhuma tarefa neste dia. <button data-act="tarefa-novo" data-data="${key}">Adicionar tarefa</button></div>`}
+      </div>
+    </div>`;
+  }
+  return stats+topo+toolbar+html;
+}
+function ligarTarefas(){
+  const b=document.getElementById('buscaTarefa');
+  if(b) b.addEventListener('input', ()=>{ filtroTarefas.busca=b.value; render(); });
+  const s=document.getElementById('fEstadoTarefa');
+  if(s) s.addEventListener('change', ()=>{ filtroTarefas.estado=s.value; render(); });
+  /* navegação de semana */
+  document.querySelectorAll('[data-t-sem]').forEach(bt=>{
+    bt.onclick=()=>{
+      let off=Number(sessionStorage.getItem('crm_sem_tar_off')||0);
+      if(bt.dataset.tSem==='prev') off-=7;
+      else if(bt.dataset.tSem==='next') off+=7;
+      else off=0;
+      sessionStorage.setItem('crm_sem_tar_off', String(off));
+      render();
+    };
+  });
+}
+/* ---------- Formulário ---------- */
+function formTarefa(id, dataPre){
+  const t0=id?buscarTarefa(id):null;
+  if(id && !t0) return;
+  const v=t0?Object.assign({},t0):{
+    id:'', titulo:'', local:'', endereco:'', data:dataPre||hojeISO(), hora:'',
+    clienteId:'', obs:'', feito:false, feitoEm:'', criadoEm:agoraDT()
+  };
+  const clientes=db.clientes.slice();
+  const cliNome=(clientes.find(x=>x.id===v.clienteId)||{}).nome||'';
+  abrirModal(`
+    <form id="fTarefa">
+      <div class="modal-h"><h2>✅ ${t0?'Editar tarefa':'Nova tarefa'}</h2><button type="button" class="x" data-fechar>×</button></div>
+      <div class="modal-b">
+        <div class="form-grid">
+          <div class="campo full">
+            <label>O que vou fazer *</label>
+            <input name="titulo" maxlength="160" required placeholder="Ex.: trocar roteador e configurar Wi-Fi" value="${esc(v.titulo||'')}">
+          </div>
+          <div class="campo"><label>Local / empresa</label>
+            <input name="local" maxlength="120" placeholder="Ex.: Padaria do Bairro" value="${esc(v.local||'')}">
+          </div>
+          <div class="campo"><label>Horário</label>
+            <input name="hora" type="time" value="${esc(v.hora||'')}">
+          </div>
+          <div class="campo full"><label>Endereço</label>
+            <input name="endereco" maxlength="200" placeholder="Rua, número, bairro — para abrir no mapa" value="${esc(v.endereco||'')}">
+          </div>
+          <div class="campo full">
+            <label>Cliente (opcional)</label>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <input id="buscaCliTarefa" type="search" autocomplete="off" placeholder="Digite para buscar cliente por nome, empresa, telefone..." value="${esc(cliNome)}">
+              <select name="clienteId" id="selClienteTarefa">
+                <option value="">— Sem cliente vinculado —</option>
+                ${opcoesClienteHTML(clientes, v.clienteId)}
+              </select>
+              <div class="mini" id="dicaBuscaCliTarefa">Digite para filtrar por nome, empresa, telefone, e-mail ou CPF/CNPJ.</div>
+            </div>
+          </div>
+          <div class="campo full"><label>Observação</label>
+            <textarea name="obs" rows="4" placeholder="Ex.: levar cabo de rede, cobrar o mensal" style="font-size:13.5px">${esc(v.obs||'')}</textarea>
+          </div>
+          <div class="campo"><label>Dia</label>
+            <input name="data" type="date" value="${esc(v.data||hojeISO())}">
+          </div>
+          <div class="campo"><label>Situação</label>
+            <select name="feito">
+              <option value="0" ${!v.feito?'selected':''}>⏳ Pendente</option>
+              <option value="1" ${v.feito?'selected':''}>✅ Já fiz</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-f" style="flex-wrap:wrap">
+        <button type="button" class="btn ghost" data-fechar>Cancelar</button>
+        <button type="submit" class="btn primary">💾 Salvar tarefa</button>
+      </div>
+    </form>`, true);
+
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  const f=document.getElementById('fTarefa');
+  const sel=document.getElementById('selClienteTarefa');
+  const inp=document.getElementById('buscaCliTarefa');
+  const dica=document.getElementById('dicaBuscaCliTarefa');
+  if(inp && sel) inp.addEventListener('input', ()=>filtrarOpcoesCliente(inp, sel, dica));
+  f.onsubmit=e=>{
+    e.preventDefault();
+    const titulo=f.querySelector('[name="titulo"]').value.trim();
+    if(!titulo){ toast('Escreva o que você vai fazer.','erro'); return; }
+    const dados={
+      titulo,
+      local:f.querySelector('[name="local"]').value.trim(),
+      endereco:f.querySelector('[name="endereco"]').value.trim(),
+      data:f.querySelector('[name="data"]').value||hojeISO(),
+      hora:f.querySelector('[name="hora"]').value||'',
+      clienteId:sel.value||'',
+      obs:f.querySelector('[name="obs"]').value.trim(),
+      feito:f.querySelector('[name="feito"]').value==='1'
+    };
+    if(t0){
+      const mudou=dados.feito!==!!t0.feito;
+      Object.assign(t0, dados);
+      if(mudou) t0.feitoEm = dados.feito ? hojeISO() : '';
+    }else{
+      listaTarefas().push(Object.assign({id:uid(), criadoEm:agoraDT(), feitoEm:dados.feito?hojeISO():''}, dados));
+    }
+    salvar();
+    fecharModal();
+    view='tarefas'; render();
+    toast(t0?'Tarefa atualizada.':'Tarefa salva.');
+  };
+}
+/* Lista com todas as tarefas (qualquer data) */
+function verTodasTarefas(){
+  const l=listaTarefas().slice().sort((a,b)=>String(b.data||'').localeCompare(String(a.data||'')) || String(a.hora||'99:99').localeCompare(String(b.hora||'99:99')));
+  const linhas=l.map(t=>{
+    const cli=buscarCli(t.clienteId);
+    return `<tr>
+      <td>${fmtData(t.data)}</td>
+      <td class="num">${t.hora?esc(t.hora):'—'}</td>
+      <td><b>${esc(t.titulo||'')}</b>${t.local?`<div class="mt">📍 ${esc(t.local)}</div>`:''}${t.endereco?`<div class="mt">🏠 ${esc(t.endereco)}</div>`:''}</td>
+      <td>${cli?esc(cli.nome):'—'}</td>
+      <td><span class="selo ${t.feito?'ok':'vence'}">${t.feito?'Feita':'Pendente'}</span></td>
+      <td><div class="acoes">
+        <button class="icon-btn" data-act="tarefa-feito" data-id="${t.id}" title="${t.feito?'Reabrir':'Marcar como feita'}">${t.feito?'↩️':'✓'}</button>
+        <button class="icon-btn" data-act="tarefa-editar" data-id="${t.id}" title="Editar">✏️</button>
+        <button class="icon-btn del" data-act="tarefa-excluir" data-id="${t.id}" title="Excluir">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join('');
+  abrirModal(`
+    <div class="modal-h"><h2>📋 Todas as tarefas</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      ${l.length?`<div class="tabela-wrap"><table>
+        <thead><tr><th>Dia</th><th>Hora</th><th>Tarefa</th><th>Cliente</th><th>Status</th><th></th></tr></thead>
+        <tbody>${linhas}</tbody></table></div>`
+        :`<div class="vazio" style="padding:40px 16px"><span class="big">✅</span>Nenhuma tarefa cadastrada ainda.</div>`}
+    </div>
+    <div class="modal-f"><button type="button" class="btn ghost" data-fechar>Fechar</button></div>`, true);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+}
+/* ---------- Ações ---------- */
+function concluirTarefa(id){
+  const t=buscarTarefa(id); if(!t) return;
+  t.feito=!t.feito;
+  t.feitoEm=t.feito?hojeISO():'';
+  salvar(); render();
+  if(modal && modal.querySelector('[data-act="tarefa-editar"]')) verTodasTarefas();
+  toast(t.feito?'✅ Tarefa concluída.':'Tarefa reaberta.');
+}
+function mapaTarefa(id){
+  const t=buscarTarefa(id); if(!t) return;
+  const end=String(t.endereco||'').trim();
+  if(!end){ toast('Esta tarefa não tem endereço.','erro'); return; }
+  window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(end),'_blank','noopener');
+}
+function zapTarefa(id){
+  const t=buscarTarefa(id); if(!t) return;
+  const cli=buscarCli(t.clienteId);
+  if(!cli||!cli.telefone){ toast('Esta tarefa não tem cliente com telefone.','erro'); return; }
+  const msg=`Olá${cli.nome?', '+String(cli.nome).trim().split(/\s+/)[0]:''}! 👋 Passando para o serviço de hoje (${t.titulo||'visita'}).`;
+  window.open('https://wa.me/'+telZap(cli.telefone)+'?text='+encodeURIComponent(msg),'_blank','noopener');
+}
+/* ---------- Impressão do roteiro da semana ---------- */
+function imprimirRoteiroSemana(){
+  const ini=inicioSemanaTarefas();
+  const sem=tarefasDaSemana();
+  if(!sem.length){ toast('Nenhuma tarefa na semana para imprimir.','erro'); return; }
+  const em=db.emissor||emissorVazio();
+  let corpo='';
+  for(let i=0;i<7;i++){
+    const d=new Date(ini.getFullYear(), ini.getMonth(), ini.getDate()+i);
+    const key=isoDeData(d);
+    const doDia=sem.filter(t=>t.data===key);
+    if(!doDia.length) continue;
+    corpo+=`<div class="obs" style="padding:8px 0;border-bottom:1px solid #e2e8f0">
+      <b>${DIAS_SEMANA[i].nome} — ${fmtData(key)}</b>
+      ${doDia.map(t=>`<div style="margin-top:5px;font-size:13px">
+        ${t.feito?'☑':'☐'} ${t.hora?`<b>${esc(t.hora)}</b> — `:''}<b>${esc(t.titulo||'')}</b>
+        ${t.local?` · 📍 ${esc(t.local)}`:''}
+        ${t.endereco?`<div style="color:#475569">🏠 ${esc(t.endereco)}</div>`:''}
+        ${t.obs?`<div style="color:#64748b;font-style:italic">${esc(t.obs)}</div>`:''}
+      </div>`).join('')}
+    </div>`;
+  }
+  imprimirDoc(`
+    <div class="topo">
+      <div class="marca-doc">
+        <img class="doc-logo" src="${LOGO_DATA_URI}" alt="">
+        <div class="marca-txt">
+          <div style="font-size:16.5px;font-weight:800">${esc(em.nome||MARCA_NOME)}</div>
+          ${em.telefone?`<div>${esc(em.telefone)}</div>`:''}
+        </div>
+      </div>
+      <div class="emissor">
+        <div class="num">ROTEIRO DA SEMANA</div>
+        <div style="color:#64748b;font-size:13px;margin-top:3px">${semanaTarefasLabel()}</div>
+      </div>
+    </div>
+    ${corpo}
     <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())}</div></div>`);
 }
 
