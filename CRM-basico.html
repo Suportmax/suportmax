@@ -4586,6 +4586,7 @@ function htmlOrcamentos(){
       <option value="vencendo" ${filtroOrc.venc==='vencendo'?'selected':''}>⏳ Vencendo (5 dias)</option>
       <option value="vencidos" ${filtroOrc.venc==='vencidos'?'selected':''}>🔴 Vencidos</option>
     </select>
+    <button class="btn ghost" id="btnImprimirOrc" title="Imprimir a lista de orçamentos que está na tela">🖨️ Imprimir</button>
     ${abaArquivados?'':'<button class="btn ghost" id="btnCatalogo">📦 Catálogo de produtos</button>'}
     ${abaArquivados?'':'<button class="btn primary" id="btnNovoOrc">＋ Novo orçamento</button>'}
   </div>
@@ -4668,6 +4669,8 @@ function ligarOrcamentos(){
   if(btnNovo) btnNovo.addEventListener('click', ()=>formOrcamento(null));
   const btnCat = document.getElementById('btnCatalogo');
   if(btnCat) btnCat.addEventListener('click', catalogoProdutos);
+  const btnImp = document.getElementById('btnImprimirOrc');
+  if(btnImp) btnImp.addEventListener('click', imprimirListaOrcamentos);
   atualizarTabelaOrc();
 }
 function atualizarTabelaOrc(){
@@ -9388,6 +9391,34 @@ function imprimirEtiquetas(){
       ${(c.telefone||'')?'':''}
       <div class="et-rod">${esc(em.nome||MARCA_NOME)}</div>
     </div>`).join('')}</div>`;
+  imprimirDoc(html);
+}
+/* Imprime a lista de orçamentos que está na tela (respeita aba, busca e filtros) */
+function imprimirListaOrcamentos(){
+  const lista = listaOrcFiltrada();
+  if(!lista.length){ toast('Nenhum orçamento para imprimir com esses filtros.','erro'); return; }
+  const arquivados = filtroOrc.aba==='arquivados';
+  const total = lista.reduce((s,o)=>s+totalOrc(o),0);
+  const busca = filtroOrc.busca.trim();
+  const stFiltro = filtroOrc.status==='todos' ? 'todos os status' : statusOrc(filtroOrc.status).label;
+  const html = `<div class="lista-print">
+    <h1>${arquivados?'Lista de orçamentos arquivados':'Lista de orçamentos'}</h1>
+    <div class="lp-sub">${lista.length} orçamento(s) · ${esc(stFiltro)}${busca?` · busca: "${esc(busca)}"`:''} · emitido em ${fmtDT(agoraDT())}</div>
+    <table class="lp-tab">
+      <thead><tr><th>#</th><th>Orçamento</th><th>Data</th><th>Cliente</th><th>Itens</th><th>Status</th><th style="text-align:right">Total</th></tr></thead>
+      <tbody>${lista.map((o,i)=>`<tr>
+        <td>${i+1}</td>
+        <td>${esc(o.numero||'—')}</td>
+        <td>${fmtData(o.data)}</td>
+        <td>${esc(nomeClienteOrc(o))}</td>
+        <td>${(o.itens||[]).length}</td>
+        <td>${esc(statusOrc(o.status).label)}${arquivados&&o.arquivadoMotivo?` (${esc(o.arquivadoMotivo)})`:''}</td>
+        <td style="text-align:right">${brl(totalOrc(o))}</td>
+      </tr>`).join('')}
+      <tr><td colspan="6" style="text-align:right;font-weight:700">Total</td><td style="text-align:right;font-weight:700">${brl(total)}</td></tr>
+      </tbody>
+    </table>
+  </div>`;
   imprimirDoc(html);
 }
 function imprimirListaClientes(){
