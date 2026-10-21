@@ -969,6 +969,8 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
 const KEY = 'crm_basico_v1';
 const KEY_SYNC_PENDENTE = KEY + '_sync_pendente';
 const KEY_SYNC_AT = KEY + '_sync_at';
+const KEY_DONO_LOCAL = KEY + '_dono_local';
+let localDataKey = KEY;
 
 /* Marca (logo) — incorporada como data URI para o app continuar sendo um único arquivo.
    Para trocar a logo: gere outro data URI e substitua o valor de LOGO_DATA_URI. */
@@ -1688,25 +1690,65 @@ function prepararPrimeiroUso(nova){
     /* Pré-preenche os dados da empresa no primeiro uso (podem ser alterados na aba Dados) */
     if(!nova.emissor || (!nova.emissor.nome && !nova.emissor.telefone)) nova.emissor = emissorPadrao();
     nova.catalogoInfoCarregado = true;
-    try{ localStorage.setItem(KEY, JSON.stringify(nova)); }catch(e){}
+    try{ localStorage.setItem(localDataKey, JSON.stringify(nova)); }catch(e){}
     if(n) setTimeout(()=>toast(`📦 Catálogo de informática carregado: ${n} produtos e serviços já estão disponíveis nos orçamentos.`, 'ok'), 400);
   }
   /* Aplica as fotos embutidas nos itens do catálogo que ainda não têm foto (uma vez por sessão de carga) */
   if((nova.produtos||[]).some(p=>p && !p.foto && fotoDoProduto(p.nome))){
     const q = aplicarFotosCatalogoEm(nova);
-    if(q) try{ localStorage.setItem(KEY, JSON.stringify(nova)); }catch(e){}
+    if(q) try{ localStorage.setItem(localDataKey, JSON.stringify(nova)); }catch(e){}
   }
   return nova;
 }
-function carregar(){
+function carregar(chave=localDataKey){
   let nova = null;
   try{
-    const raw = localStorage.getItem(KEY);
+    const raw = localStorage.getItem(chave);
     if(raw) nova = normalizar(JSON.parse(raw));
     else nova = baseVazia();
-  }catch(e){ console.warn('Falha ao ler dados', e); nova = baseVazia(); }
+  }catch(e){
+    console.error('Falha ao ler dados locais; uma cópia de recuperação será preservada.', e);
+    try{
+      const raw = localStorage.getItem(chave);
+      if(raw) localStorage.setItem(chave+'_recuperacao_'+Date.now(), raw);
+    }catch(e2){ console.error('Não foi possível preservar a cópia de recuperação.', e2); }
+    nova = baseVazia();
+    setTimeout(()=>toast('Não foi possível ler os dados locais. Uma cópia de recuperação foi preservada quando havia espaço; confira os backups antes de continuar.','erro'), 500);
+  }
   if(!nova) nova = baseVazia();
   return prepararPrimeiroUso(nova);
+}
+
+/* Cada conta autenticada mantém seu próprio estado local neste navegador. */
+function selecionarDadosLocaisDoUsuario(user){
+  const userId = String(user&&user.id||'');
+  if(!userId) throw new Error('Não foi possível identificar a conta autenticada.');
+  const chaveUsuario = KEY+'_user_'+userId;
+  const donoAntigo = localStorage.getItem(KEY_DONO_LOCAL);
+  const dadosUsuario = localStorage.getItem(chaveUsuario);
+  localDataKey = chaveUsuario;
+  if(dadosUsuario){
+    db = carregar(chaveUsuario);
+  }else if(!donoAntigo || donoAntigo===userId){
+    /* Migra o estado legado uma única vez para a primeira conta autenticada. */
+    db = prepararPrimeiroUso(normalizar(db)||baseVazia());
+    localStorage.setItem(chaveUsuario, JSON.stringify(db));
+    localStorage.setItem(KEY_DONO_LOCAL, userId);
+    const pendente = localStorage.getItem(KEY_SYNC_PENDENTE);
+    const versao = localStorage.getItem(KEY_SYNC_AT);
+    if(pendente) localStorage.setItem(chaveUsuario+'_sync_pendente', pendente);
+    if(versao) localStorage.setItem(chaveUsuario+'_sync_at', versao);
+    /* Evita que a próxima abertura carregue em memória o estado legado de outra conta. */
+    localStorage.removeItem(KEY);
+    localStorage.removeItem(KEY_SYNC_PENDENTE);
+    localStorage.removeItem(KEY_SYNC_AT);
+  }else{
+    /* Sem dados locais próprios: começa vazio; nunca copia dados de outra conta. */
+    db = prepararPrimeiroUso(baseVazia());
+    localStorage.setItem(chaveUsuario, JSON.stringify(db));
+  }
+  db.role = 'comum';
+  aplicarPermissoes();
 }
 
 /* ---------- Nuvem (Supabase): sincroniza celular e computador ---------- */
@@ -1736,19 +1778,19 @@ function setNuvemStatus(s){
 }
 
 function nuvemTemPendenteLocal(){
-  try{ return localStorage.getItem(KEY_SYNC_PENDENTE)==='1'; }
+  try{ return localStorage.getItem(localDataKey+'_sync_pendente')==='1'; }
   catch(e){ console.warn('Não foi possível verificar alterações pendentes de sincronização.', e); return false; }
 }
 function nuvemUltimaVersaoLocal(){
-  try{ return localStorage.getItem(KEY_SYNC_AT)||null; }
+  try{ return localStorage.getItem(localDataKey+'_sync_at')||null; }
   catch(e){ console.warn('Não foi possível ler a versão sincronizada anteriormente.', e); return null; }
 }
 function nuvemSalvarControle(pendente, atualizadoEm){
   try{
-    if(atualizadoEm) localStorage.setItem(KEY_SYNC_AT, atualizadoEm);
-    else localStorage.removeItem(KEY_SYNC_AT);
-    if(pendente) localStorage.setItem(KEY_SYNC_PENDENTE, '1');
-    else localStorage.removeItem(KEY_SYNC_PENDENTE);
+    if(atualizadoEm) localStorage.setItem(localDataKey+'_sync_at', atualizadoEm);
+    else localStorage.removeItem(localDataKey+'_sync_at');
+    if(pendente) localStorage.setItem(localDataKey+'_sync_pendente', '1');
+    else localStorage.removeItem(localDataKey+'_sync_pendente');
   }catch(e){ console.warn('Não foi possível registrar o estado da sincronização.', e); }
 }
 
@@ -1838,13 +1880,13 @@ function nuvemSalvarAgendado(){
 
 function persistirDadosLocal(){
   try{
-    localStorage.setItem(KEY, JSON.stringify(db));
+    localStorage.setItem(localDataKey, JSON.stringify(db));
     return true;
   }catch(e){
     if(Array.isArray(db.backups) && db.backups.length){
       db.backups = [];
       try{
-        localStorage.setItem(KEY, JSON.stringify(db));
+        localStorage.setItem(localDataKey, JSON.stringify(db));
         toast('Armazenamento cheio: backups internos removidos para liberar espaço.','aviso');
         return true;
       }catch(e2){ e = e2; }
@@ -1868,7 +1910,7 @@ function persistirDadosLocal(){
           return c;
         });
       }
-      localStorage.setItem(KEY, JSON.stringify(db));
+      localStorage.setItem(localDataKey, JSON.stringify(db));
       toast('Armazenamento cheio: fotos pesadas foram removidas. Exporte um backup JSON agora.','aviso');
       return true;
     }catch(e2){
@@ -1900,13 +1942,14 @@ function backupDiarioAuto(){
   const ult = db.backups[0];
   if(ult) ult.auto = true;
   if(db.backups.length > 6) db.backups = db.backups.slice(0,6);
-  try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){}
+  try{ localStorage.setItem(localDataKey, JSON.stringify(db)); }catch(e){}
   if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
 }
 
 function aplicarDadosRemotos(remoto){
   const anterior = db;
   db = prepararPrimeiroUso(remoto.dados);
+  db.role = 'comum';
   if(!persistirDadosLocal()){
     db = anterior;
     return false;
@@ -1915,6 +1958,7 @@ function aplicarDadosRemotos(remoto){
   nuvemConflito = false;
   nuvemSalvarControle(false, nuvemVersaoRemota);
   aplicarMarca();
+  aplicarPermissoes();
   render();
   return true;
 }
@@ -7228,7 +7272,8 @@ function mostrarLinkOrc(id){
   abrirModal(`
     <div class="modal-h"><h2>🔗 Link público do orçamento</h2><button type="button" class="x" data-fechar>×</button></div>
     <div class="modal-b">
-      <p style="font-size:13.5px;color:var(--suave);margin:0 0 8px">Envie este link ao cliente. Ele abre o orçamento em modo leitura no celular e pode <b>aceitar</b> ou <b>recusar</b> — a resposta volta para você pelo WhatsApp.<br>
+      <p style="font-size:13.5px;color:var(--suave);margin:0 0 8px">Envie este link ao cliente. Ele abre o orçamento em modo leitura no celular; os botões apenas preparam uma mensagem no WhatsApp e não alteram o status no CRM.<br>
+      <span style="display:inline-block;margin-top:6px;padding:7px 10px;border-radius:10px;background:#fff7ed;color:#9a3412;font-weight:600">🔒 O link contém os dados do orçamento. Qualquer pessoa que receber o link poderá visualizá-los; encaminhe somente ao cliente.</span><br>
       <span style="display:inline-block;margin-top:6px;padding:7px 10px;border-radius:10px;background:var(--prim-cl);color:var(--prim-esc);font-weight:600">💡 No WhatsApp o cliente recebe um cartão <b>“ORÇAMENTO SUPORT MAX”</b> com a capa da marca — o endereço gigante fica escondido dentro do cartão.</span></p>
       <div class="link-box">
         <input id="linkOrcPub" readonly value="${esc(link)}">
@@ -7311,8 +7356,8 @@ function htmlOrcPublico(d){
       ${d.ob?`<div class="obs"><b>Condições:</b><br>${esc(d.ob)}</div>`:''}
       <div class="pub-acoes">
         <div class="pub-acoes-info"><span>Total do orçamento</span><b>${brl(d.tt)}</b></div>
-        <button class="btn primary" id="pubAceitar">✅ Aceitar orçamento</button>
-        <button class="btn ghost" id="pubRecusar">✖ Não aceitar</button>
+        <button class="btn primary" id="pubAceitar">✅ Avisar que aceito pelo WhatsApp</button>
+        <button class="btn ghost" id="pubRecusar">✖ Conversar pelo WhatsApp</button>
       </div>
       <div class="rodape-doc">Orçamento gerado em ${fmtData(hojeISO())}</div>
     </div>
@@ -9248,6 +9293,18 @@ function mostrarLogin(msg, tipo){
   if(sidebarUser) sidebarUser.hidden = true;
   if(msg) setLoginStatus(msg, tipo);
 }
+function limparSessaoLocal(){
+  if(nuvemTimer) clearTimeout(nuvemTimer);
+  nuvemTimer = null;
+  nuvemLigada = false;
+  nuvemPronta = false;
+  nuvemConflito = false;
+  nuvemVersaoRemota = null;
+  nuvemRevisaoLocal = 0;
+  localDataKey = KEY;
+  db = baseVazia();
+  setNuvemStatus('off');
+}
 async function entrarNoApp(user){
   const { screen, app, sidebarUser, userEmail } = loginEls();
   if(screen) screen.hidden = true;
@@ -9265,14 +9322,15 @@ async function entrarNoApp(user){
 /* Lê o papel do usuário na tabela crm_members (coluna opcional "role") */
 async function carregarPapel(user){
   if(!crmClient || !user) return;
+  /* Sem confirmação explícita do papel, a interface aplica o menor acesso. */
+  db.role = 'comum';
   try{
     const { data, error } = await crmClient.from('crm_members').select('role').eq('user_id', user.id).maybeSingle();
-    if(error || !data) return; /* sem coluna role ou sem linha individual: mantém admin */
-    db.role = (data.role === 'comum') ? 'comum' : 'admin';
-    try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){}
-    aplicarPermissoes();
-    render();
-  }catch(e){ /* silencioso */ }
+    if(!error && data) db.role = data.role === 'admin' ? 'admin' : 'comum';
+    else if(error) console.warn('Não foi possível confirmar o papel do usuário; acesso comum aplicado.', error);
+  }catch(e){ console.warn('Não foi possível confirmar o papel do usuário; acesso comum aplicado.', e); }
+  aplicarPermissoes();
+  render();
 }
 function souAdmin(){ return db.role !== 'comum'; }
 function aplicarPermissoes(){
@@ -9305,6 +9363,13 @@ async function validarEEntrar(user){
     mostrarLogin('Esta conta não está autorizada a acessar o CRM.', 'error');
     return;
   }
+  try{
+    selecionarDadosLocaisDoUsuario(user);
+  }catch(err){
+    await crmClient.auth.signOut();
+    mostrarLogin('Não foi possível separar os dados locais desta conta com segurança: '+String(err&&err.message||err), 'error');
+    return;
+  }
   entrarNoApp(user);
 }
 async function initAuth(){
@@ -9335,7 +9400,7 @@ async function initAuth(){
   }
 
   crmClient.auth.onAuthStateChange((event, session)=>{
-    if(event === 'SIGNED_OUT'){ mostrarLogin('Sessão encerrada.', 'success'); }
+    if(event === 'SIGNED_OUT'){ limparSessaoLocal(); mostrarLogin('Sessão encerrada.', 'success'); }
   });
 
   if(form){
@@ -9344,10 +9409,17 @@ async function initAuth(){
       if(btn){ btn.disabled = true; btn.textContent = 'Entrando...'; }
       setLoginStatus('', '');
       const fd = new FormData(form);
-      const { data: signIn, error: signInErr } = await crmClient.auth.signInWithPassword({
-        email: String(fd.get('email')||'').trim(),
-        password: String(fd.get('password')||'')
-      });
+      let signIn, signInErr;
+      try{
+        ({ data:signIn, error:signInErr } = await crmClient.auth.signInWithPassword({
+          email: String(fd.get('email')||'').trim(),
+          password: String(fd.get('password')||'')
+        }));
+      }catch(err){
+        if(btn){ btn.disabled = false; btn.textContent = 'Entrar'; }
+        setLoginStatus('Falha de conexão ao tentar entrar: '+String(err&&err.message||err), 'error');
+        return;
+      }
       if(btn){ btn.disabled = false; btn.textContent = 'Entrar'; }
       if(signInErr){
         setLoginStatus('Não foi possível entrar: ' + signInErr.message, 'error');
@@ -10375,7 +10447,8 @@ function mostrarLinkCT(id){
   abrirModal(`
     <div class="modal-h"><h2>🔗 Link do contrato ${esc(c.numero||'')}</h2><button type="button" class="x" data-fechar>×</button></div>
     <div class="modal-b">
-      <p style="font-size:13.5px;color:var(--suave);margin:0 0 8px">Envie este link ao cliente. Ele abre o contrato no celular, com o texto completo, e pode <b>assinar com o dedo</b> — depois é só baixar a assinatura e mandar de volta no WhatsApp.</p>
+      <p style="font-size:13.5px;color:var(--suave);margin:0 0 8px">Envie este link ao cliente. Ele abre o contrato completo; a assinatura feita nessa página fica apenas no navegador do cliente, não é registrada no CRM e precisa ser baixada e enviada de volta.<br>
+      <span style="display:inline-block;margin-top:6px;padding:7px 10px;border-radius:10px;background:#fff7ed;color:#9a3412;font-weight:600">🔒 Qualquer pessoa com o link pode ler o contrato completo. Encaminhe somente ao cliente.</span></p>
       <div class="link-box">
         <input id="linkCTPub" readonly value="${esc(link)}">
         <button class="btn ghost sm" id="btnCopiarLinkCT">📋 Copiar</button>
@@ -10935,10 +11008,10 @@ function htmlContratoPublico(d){
       </div>
       <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
         <button class="btn ghost sm" id="pubAssLimpar">🧽 Limpar</button>
-        <button class="btn primary" id="pubAssSalvar">💾 Confirmar assinatura</button>
+        <button class="btn primary" id="pubAssSalvar">💾 Preparar assinatura</button>
       </div>
       <div id="pubAssOk" hidden style="margin-top:14px">
-        <div class="aviso-assinado">✅ Assinatura registrada!</div>
+        <div class="aviso-assinado">✅ Assinatura pronta para envio; ainda não foi salva no CRM.</div>
         <div class="assin-preview"><img id="pubAssImg" src="" alt="Assinatura"></div>
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
           <button class="btn ok" id="pubAssBaixar">⬇️ Baixar minha assinatura</button>
@@ -11002,7 +11075,7 @@ function iniciarContratoPublico(d){
     if(elImg) elImg.src=img;
     const ok=document.getElementById('pubAssOk'); if(ok) ok.hidden=false;
     salvarAss.disabled=true;
-    toast('Assinatura registrada!');
+    toast('Assinatura preparada nesta página. Baixe o arquivo e envie à empresa; ela ainda não foi registrada no CRM.','aviso');
   };
   const baixar=document.getElementById('pubAssBaixar');
   if(baixar) baixar.onclick=()=>{
