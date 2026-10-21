@@ -1394,7 +1394,16 @@ function prefs(){ if(!db.prefs) db.prefs = baseVazia().prefs; if(!db.prefs.carto
    quitado em parcelas. O valor restante é o que está em aberto. */
 function pagamentosDe(o){ return Array.isArray(o.pagamentos) ? o.pagamentos : []; }
 function pagoOrc(o){ return pagamentosDe(o).reduce((s,p)=>s+(Number(p.valor)||0),0); }
-function abertoOrc(o){ return Math.max(0, +(totalOrc(o) - pagoOrc(o)).toFixed(2)); }
+function valorOrcVenda(o){
+  if(!o) return 0;
+  if(o.venda && typeof o.venda.valor==='number') return o.venda.valor;
+  if(o.venda && typeof o.venda.valor==='string') return Number(o.venda.valor)||0;
+  if(o.lancamentoId && db.financeiro){
+    const l = (db.financeiro.receitas||[]).find(x=>x.id===o.lancamentoId);
+    if(l) return Number(l.valor)||0;
+  }
+  return totalOrc(o);
+}\nfunction abertoOrc(o){ const tv = valorOrcVenda(o); return Math.max(0, +(tv - pagoOrc(o)).toFixed(2)); }
 function orcQuitado(o){ return totalOrc(o) > 0 && pagoOrc(o) >= totalOrc(o) - 0.005; }
 function statusFin(o){
   if(o.status!=='aprovado' && o.status!=='entregue') return 'na';
@@ -2508,7 +2517,7 @@ function htmlPainel(){
 
   const orcs = listaOrcamentos();
   const orcAbertos = orcs.filter(o=>o.status==='rascunho'||o.status==='enviado');
-  const valorAprov = orcs.filter(o=>o.status==='aprovado').reduce((s,o)=>s+totalOrc(o),0);
+  const valorAprov = orcs.filter(o=>o.status==='aprovado').reduce((s,o)=>s+valorOrcVenda(o),0);
   const ultOrc = orcs.slice().sort((a,b)=>(b.criadoEm||b.data||'').localeCompare(a.criadoEm||a.data||'')).slice(0,5);
 
   if(t===0){
@@ -2620,7 +2629,7 @@ function htmlPainel(){
         <div><div class="nm">${esc(o.numero||'—')} · ${esc(nomeClienteOrc(o))}</div>
           <div class="mt">${(o.itens||[]).length} item(ns) · ${fmtData(o.data)}</div></div>
         <div class="end">
-          <span class="vl-total">${brl(totalOrc(o))}</span>
+          <span class="vl-total">${brl(valorOrcVenda(o))}</span>
           ${badgeOrc(o.status)}
         </div>
       </div>`).join('') : `<div class="vazio"><span class="big">🧾</span>Nenhum orçamento criado ainda.</div>`}
@@ -2650,7 +2659,7 @@ function resumoMensalCard(){
   const orcs = listaOrcamentos();
   const doMes = orcs.filter(o=>String(o.data||'').slice(0,7)===mes);
   const aprovMes = doMes.filter(o=>o.status==='aprovado'||o.status==='entregue');
-  const fatMes = aprovMes.reduce((s,o)=>s+totalOrc(o),0);
+  const fatMes = aprovMes.reduce((s,o)=>s+valorOrcVenda(o),0);
   const meta = Number(db.meta&&db.meta.valorMensal)||0;
   const pct = meta>0 ? Math.min(100, Math.round(fatMes/meta*100)) : 0;
   const fupMes = agendaPendentes().filter(c=>String(c.followup.data).slice(0,7)===mes).length;
