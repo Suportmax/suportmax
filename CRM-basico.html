@@ -137,6 +137,9 @@ td .mt{font-size:12.3px;color:var(--suave)}
 .icon-btn.del:hover{background:#fef2f2;border-color:#fecaca}
 .icon-btn.nf-on{background:#fffbeb;border-color:#fde68a}
 .icon-btn.ok-on{background:#f0fdf4;border-color:#bbf7d0}
+.btn-whatsapp{display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #86efac;border-radius:7px;
+  background:#f0fdf4;color:#15803d;font-size:12px;font-weight:700;white-space:nowrap;transition:.15s}
+.btn-whatsapp:hover{background:#dcfce7;border-color:#4ade80}
 
 @keyframes pulseBorda{0%,100%{box-shadow:0 0 0 0 rgba(37,99,235,.35)}50%{box-shadow:0 0 0 6px rgba(37,99,235,0)}}
 .btn.pulse{animation:pulseBorda 1.8s ease-in-out infinite;border-color:#93c5fd}
@@ -4742,7 +4745,7 @@ function tabelaOrcHTML(){
         <button class="icon-btn" title="Gerar contrato de serviço" data-act="orc-contrato" data-id="${o.id}">📜</button>
         <button class="icon-btn${nfPendente(o)?' nf-on':''}" title="${podeMarcarNF(o)?'Nota fiscal (controle)':(precisaNF(o)?'Nota fiscal (controle)':'Só em orçamentos aprovados')}" data-act="orc-nf" data-id="${o.id}" style="${podeMarcarNF(o)||precisaNF(o)?'':'opacity:.35'}">📄</button>
         <button class="icon-btn" title="Duplicar" data-act="orc-duplicar" data-id="${o.id}">📋</button>
-        <button class="icon-btn" title="Enviar por WhatsApp" data-act="orc-zap" data-id="${o.id}">💬</button>
+        <button type="button" class="btn-whatsapp" title="Enviar orçamento por WhatsApp" data-act="orc-zap" data-id="${o.id}">💬 Enviar Orçamento via WhatsApp</button>
         <button class="icon-btn" title="Usar modelo de mensagem" data-act="orc-modelo" data-id="${o.id}">📝</button>
         <button class="icon-btn" title="Editar" data-act="orc-editar" data-id="${o.id}">✏️</button>
         ${abaArquivados
