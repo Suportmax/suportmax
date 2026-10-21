@@ -1846,7 +1846,7 @@ async function importarAnivGoogle(){
     if(!ev.length){ toast('Nenhum aniversário encontrado no .ics.','erro'); return; }
     db.anivGoogle = ev;
     salvar();
-    toast(${ev.length} aniversariante(s) importado(s) do Google Agenda!, 'ok');
+    toast(`${ev.length} aniversariante(s) importado(s) do Google Agenda!`, 'ok');
     if(view==='aniversarios') render();
   }catch(e){
     toast('Não foi possível importar. Verifique se o link está público ou exportado.','erro');
