@@ -733,6 +733,13 @@ body.tema-escuro .assin-area,body.tema-escuro .assin-preview{background:#0d1728;
   body{background:#fff}
   body.imprimindo .app,body.imprimindo .overlay,body.imprimindo #toast{display:none !important}
   body.imprimindo #areaImpressao{display:block !important}
+  /* Impressão pelo Ctrl+P (PC): havendo um documento na área de impressão, sai só o
+     documento — sem a interface do CRM e sem nenhum botão sobre o preço */
+  body.com-doc .app,body.com-doc .overlay,body.com-doc .login-screen,body.com-doc #toast,body.com-doc .fab-novo{display:none !important}
+  body.com-doc #areaImpressao{display:block !important}
+  /* Botões de aceitar/recusar do link público não vão para o papel */
+  .pub-acoes{display:none !important}
+  .pub-wrap{padding-bottom:20px !important}
   @page{margin:14mm}
 }
 /* Impressão em cupom (bobina térmica 80mm/58mm) */
@@ -2361,7 +2368,7 @@ const modal = document.getElementById('modal');
 const overlay2 = document.getElementById('overlay2');
 const modal2 = document.getElementById('modal2');
 function abrirModal(html, wide){ modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); }
-function fecharModal(){ overlay.classList.remove('open'); modal.classList.remove('wide'); modal.innerHTML=''; fecharModal2(); }
+function fecharModal(){ overlay.classList.remove('open'); modal.classList.remove('wide'); modal.innerHTML=''; limparEspelho(); fecharModal2(); }
 /* Segunda camada de modal (ex.: seletor de produto sobre o formulário do orçamento) */
 function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); }
 function fecharModal2(){ overlay2.classList.remove('open'); modal2.classList.remove('wide'); modal2.innerHTML=''; }
@@ -5248,6 +5255,7 @@ function orcDocHTML(o){
 
 function verOrc(id){
   const o = buscarOrc(id); if(!o) return;
+  espelharDoc(orcDocHTML(o));   /* Ctrl+P no PC imprime só o orçamento, sem botões por cima do preço */
   abrirModal(`
     <div class="modal-h"><h2>👁️ ${esc(o.numero||'Orçamento')}</h2><button type="button" class="x" data-fechar>×</button></div>
     <div class="modal-b" style="background:#f1f5f9">
@@ -5431,18 +5439,36 @@ function valorEmTexto(v){
 
 function imprimirDoc(html){
   const area = document.getElementById('areaImpressao');
+  area.dataset.espelho = '';           /* conteúdo impresso de verdade (não é só espelho) */
   area.innerHTML = `<div class="orc-doc orc-print">${html}</div>`;
-  document.body.classList.add('imprimindo');
+  document.body.classList.add('imprimindo','com-doc');
   const limpar = ()=>{ document.body.classList.remove('imprimindo'); window.removeEventListener('afterprint', limpar); };
   window.addEventListener('afterprint', limpar);
   try{ window.print(); }catch(e){ toast('Não foi possível abrir a janela de impressão.','erro'); }
   setTimeout(limpar, 1500);
 }
+/* Espelha o documento na área de impressão: assim o Ctrl+P do PC (com o orçamento
+   aberto no 👁️) imprime só o orçamento, sem botões nem a interface do CRM. */
+function espelharDoc(html){
+  const area = document.getElementById('areaImpressao');
+  if(!area) return;
+  area.dataset.espelho = '1';
+  area.innerHTML = `<div class="orc-doc orc-print">${html}</div>`;
+  document.body.classList.add('com-doc');
+}
+function limparEspelho(){
+  const area = document.getElementById('areaImpressao');
+  if(!area || area.dataset.espelho!=='1') return;
+  area.dataset.espelho = '';
+  area.innerHTML = '';
+  document.body.classList.remove('com-doc');
+}
 /* Imprime em formato de cupom (bobina). larguraCm: 8 (80mm) ou 5.8 (58mm) */
 function imprimirCupom(html, larguraCm){
   const area = document.getElementById('areaImpressao');
+  area.dataset.espelho = '';
   area.innerHTML = `<style id="estiloCupom">@page{size:${larguraCm||8}cm auto;margin:3mm}body.imprimir-cupom #areaImpressao{width:${larguraCm||8}cm;max-width:${larguraCm||8}cm}</style><div class="orc-doc orc-print">${html}</div>`;
-  document.body.classList.add('imprimindo','imprimir-cupom');
+  document.body.classList.add('imprimindo','imprimir-cupom','com-doc');
   const limpar = ()=>{
     document.body.classList.remove('imprimindo','imprimir-cupom');
     const s = document.getElementById('estiloCupom'); if(s) s.remove();
@@ -6066,6 +6092,7 @@ function osDocHTML(os){
 }
 function verOrdem(id){
   const os = buscarOrdem(id); if(!os) return;
+  espelharDoc(osDocHTML(os));   /* Ctrl+P no PC imprime só a OS, sem botões por cima do preço */
   abrirModal(`
     <div class="modal-h"><h2>🛠️ Ordem de serviço</h2><button type="button" class="x" data-fechar>×</button></div>
     <div class="modal-b">
@@ -8147,6 +8174,7 @@ function imprimirRelatorio(){
     <td style="text-align:right">${brl(valorVendaOS(o))}</td>
   </tr>`).join('');
   const area = document.getElementById('areaImpressao');
+  area.dataset.espelho = '';
   area.innerHTML = `<div class="orc-doc orc-print">
     <div class="topo">
       <div class="marca-doc">
@@ -8180,7 +8208,7 @@ function imprimirRelatorio(){
     </table>` : ''}
     <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())} · Relatório de orçamentos e vendas</div></div>
   </div>`;
-  document.body.classList.add('imprimindo');
+  document.body.classList.add('imprimindo','com-doc');
   const limpar = ()=>{ document.body.classList.remove('imprimindo'); window.removeEventListener('afterprint', limpar); };
   window.addEventListener('afterprint', limpar);
   try{ window.print(); }catch(e){ toast('Não foi possível abrir a janela de impressão.','erro'); }
