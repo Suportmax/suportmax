@@ -7035,12 +7035,12 @@ function listaFinFiltrada(){
 }
 function tabelaFinHTML(){
   const l = listaFinFiltrada();
-  const totalGeral = l.reduce((s,o)=>s+totalOrc(o),0);
+  const totalGeral = l.reduce((s,o)=>s+(typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o)),0);
   if(!listaOrcamentos().filter(o=>statusFin(o)!=='na').length)
     return `<tr><td colspan="7"><div class="vazio"><span class="big">💰</span>Nenhum orçamento aprovado ainda.<br>Aprove um orçamento para acompanhar o recebimento.</div></td></tr>`;
   if(!l.length) return `<tr><td colspan="7"><div class="vazio"><span class="big">🔍</span>Nenhum título encontrado.</div></td></tr>`;
   return l.map(o=>{
-    const st = statusFin(o), ab = abertoOrc(o), pg = pagoOrc(o), tot = totalOrc(o);
+    const st = statusFin(o), ab = abertoOrc(o), pg = pagoOrc(o), tot = (typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o));
     const venc = vencidoOrc(o);
     const rot = st==='pago'?'✅ Quitado':(st==='parcial'?'🟡 Parcial':'🔵 Em aberto');
     return `<tr>
@@ -7071,7 +7071,7 @@ function formPagamento(orcId){
   <div class="modal-h"><h2>💵 Registrar pagamento</h2><button type="button" class="x" data-fechar>×</button></div>
   <div class="modal-b">
     <div class="info-orc">${esc(o.numero||'—')} · ${esc(nomeClienteOrc(o))}</div>
-    <div class="resumo-mini">Total ${brl(totalOrc(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(ab)}</b></div>
+    <div class="resumo-mini">Total ${brl(typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o))} · Recebido ${brl(pagoOrc(o))} · <b>Em aberto ${brl(ab)}</b></div>
     <form id="fPgto">
       <div class="linha-campos">
         <div class="campo"><label>Valor (R$)</label><input type="number" step="0.01" min="0" name="valor" value="${ab.toFixed(2)}" required></div>
