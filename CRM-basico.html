@@ -7599,6 +7599,7 @@ function htmlRelatorios(){
     if(!lucroMeses[chave]) return;
     const rec = totalOrc(o);
     const cus = custoOrc(o);
+    const rec = typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o);
     lucroMeses[chave].receita += rec;
     lucroMeses[chave].custo += cus;
     lucroMeses[chave].lucro += (rec - cus);
@@ -7627,7 +7628,7 @@ function htmlRelatorios(){
   /* Totais por status */
   const porStatus = STATUS_ORC.map(s=>{
     const lista = os.filter(o=>o.status===s.id);
-    return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a+totalOrc(o),0) };
+    return { ...s, qtd:lista.length, valor:lista.reduce((a,o)=>a+(typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o)),0) };
   });
 
   /* Comissão e meta */
@@ -7635,7 +7636,7 @@ function htmlRelatorios(){
   const valorComissao = totalAprov * comissaoPct/100;
   const metaMensal = Number((db.meta||{}).valorMensal)||0;
   const mesAtualChave = new Date().getFullYear()+'-'+String(new Date().getMonth()+1).padStart(2,'0');
-  const faturamentoMes = listaOrcamentos().filter(o=>o.status==='aprovado' && String(o.data||'').slice(0,7)===mesAtualChave).reduce((s,o)=>s+totalOrc(o),0);
+  const faturamentoMes = listaOrcamentos().filter(o=>o.status==='aprovado' && String(o.data||'').slice(0,7)===mesAtualChave).reduce((s,o)=>s+(typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o)),0);
   const metaPct = metaMensal>0 ? Math.min(100, Math.round(faturamentoMes/metaMensal*100)) : 0;
 
   const opcoesStatus = ['<option value="todos">Todos os status</option>', ...STATUS_ORC.map(s=>`<option value="${s.id}" ${relFiltro.status===s.id?'selected':''}>${s.label}</option>`)].join('');
@@ -7748,7 +7749,7 @@ function htmlRelatorios(){
         <div class="rel-linha">
           <span class="rel-nome">${esc(o.numero||'')} · ${esc(nomeClienteOrc(o))}</span>
           ${seloValidade(o)}
-          <b class="rel-valor">${brl(totalOrc(o))}</b>
+          <b class="rel-valor">${brl((typeof valorOrcVenda==='function'?valorOrcVenda(o):totalOrc(o)))}</b>
         </div>`).join('')}</div>` : `<div class="vazio"><span class="big">✅</span>Nenhum orçamento vencendo nos próximos dias.</div>`; })()}
     </div>
   </div>
