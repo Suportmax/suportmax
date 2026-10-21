@@ -1860,7 +1860,9 @@ async function importarAnivGoogle(){
   }catch(e){
     toast('Não foi possível importar. Verifique se o link está público ou exportado.','erro');
   }
-}\n\n/* ---------- CPF / CNPJ ---------- */
+}
+
+/* ---------- CPF / CNPJ ---------- */
 function soDigitos(s){ return String(s==null?'':s).replace(/\D/g,''); }
 function mascaraCPF(s){
   const d = soDigitos(s).slice(0,11);
