@@ -10102,9 +10102,12 @@ function restaurarBackup(id){
 }
 function talvezAvisarBackup(){
   if(!backupVencido()) return;
-  const quando = db.ultimoBackup ? `há ${Math.floor(diasDesdeUltimoBackup())} dia(s)` : 'nunca';
+  const dias = db.ultimoBackup ? Math.floor(diasDesdeUltimoBackup()) : 0;
+  const aviso = db.ultimoBackup
+    ? `💾 Já faz ${dias} ${dias===1?'dia':'dias'} que você não baixa um backup dos seus dados.`
+    : '💾 Você ainda não baixou nenhum backup dos seus dados.';
   setTimeout(()=>{
-    if(confirm(`💾 Faz ${quando} que você não baixa um backup dos seus dados.\n\nDeseja baixar uma cópia agora?`)) baixarBackupAgora();
+    if(confirm(`${aviso}\n\nDeseja baixar uma cópia agora?`)) baixarBackupAgora();
   }, 2600);
   const bc = document.getElementById('btnBackupTopo');
   if(bc) bc.classList.add('pulse');
