@@ -17,8 +17,8 @@ O endpoint exige sessão autenticada e perfil `admin` em `crm_members`. O CRM fa
 
 ## Regra aplicada
 
-Markup padrão: 65% sobre o custo. Fórmula: `custo × (1 + markup/100)`. O markup pode ser alterado no modal de importação e fica salvo junto às preferências da conta. Contas que ainda tinham o padrão anterior de 40% passam a mostrar 65%; outros percentuais salvos são mantidos.
+Markup padrão: 65% sobre o custo. O custo importado soma o valor unitário da NF-e ao frete, seguro e outras despesas rateadas pela quantidade, descontando abatimentos. Despesas variáveis sobre venda (como taxas) podem ser informadas no modal; o padrão é 0%. Fórmula do preço mínimo: `custo total × (1 + markup/100) ÷ (1 - despesas sobre venda/100)`. Markup e despesas variáveis ficam salvos nas preferências da conta. Contas que ainda tinham o padrão anterior de 40% passam a mostrar 65%; outros percentuais salvos são mantidos.
 
-Quando há referências online, o CRM usa a mediana dos preços encontrados como sugestão, mas nunca abaixo do custo acrescido do markup. Ao atualizar um produto existente, preserva o preço atual se ele já for maior que a sugestão. O usuário pode revisar os preços e as fontes antes de concluir a importação.
+Quando há referências online, o CRM usa a mediana dos preços encontrados como sugestão, mas nunca abaixo do preço mínimo calculado com custo, markup e despesas variáveis. Ao atualizar um produto existente, preserva o preço atual se ele já for maior que a sugestão. O usuário pode revisar os preços e as fontes antes de concluir a importação.
 
 Os preços online são referências de anúncios; confirme se o modelo, estado, frete, taxas e condições comerciais correspondem ao produto que será vendido.

@@ -4,7 +4,7 @@
    - Demais requisições do mesmo site: cache primeiro, atualizando em segundo plano.
    - Requisições para outros domínios (ex.: Supabase) nunca são interceptadas. */
 
-const CACHE = 'suportmax-crm-v42';
+const CACHE = 'suportmax-crm-v43';
 const SDK_SUPABASE = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
 const ESSENCIAIS = ['./', './CRM-basico.html', './index.html', './manifest.webmanifest', './crm-icon.svg'];
 
