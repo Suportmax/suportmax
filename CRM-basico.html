@@ -745,7 +745,7 @@ body.tema-escuro .atalho-linha kbd{background:#0f172a;color:#e2e8f0}
 .link-btn{color:var(--prim);font-weight:600;font-size:12.5px}
 .link-btn:hover{text-decoration:underline}
 .itens-wrap{overflow-x:auto;border:1px solid var(--borda);border-radius:10px;background:#fff;container-type:inline-size}
-table.itens{width:100%;min-width:790px;table-layout:fixed}
+table.itens{width:100%;min-width:650px;table-layout:fixed}
 table.itens th{padding:9px 10px;font-size:11px}
 table.itens td{padding:7px 8px;vertical-align:middle}
 table.itens input,table.itens select{width:100%;padding:7px 9px;border:1px solid var(--borda);border-radius:8px;outline:none;background:#fff;min-width:0}
@@ -5258,8 +5258,7 @@ function itemOrcHTML(it){
   const subRot = p ? `${brl(p.preco)}` : 'Buscar no catálogo';
   return `<tr data-item="${it.id}">
     <td data-label="Produto / serviço"><div style="display:flex;gap:6px;align-items:center">${p&&p.foto?`<img class="cat-foto" data-foto-item src="${p.foto}" alt="">`:'<span data-foto-item></span>'}<button type="button" class="prod-pick ${p?'':'vazio'}" data-campo="produto" data-prod-id="${esc(it.produtoId||'')}" title="${p?esc(p.nome):'Escolher produto do catálogo'}"><span class="pp-nome">${rotulo}</span><span class="pp-sub">${subRot}</span><span class="pp-seta">🔍</span></button></div></td>
-    <td data-label="Descrição"><input data-campo="desc" maxlength="160" value="${esc(it.desc)}" placeholder="Descrição do item"></td>
-    <td class="col-qtd" data-label="Qtd"><input data-campo="qtd" type="number" min="0" step="0.01" value="${Number(it.qtd)||0}"></td>
+    <td class="col-qtd" data-label="Qtd"><input data-campo="qtd" type="number" min="0" step="1" value="${Number(it.qtd)||0}"></td>
     <td class="col-unit" data-label="Valor unit. R$"><input data-campo="unit" type="number" min="0" step="0.01" value="${Number(it.unit)||0}"></td>
     <td class="col-desc-item" data-label="Desc. item">
       <div style="display:flex;gap:4px;align-items:center">
@@ -5336,7 +5335,7 @@ function formOrcamento(id){
             <div class="itens-wrap">
               <table class="itens">
                 <thead><tr>
-                  <th>Produto / serviço</th><th>Descrição</th>
+                  <th>Produto / serviço</th>
                   <th class="col-qtd num">Qtd</th><th class="col-unit num">Valor unit. R$</th>
                   <th class="col-desc-item num">Desc. item</th>
                   <th class="col-tot num">Total</th><th class="col-rm"></th>
@@ -5353,9 +5352,6 @@ function formOrcamento(id){
               <div class="titulo">📦 Novo produto / serviço</div>
               <div class="form-grid" style="gap:10px">
                 <div class="campo full"><label>Nome * <span class="req">*</span></label><input id="npNome" maxlength="100" placeholder="Ex.: Serviço de instalação"></div>
-                <div class="campo"><label>Preço padrão (R$)</label><input id="npPreco" type="number" min="0" step="0.01"></div>
-                <div class="campo"><label>Unidade</label><select id="npUn">${UN.map(u=>`<option>${u}</option>`).join('')}</select></div>
-                <div class="campo full"><label>Descrição padrão (texto do item)</label><input id="npDesc" maxlength="160" placeholder="O que aparecerá na linha do orçamento"></div>
               </div>
               <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end">
                 <button type="button" class="btn ghost sm" id="npCancelar">Cancelar</button>
@@ -5420,7 +5416,6 @@ function formOrcamento(id){
   function lerItem(tr){
     const it = v.itens.find(x=>x.id===tr.dataset.item);
     if(!it) return null;
-    it.desc = tr.querySelector('[data-campo="desc"]').value;
     it.qtd = Math.max(0, Number(tr.querySelector('[data-campo="qtd"]').value)||0);
     it.unit = Math.max(0, Number(tr.querySelector('[data-campo="unit"]').value)||0);
     it.descItem = Math.max(0, Number(tr.querySelector('[data-campo="descItem"]').value)||0);
@@ -5435,7 +5430,6 @@ function formOrcamento(id){
 
   tbody.addEventListener('input', e=>{
     const tr = e.target.closest('tr[data-item]'); if(!tr) return;
-    if(e.target.dataset.campo==='desc') tr.dataset.previa = '0';
     const it = lerItem(tr); if(!it) return;
     const dv = itemDescV(it);
     tr.querySelector('[data-tot]').innerHTML = brl(itemTotal(it)) + (dv>0?`<div class="mt" style="color:var(--erro)">− ${brl(dv)}</div>`:'');
@@ -5478,11 +5472,7 @@ function formOrcamento(id){
       btn.querySelector('.pp-sub').textContent = p ? brl(p.preco) : 'Buscar no catálogo';
     }
     if(p){
-      if(tr.dataset.previa!=='0'){
-        it.desc = p.desc || p.nome;
-        tr.querySelector('[data-campo="desc"]').value = it.desc;
-        tr.dataset.previa = '1';
-      }
+      it.desc = p.nome;
       it.unit = Math.max(0, Number(p.preco)||0);
       tr.querySelector('[data-campo="unit"]').value = it.unit;
       const dv = itemDescV(it);
@@ -5511,7 +5501,7 @@ function formOrcamento(id){
     repintarItens();
     const rows = tbody.querySelectorAll('tr[data-item]');
     const last = rows[rows.length-1];
-    if(last) last.querySelector('[data-campo="desc"]').focus();
+    if(last) last.querySelector('[data-campo="qtd"]').focus();
   };
 
   descontoEl.addEventListener('input', atualizarTotais);
@@ -5572,9 +5562,9 @@ function formOrcamento(id){
     if(!nome){ toast('Informe o nome do produto/serviço.','erro'); return; }
     const p = {
       id:uid(), nome,
-      preco: Math.max(0, Number(document.getElementById('npPreco').value)||0),
-      un: document.getElementById('npUn').value,
-      desc: document.getElementById('npDesc').value.trim()
+      preco: 0,
+      un: 'un',
+      desc: ''
     };
     listaProdutos().push(p); salvar();
     const alvo = linhaNovoProd || tbody.querySelector('tr[data-item]');
@@ -5586,7 +5576,7 @@ function formOrcamento(id){
         it.unit = p.preco;
       }
     }
-    ['npNome','npPreco','npDesc'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('npNome').value='';
     painelProd.hidden = true;
     linhaNovoProd = null;
     repintarItens();
@@ -6228,7 +6218,7 @@ function formOrdem(id){
             <div class="itens-wrap">
               <table class="itens">
                 <thead><tr>
-                  <th>Produto / serviço</th><th>Descrição</th>
+                  <th>Produto / serviço</th>
                   <th class="col-qtd num">Qtd</th><th class="col-unit num">Valor unit. R$</th>
                   <th class="col-desc-item num">Desc. item</th>
                   <th class="col-tot num">Total</th><th class="col-rm"></th>
@@ -6244,9 +6234,6 @@ function formOrdem(id){
               <div class="titulo">📦 Novo produto / serviço</div>
               <div class="form-grid" style="gap:10px">
                 <div class="campo full"><label>Nome * <span class="req">*</span></label><input id="npNomeOS" maxlength="100" placeholder="Ex.: Serviço de instalação"></div>
-                <div class="campo"><label>Preço padrão (R$)</label><input id="npPrecoOS" type="number" min="0" step="0.01"></div>
-                <div class="campo"><label>Unidade</label><select id="npUnOS">${UN.map(u=>`<option>${u}</option>`).join('')}</select></div>
-                <div class="campo full"><label>Descrição padrão (texto do item)</label><input id="npDescOS" maxlength="160"></div>
               </div>
               <div style="margin-top:10px;display:flex;gap:8px;justify-content:flex-end">
                 <button type="button" class="btn ghost sm" id="npCancelarOS">Cancelar</button>
@@ -6309,7 +6296,6 @@ function formOrdem(id){
   const valServEl = modal.querySelector('[name="valor"]');
   function lerItemOS(tr){
     const it = v.itens.find(x=>x.id===tr.dataset.item); if(!it) return null;
-    it.desc = tr.querySelector('[data-campo="desc"]').value;
     it.qtd = Math.max(0, Number(tr.querySelector('[data-campo="qtd"]').value)||0);
     it.unit = Math.max(0, Number(tr.querySelector('[data-campo="unit"]').value)||0);
     it.descItem = Math.max(0, Number(tr.querySelector('[data-campo="descItem"]').value)||0);
@@ -6329,7 +6315,6 @@ function formOrdem(id){
   function repintarItensOS(){ tbodyOS.innerHTML = v.itens.map(itemOrcHTML).join(''); atualizarTotalOS(); }
   tbodyOS.addEventListener('input', e=>{
     const tr = e.target.closest('tr[data-item]'); if(!tr) return;
-    if(e.target.dataset.campo==='desc') tr.dataset.previa = '0';
     const it = lerItemOS(tr); if(!it) return;
     const dv = itemDescV(it);
     tr.querySelector('[data-tot]').innerHTML = brl(itemTotal(it)) + (dv>0?`<div class="mt" style="color:var(--erro)">− ${brl(dv)}</div>`:'');
@@ -6369,11 +6354,7 @@ function formOrdem(id){
       btn.querySelector('.pp-sub').textContent = p ? brl(p.preco) : 'Buscar no catálogo';
     }
     if(p){
-      if(tr.dataset.previa!=='0'){
-        it.desc = p.desc || p.nome;
-        tr.querySelector('[data-campo="desc"]').value = it.desc;
-        tr.dataset.previa = '1';
-      }
+      it.desc = p.nome;
       it.unit = Math.max(0, Number(p.preco)||0);
       tr.querySelector('[data-campo="unit"]').value = it.unit;
       const dv = itemDescV(it);
@@ -6410,9 +6391,9 @@ function formOrdem(id){
     if(!nome){ toast('Informe o nome do produto/serviço.','erro'); return; }
     const p = {
       id:uid(), nome,
-      preco: Math.max(0, Number(document.getElementById('npPrecoOS').value)||0),
-      un: document.getElementById('npUnOS').value,
-      desc: document.getElementById('npDescOS').value.trim()
+      preco: 0,
+      un: 'un',
+      desc: ''
     };
     listaProdutos().push(p); salvar();
     const alvo = linhaNovoProdOS || tbodyOS.querySelector('tr[data-item]');
@@ -6420,7 +6401,7 @@ function formOrdem(id){
       const it = v.itens.find(x=>x.id===alvo.dataset.item);
       if(it){ it.produtoId = p.id; it.desc = p.desc || p.nome; it.unit = p.preco; }
     }
-    ['npNomeOS','npPrecoOS','npDescOS'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('npNomeOS').value='';
     painelProdOS.hidden = true;
     linhaNovoProdOS = null;
     repintarItensOS();
@@ -7051,14 +7032,14 @@ function formProduto(id){
       <div class="modal-b">
         <div class="form-grid">
           <div class="campo full"><label>Nome <span class="req">*</span></label><input name="nome" required maxlength="100" value="${esc(v.nome)}" placeholder="Ex.: Formatação com backup" autofocus enterkeyhint="next"></div>
-          <div class="campo"><label>Custo (R$)</label><input name="custo" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(v.custo)||0}"></div>
-          <div class="campo"><label>Preço de venda (R$)</label><input name="preco" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(v.preco)||0}"></div>
-          <details class="prod-avancado" ${v.fornecedorId||v.desc||v.foto?'open':''}>
-            <summary>Unidade, fornecedor, descrição e foto <span class="mini">(opcional)</span></summary>
+          <details class="prod-avancado" ${Number(v.custo)>0||Number(v.preco)>0||v.fornecedorId||v.foto?'open':''}>
+            <summary>Dados adicionais <span class="mini">(preço, custo, unidade, fornecedor e foto)</span></summary>
             <div class="prod-avancado-conteudo">
+              <div class="campo"><label>Custo (R$)</label><input name="custo" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(v.custo)||0}"></div>
+              <div class="campo"><label>Preço de venda (R$)</label><input name="preco" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(v.preco)||0}"></div>
               <div class="campo"><label>Unidade</label><select name="un">${UN.map(u=>`<option ${v.un===u?'selected':''}>${u}</option>`).join('')}</select></div>
               <div class="campo"><label>Fornecedor</label><select name="fornecedorId"><option value="">— Nenhum —</option>${listaFornecedores().map(f=>`<option value="${f.id}" ${v.fornecedorId===f.id?'selected':''}>${esc(f.nome)}</option>`).join('')}</select></div>
-              <div class="campo full"><label>Descrição padrão para orçamento</label><input name="desc" maxlength="160" value="${esc(v.desc||'')}"></div>
+              <div class="campo full"><div class="info-resumo" id="resMargem"></div></div>
               <div class="campo full">
                 <label>Foto do item</label>
                 <div class="foto-prod">
@@ -7073,7 +7054,6 @@ function formProduto(id){
               </div>
             </div>
           </details>
-          <div class="campo full"><div class="info-resumo" id="resMargem"></div></div>
         </div>
       </div>
       <div class="modal-f">
@@ -7148,7 +7128,7 @@ function formProduto(id){
       un:String(f.get('un')||'un'),
       custo:Math.max(0, Number(f.get('custo'))||0),
       preco:Math.max(0, Number(f.get('preco'))||0),
-      desc:String(f.get('desc')||'').trim(),
+      desc:p?String(p.desc||'').trim():'',
       fornecedorId:String(f.get('fornecedorId')||''),
       foto:fotoAtual
     };
@@ -8781,11 +8761,13 @@ function catalogoProdutos(){
         <div class="titulo" id="prodTitulo">＋ Novo produto / serviço</div>
         <div class="form-grid" style="gap:10px">
           <div class="campo full"><label>Nome * <span class="req">*</span></label><input id="pNome" maxlength="100" placeholder="Ex.: Convite impresso, Consultoria mensal, Hora técnica..."></div>
-          <div class="campo"><label>Preço padrão (R$)</label><input id="pPreco" type="number" min="0" step="0.01"></div>
-          <div class="campo"><label>Unidade</label>
-            <select id="pUn">${['un','cx','kg','m','m²','h','hora','serviço','pacote'].map(u=>`<option>${u}</option>`).join('')}</select>
-          </div>
-          <div class="campo full"><label>Descrição padrão (texto que vai no orçamento)</label><input id="pDesc" maxlength="160" placeholder="Ex.: Impressão colorida frente e verso em papel couché 150g"></div>
+          <details class="prod-avancado" id="prodExtras">
+            <summary>Dados adicionais <span class="mini">(preço e unidade)</span></summary>
+            <div class="prod-avancado-conteudo">
+              <div class="campo"><label>Preço padrão (R$)</label><input id="pPreco" type="number" inputmode="decimal" min="0" step="0.01"></div>
+              <div class="campo"><label>Unidade</label><select id="pUn">${['un','cx','kg','m','m²','h','hora','serviço','pacote'].map(u=>`<option>${u}</option>`).join('')}</select></div>
+            </div>
+          </details>
         </div>
         <div style="margin-top:11px;display:flex;gap:8px;justify-content:flex-end">
           <button type="button" class="btn ghost sm" id="pCancelar" hidden>Cancelar edição</button>
@@ -8804,8 +8786,9 @@ function catalogoProdutos(){
 
   function limparForm(){
     editando = null;
-    ['pNome','pPreco','pDesc'].forEach(i=>document.getElementById(i).value='');
+    ['pNome','pPreco'].forEach(i=>document.getElementById(i).value='');
     document.getElementById('pUn').selectedIndex = 0;
+    document.getElementById('prodExtras').open = false;
     document.getElementById('pSalvar').textContent = '＋ Adicionar ao catálogo';
     document.getElementById('pCancelar').hidden = true;
     document.getElementById('prodTitulo').textContent = '＋ Novo produto / serviço';
@@ -8840,7 +8823,7 @@ function catalogoProdutos(){
       nome,
       preco: Math.max(0, Number(document.getElementById('pPreco').value)||0),
       un: document.getElementById('pUn').value,
-      desc: document.getElementById('pDesc').value.trim()
+      desc: editando ? String(editando.desc||'').trim() : ''
     };
     if(editando){ Object.assign(editando, dados); toast('Produto atualizado.'); }
     else{ listaProdutos().push({id:uid(), ...dados}); toast('Produto adicionado ao catálogo.'); }
@@ -8857,7 +8840,7 @@ function catalogoProdutos(){
       document.getElementById('pNome').value = p.nome;
       document.getElementById('pPreco').value = (Number(p.preco)||0);
       document.getElementById('pUn').value = p.un || 'un';
-      document.getElementById('pDesc').value = p.desc||'';
+      document.getElementById('prodExtras').open = true;
       document.getElementById('pSalvar').textContent = '💾 Salvar alterações';
       document.getElementById('pCancelar').hidden = false;
       document.getElementById('prodTitulo').textContent = '✏️ Editando: ' + p.nome;
