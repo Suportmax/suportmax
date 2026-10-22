@@ -6975,6 +6975,8 @@ function abrirImportacaoNFeProdutos(){
       <div class="painel-inline" style="margin-bottom:12px"><div class="campo"><label>Chave de acesso da NF-e (44 dígitos)</label><input id="nfeChaveConsulta" inputmode="numeric" maxlength="44" placeholder="Digite ou cole a chave"></div><button type="button" class="btn ghost" id="nfeConsultarChave">Consultar situação na SEFAZ</button><div class="mini">A consulta pública não importa os itens. Para obter o XML completo, use o arquivo enviado pelo fornecedor ou a distribuição oficial de DF-e, quando você for destinatário autorizado.</div></div>
       <div class="campo"><label>Selecionar XML para importar produtos da NF-e</label><input id="nfeXmlArquivo" type="file" accept=".xml,text/xml,application/xml"></div>
       <label class="mini" style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="nfeImportarEstoque" type="checkbox" checked> Somar a quantidade da nota ao estoque dos produtos</label>
+      <div class="linha-campos" style="margin-top:10px;align-items:end"><div class="campo"><label>Markup mínimo sobre o custo (%)</label><input id="nfeMarkup" type="number" min="0" max="300" step="1" value="${Math.max(0,Math.min(300,Number(db.prefs?.markupImportacao??40)||0))}"></div><label class="mini" style="display:flex;gap:8px;align-items:center"><input id="nfeConsultarMercado" type="checkbox" checked> Consultar preços online (até 20 produtos por nota)</label></div>
+      <div class="mini">Preço base = custo × (1 + markup). A consulta do Google Shopping é uma referência; confira modelo, condição, frete e taxas antes de vender. Cada produto pesquisado usa uma busca do serviço.</div>
       <div id="nfeXmlResumo" style="margin-top:12px"></div>
       <div id="nfeFornecedorXml" style="margin-top:8px"></div>
       <button type="button" class="btn ghost sm" id="nfeCadastrarFornecedor" style="display:none;margin-top:8px">🚚 Cadastrar/atualizar fornecedor com dados do XML</button>
@@ -6994,6 +6996,17 @@ function abrirImportacaoNFeProdutos(){
   };
   const arquivo=document.getElementById('nfeXmlArquivo'), resumo=document.getElementById('nfeXmlResumo'), itensEl=document.getElementById('nfeXmlItens'), erro=document.getElementById('nfeXmlErro'), btn=document.getElementById('nfeXmlImportar');
   let produtosXml=[], fornecedorXml=null, fornecedorIdXml='';
+  const markupInput=document.getElementById('nfeMarkup');
+  const markupAtual=()=>Math.max(0,Math.min(300,Number(markupInput.value)||0));
+  const calcularPrecoSugerido=x=>{
+    const markup=markupAtual(), piso=Number((Number(x.custo||0)*(1+markup/100)).toFixed(2));
+    const refs=(x.referenciasMercado||[]).map(r=>Number(r.preco)||0).filter(n=>n>0).sort((a,b)=>a-b);
+    const mediana=refs.length?(refs.length%2?refs[(refs.length-1)/2]:(refs[refs.length/2-1]+refs[refs.length/2])/2):0;
+    x.precoMercado=Number(mediana.toFixed(2));
+    x.precoSugerido=Number(Math.max(piso,mediana).toFixed(2));
+  };
+  const renderItensXml=()=>{itensEl.innerHTML=produtosXml.map((x,i)=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:9px;border-bottom:1px solid var(--borda);font-size:12.5px"><input type="checkbox" data-nfe-linha="${i}" checked style="margin-top:3px"><span style="flex:1;min-width:0"><b>${esc(x.nome)}</b><span class="mini"> · ${esc(x.codigo)} · ${x.qtd} ${esc(x.un)} × custo ${brl(x.custo)} · venda sugerida ${brl(x.precoSugerido)}</span><br><span class="mini">NCM ${esc(x.ncm||'—')} · CEST ${esc(x.cest||'—')} · CFOP ${esc(x.cfop||'—')} · CSOSN 400 · Origem ${esc(x.origem||'—')}${x.precoMercado?` · mediana online ${brl(x.precoMercado)}`:''}</span>${(x.referenciasMercado||[]).slice(0,3).map(r=>`<div class="mini"><a href="${esc(r.link||'#')}" target="_blank" rel="noopener">${esc(r.loja||'Loja')} · ${esc(r.titulo||'Produto')} · ${brl(r.preco)}</a></div>`).join('')}</span></label>`).join('');};
+  markupInput.onchange=()=>{db.prefs.markupImportacao=markupAtual();salvar();produtosXml.forEach(calcularPrecoSugerido);renderItensXml();};
   const fornecedorHtml=f=>`<div class="mini" style="margin-top:6px">${esc([f.documento&&'CNPJ/CPF '+f.documento, f.ie&&'IE '+f.ie, f.im&&'IM '+f.im, f.endereco, [f.municipio,f.uf].filter(Boolean).join('/'), f.cep&&'CEP '+f.cep, f.telefone&&'Fone '+f.telefone, f.crt&&'CRT '+f.crt].filter(Boolean).join(' · ')||'Sem dados adicionais no XML')}</div>`;
   const salvarFornecedorDoXml=(notificar=true)=>{
     if(!fornecedorXml||!fornecedorXml.nome) return '';
@@ -7035,9 +7048,28 @@ function abrirImportacaoNFeProdutos(){
         return {nome:value('xProd'),codigo:value('cProd'),gtin:(value('cEAN')||value('cEANTrib')).replace(/^SEM GTIN$/i,''),un:value('uCom')||'un',custo:Number(String(value('vUnCom')).replace(',','.'))||0,ncm:value('NCM'),cest:value('CEST'),cfop:value('CFOP'),csosn:'400',origem:nested(icms,'orig'),qtd:Number(String(value('qCom')).replace(',','.'))||0,fornecedorNome:emitNome,fornecedorDoc:emitDoc};
       }).filter(x=>x&&x.nome);
       if(!produtosXml.length) throw new Error('A nota não contém produtos importáveis.');
+      produtosXml.forEach(calcularPrecoSugerido);
+      let avisoMercado='';
+      if(document.getElementById('nfeConsultarMercado').checked){
+        btn.disabled=true; btn.textContent='Consultando preços online…';
+        try{
+          const {data,error:fnError}=await crmClient.functions.invoke('precos-produtos',{body:{itens:produtosXml.slice(0,20).map((x,i)=>({indice:i,nome:x.nome,gtin:x.gtin||''}))}});
+          if(fnError) throw fnError;
+          const resultados=Array.isArray(data?.itens)?data.itens:[];
+          resultados.forEach(r=>{if(produtosXml[r.indice])produtosXml[r.indice].referenciasMercado=Array.isArray(r.resultados)?r.resultados:[];});
+          produtosXml.forEach(calcularPrecoSugerido);
+          const pesquisados=resultados.filter(r=>r.resultados?.length).length;
+          avisoMercado=pesquisados?`${pesquisados} produto(s) com referência online.`:'Nenhum preço online confiável encontrado; foi aplicado o markup mínimo.';
+          if(data?.limiteExcedido) avisoMercado+=` A consulta online foi limitada a ${data.limite} produtos; os demais usam apenas o markup.`;
+        }catch(e){
+          avisoMercado='Consulta online indisponível; usando o markup mínimo. Configure a Edge Function e a chave SERPAPI_API_KEY no Supabase.';
+          console.warn('Consulta online de preços indisponível.',e);
+        }finally{btn.textContent='Importar selecionados';}
+      }
       resumo.innerHTML=`<div class="selo info">${produtosXml.length} item(ns) · ${esc(emitNome||'Fornecedor não identificado')}${chave?` · chave ${esc(chave)}`:''}</div>`;
+      resumo.innerHTML+=`<div class="mini" style="margin-top:6px">${avisoMercado||'Preço calculado somente com o markup mínimo.'} Markup: ${markupAtual()}%.</div>`;
       if(fornecedorXml?.nome){document.getElementById('nfeFornecedorXml').innerHTML=`<b>Fornecedor da nota: ${esc(fornecedorXml.nome)}</b>${fornecedorHtml(fornecedorXml)}`; document.getElementById('nfeCadastrarFornecedor').style.display='inline-flex';}
-      itensEl.innerHTML=produtosXml.map((x,i)=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:9px;border-bottom:1px solid var(--borda);font-size:12.5px"><input type="checkbox" data-nfe-linha="${i}" checked style="margin-top:3px"><span style="flex:1;min-width:0"><b>${esc(x.nome)}</b><span class="mini"> · ${esc(x.codigo)} · ${x.qtd} ${esc(x.un)} × ${brl(x.custo)}</span><br><span class="mini">NCM ${esc(x.ncm||'—')} · CEST ${esc(x.cest||'—')} · CFOP ${esc(x.cfop||'—')} · CSOSN 400 · Origem ${esc(x.origem||'—')}</span></span></label>`).join('');
+      renderItensXml();
       btn.disabled=false;
     }catch(e){ produtosXml=[]; erro.textContent=e.message||'Falha ao ler o XML.'; }
   };
@@ -7046,11 +7078,13 @@ function abrirImportacaoNFeProdutos(){
     if(!selecionados.length){ erro.textContent='Selecione pelo menos um item.'; return; }
     let novos=0, atualizados=0;
     const importarEstoque=document.getElementById('nfeImportarEstoque').checked;
+    db.prefs.markupImportacao=markupAtual();
     const fornecedorId=fornecedorIdXml||salvarFornecedorDoXml(false);
     selecionados.forEach(x=>{
       const normal=s=>String(s||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
       const p=listaProdutos().find(y=>(x.gtin&&y.gtin&&x.gtin===y.gtin)||normal(y.nome)===normal(x.nome));
-      const dados={nome:x.nome,codigo:x.codigo,gtin:x.gtin,un:x.un,custo:x.custo,ncm:x.ncm.replace(/\D/g,''),cest:x.cest.replace(/\D/g,''),cfop:x.cfop.replace(/\D/g,''),csosn:'400',origem:x.origem};
+      calcularPrecoSugerido(x);
+      const dados={nome:x.nome,codigo:x.codigo,gtin:x.gtin,un:x.un,custo:x.custo,preco:Number(p?.preco||0)>Number(x.precoSugerido||0)?Number(p.preco):Number(x.precoSugerido||0),ncm:x.ncm.replace(/\D/g,''),cest:x.cest.replace(/\D/g,''),cfop:x.cfop.replace(/\D/g,''),csosn:'400',origem:x.origem};
       if(p){ const unidadeAnterior=p.un; Object.assign(p,dados); if(fornecedorId)p.fornecedorId=fornecedorId; if(importarEstoque){const saldo=Number(p.estoque)||0;p.estoque=p.estoque==null||String(unidadeAnterior||'un').toLowerCase()!==String(x.un||'un').toLowerCase()?x.qtd:saldo+x.qtd;} atualizados++; }
       else{ listaProdutos().push({id:uid(),preco:0,desc:'',fornecedorId,...dados,...(importarEstoque?{estoque:x.qtd}: {})}); novos++; }
     });

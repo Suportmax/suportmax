@@ -1,0 +1,4 @@
+project_id = "suportmax"
+
+[functions.precos-produtos]
+verify_jwt = true
