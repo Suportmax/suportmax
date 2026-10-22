@@ -600,6 +600,32 @@ body.tema-escuro .ff-etapa{background:#0d1728}
 body.tema-escuro .td-h{background:#0f1b2e}
 body.tema-escuro .tarefa-dia.hoje .td-h{background:#132244}
 body.tema-escuro .tarefa-locais span{background:#0f1b2e;color:#cbd5e1}
+.tarefas-quadro{display:grid;grid-template-columns:repeat(3,minmax(260px,1fr));gap:12px;align-items:start;margin-top:14px;overflow-x:auto;padding-bottom:8px}
+.tarefas-coluna{min-width:0;background:var(--bg);border:1px solid var(--borda);border-radius:12px;padding:10px;min-height:250px;transition:background .15s,border-color .15s}
+.tarefas-coluna.arrastando-sobre{background:rgba(37,99,235,.08);border-color:var(--prim)}
+.tc-topo{display:flex;align-items:center;gap:8px;padding:3px 2px 10px}
+.tc-nome{width:100%;min-width:60px;max-width:210px;border:1px solid transparent!important;background:transparent!important;border-radius:6px!important;padding:5px 6px!important;font-size:13.5px!important;font-weight:750;color:var(--texto)}
+.tc-nome:hover,.tc-nome:focus{border-color:var(--borda)!important;background:var(--painel)!important;outline:none}
+.tc-contagem{font-size:11.5px;font-weight:750;color:var(--suave);background:var(--painel);border:1px solid var(--borda);border-radius:20px;padding:2px 8px}
+.tc-lista{display:flex;flex-direction:column;gap:8px;min-height:185px}
+.tk-card{background:var(--painel);border:1px solid var(--borda);border-radius:10px;padding:11px;box-shadow:0 2px 6px rgba(15,23,42,.05);cursor:grab;transition:box-shadow .15s,transform .15s}
+.tk-card:hover{box-shadow:0 7px 18px rgba(15,23,42,.1);transform:translateY(-1px)}
+.tk-card:active{cursor:grabbing}
+.tk-card.atrasada{border-left:3px solid #ef4444}
+.tk-card-topo{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.tk-card-titulo{font-size:13.5px;font-weight:720;line-height:1.4;word-break:break-word}
+.tk-prioridade{font-size:10.5px;font-weight:700;border-radius:20px;padding:3px 8px;white-space:nowrap}
+.tk-prioridade.alta{background:#fee2e2;color:#b91c1c}.tk-prioridade.normal{background:#e0f2fe;color:#075985}.tk-prioridade.baixa{background:#e2e8f0;color:#475569}
+.tk-card-meta{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:11.8px;color:var(--suave);margin-top:7px}
+.tk-card-obs{font-size:12px;color:var(--texto);opacity:.82;margin-top:8px;white-space:pre-wrap;overflow-wrap:anywhere}
+.tk-card-acoes{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:10px;padding-top:8px;border-top:1px solid var(--borda)}
+.tk-card-botoes{display:flex;gap:4px}
+.tk-card-botoes .icon-btn{width:30px;height:30px}
+.tk-mover{max-width:142px;padding:6px 8px;font-size:11.5px}
+.tc-adicionar{width:100%;margin-top:9px;text-align:left;border:1px dashed var(--borda);border-radius:8px;background:transparent;color:var(--suave);padding:8px 10px;cursor:pointer}
+.tc-adicionar:hover{color:var(--prim);border-color:var(--prim);background:rgba(37,99,235,.05)}
+body.tema-escuro .tk-prioridade.alta{background:#451a1a;color:#fecaca}body.tema-escuro .tk-prioridade.normal{background:#102f45;color:#bae6fd}body.tema-escuro .tk-prioridade.baixa{background:#263449;color:#cbd5e1}
+@media(max-width:850px){.tarefas-quadro{grid-template-columns:repeat(3,minmax(260px,82vw));scroll-snap-type:x proximity}.tarefas-coluna{scroll-snap-align:start}.tk-card{cursor:default}}
 
 /* ===== Calendário da agenda ===== */
 .cal{background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:14px;margin-top:16px}
@@ -1192,7 +1218,7 @@ const TITULOS = {
   mensagens:['Mensagens','Modelos de texto prontos para WhatsApp e e-mail'],
   relatorios:['Relatórios','Faturamento, comissões, orçamentos e ranking de itens'],
   agenda:['Agenda de Visitas','Roteiro diário para visitar clientes e marcar atendimentos'],
-  tarefas:['Tarefas da semana','Locais que você atende durante a semana, dia por dia'],
+  tarefas:['Tarefas da semana','Quadro de serviços por etapa: a fazer, em andamento e concluídos'],
   catalogo:['Catálogo','Produtos, serviços, fornecedores, estoque e margem'],
   dados:['Dados','Backup, importação e configurações']
 };
@@ -3243,7 +3269,7 @@ document.getElementById('view').addEventListener('click', e=>{
   }
   else if(btn.dataset.act==='orc-contrato'){ formContratoServico(null, id); }
   /* Tarefas da semana */
-  else if(btn.dataset.act==='tarefa-novo'){ formTarefa(null, btn.dataset.data||''); }
+   else if(btn.dataset.act==='tarefa-novo'){ formTarefa(null, btn.dataset.data||'', btn.dataset.status||'pendente'); }
   else if(btn.dataset.act==='tarefa-editar'){ formTarefa(id); }
   else if(btn.dataset.act==='tarefa-feito'){ concluirTarefa(id); }
   else if(btn.dataset.act==='tarefa-mapa'){ mapaTarefa(id); }
@@ -10886,6 +10912,10 @@ const DIAS_SEMANA = [
   {dow:'Dom', nome:'Domingo'}
 ];
 let filtroTarefas = { busca:'', estado:'todas' };
+const STATUS_TAREFAS=[{id:'pendente',nome:'A fazer',icone:'📥'},{id:'andamento',nome:'Em andamento',icone:'⚙️'},{id:'concluida',nome:'Concluída',icone:'✅'}];
+function nomeStatusTarefa(status){const padrao=STATUS_TAREFAS.find(s=>s.id===status)?.nome||'Etapa';return String(prefs().tarefasNomesEtapas?.[status]||padrao).trim()||padrao;}
+function statusTarefa(t){return STATUS_TAREFAS.some(s=>s.id===t.status)?t.status:(t.feito?'concluida':'pendente');}
+function definirStatusTarefa(t,status){const proximo=STATUS_TAREFAS.some(s=>s.id===status)?status:'pendente';t.status=proximo;t.feito=proximo==='concluida';t.feitoEm=t.feito?(t.feitoEm||hojeISO()):'';}
 
 function listaTarefas(){ if(!Array.isArray(db.tarefas)) db.tarefas = []; return db.tarefas; }
 function buscarTarefa(id){ return listaTarefas().find(t=>t.id===id); }
@@ -10914,8 +10944,9 @@ function tarefasDaSemana(){
 function tarefasFiltradas(){
   const q=String(filtroTarefas.busca||'').trim().toLowerCase();
   return tarefasDaSemana().filter(t=>{
-    if(filtroTarefas.estado==='pendentes' && t.feito) return false;
-    if(filtroTarefas.estado==='feitas' && !t.feito) return false;
+    if(filtroTarefas.estado==='pendentes' && statusTarefa(t)==='concluida') return false;
+    if(filtroTarefas.estado==='andamento' && statusTarefa(t)!=='andamento') return false;
+    if(filtroTarefas.estado==='feitas' && statusTarefa(t)!=='concluida') return false;
     if(q){
       const cli=buscarCli(t.clienteId);
       const alvo=[t.titulo,t.local,t.endereco,t.obs,cli&&cli.nome,cli&&cli.empresa].filter(Boolean).join(' ').toLowerCase();
@@ -10926,47 +10957,34 @@ function tarefasFiltradas(){
 }
 function itemTarefaHTML(t){
   const cli=buscarCli(t.clienteId);
-  return `<div class="tarefa-item ${t.feito?'feita':''}">
-    <button class="tk-check" data-act="tarefa-feito" data-id="${t.id}" title="${t.feito?'Desmarcar':'Marcar como feita'}">✓</button>
-    <div class="tk-info">
-      <div class="tk-titulo">${esc(t.titulo||'Sem título')}</div>
-      <div class="tk-linha">
-        ${t.hora?`<span>⏰ ${esc(t.hora)}</span>`:''}
-        ${t.local?`<span>📍 ${esc(t.local)}</span>`:''}
-        ${cli?`<span>👤 ${esc(cli.nome)}${cli.empresa?' · '+esc(cli.empresa):''}</span>`:''}
-      </div>
-      ${t.endereco?`<div class="tk-end">🏠 ${esc(t.endereco)}</div>`:''}
-      ${t.obs?`<div class="tk-obs">${esc(t.obs)}</div>`:''}
-      ${t.feito&&t.feitoEm?`<div class="tk-obs">✅ concluída em ${fmtData(t.feitoEm)}</div>`:''}
-    </div>
-    <div class="tk-acoes">
-      ${t.endereco?`<button class="icon-btn" data-act="tarefa-mapa" data-id="${t.id}" title="Abrir no mapa">🗺️</button>`:''}
-      ${(cli&&cli.telefone)?`<button class="icon-btn" data-act="tarefa-zap" data-id="${t.id}" title="WhatsApp do cliente">💬</button>`:''}
-      <button class="icon-btn" data-act="tarefa-editar" data-id="${t.id}" title="Editar">✏️</button>
-      <button class="icon-btn del" data-act="tarefa-excluir" data-id="${t.id}" title="Excluir">🗑️</button>
-    </div>
-  </div>`;
+  const status=statusTarefa(t), prioridade=['alta','normal','baixa'].includes(t.prioridade)?t.prioridade:'normal';
+  const atrasada=!t.feito&&t.data&&t.data<hojeISO();
+  return `<article class="tk-card ${atrasada?'atrasada':''}" draggable="true" data-tarefa-card="${t.id}">
+    <div class="tk-card-topo"><div class="tk-card-titulo">${esc(t.titulo||'Sem título')}</div><span class="tk-prioridade ${prioridade}">${prioridade==='alta'?'🔴 Alta':prioridade==='baixa'?'⚪ Baixa':'🔵 Normal'}</span></div>
+    <div class="tk-card-meta"><span>${atrasada?'⚠️ Atrasada':'📅 '+fmtData(t.data)}</span>${t.hora?`<span>⏰ ${esc(t.hora)}</span>`:''}${t.local?`<span>📍 ${esc(t.local)}</span>`:''}${cli?`<span>👤 ${esc(cli.nome)}${cli.empresa?' · '+esc(cli.empresa):''}</span>`:''}${t.endereco?`<span title="${esc(t.endereco)}">🏠 ${esc(t.endereco)}</span>`:''}</div>
+    ${t.obs?`<div class="tk-card-obs">${esc(t.obs)}</div>`:''}${t.feito&&t.feitoEm?`<div class="mini" style="margin-top:6px">✅ Concluída em ${fmtData(t.feitoEm)}</div>`:''}
+    <div class="tk-card-acoes"><div class="tk-card-botoes">${t.endereco?`<button class="icon-btn" data-act="tarefa-mapa" data-id="${t.id}" title="Abrir no mapa">🗺️</button>`:''}${(cli&&cli.telefone)?`<button class="icon-btn" data-act="tarefa-zap" data-id="${t.id}" title="WhatsApp do cliente">💬</button>`:''}<button class="icon-btn" data-act="tarefa-editar" data-id="${t.id}" title="Editar">✏️</button><button class="icon-btn del" data-act="tarefa-excluir" data-id="${t.id}" title="Excluir">🗑️</button></div><select class="filtro tk-mover" data-mover-tarefa="${t.id}" aria-label="Mover tarefa de coluna">${STATUS_TAREFAS.map(s=>`<option value="${s.id}" ${status===s.id?'selected':''}>${esc(nomeStatusTarefa(s.id))}</option>`).join('')}</select></div>
+  </article>`;
 }
 function htmlTarefas(){
-  const ini=inicioSemanaTarefas();
   const sem=tarefasDaSemana();
   const lista=tarefasFiltradas();
-  const pend=sem.filter(t=>!t.feito).length;
-  const feitas=sem.filter(t=>t.feito).length;
+  const pend=sem.filter(t=>statusTarefa(t)==='pendente').length;
+  const andamento=sem.filter(t=>statusTarefa(t)==='andamento').length;
+  const feitas=sem.filter(t=>statusTarefa(t)==='concluida').length;
   const locais=[...new Set(sem.map(t=>String(t.local||'').trim()).filter(Boolean))];
-  const hojeKey=hojeISO();
 
   const stats=`<div class="grid-stats">
-    ${stat('Tarefas na semana', sem.length, '✅')}
-    ${stat('Pendentes', pend, '⏳', pend>0)}
-    ${stat('Concluídas', feitas, '🎉')}
-    ${stat('Locais atendidos', locais.length, '📍')}
+    ${stat('Cartões nesta semana', sem.length, '📋')}
+    ${stat(esc(nomeStatusTarefa('pendente')), pend, '📥', pend>0)}
+    ${stat(esc(nomeStatusTarefa('andamento')), andamento, '⚙️', andamento>0)}
+    ${stat(esc(nomeStatusTarefa('concluida')), feitas, '🎉')}
   </div>`;
 
   const topo=`<div class="tarefa-topo">
     <div class="tarefa-topo-info">
-      <b>Meus locais da semana</b>
-      <span>Anote os lugares que você vai atender, o dia e o serviço — e marque com um clique quando terminar.</span>
+      <b>Quadro da semana</b>
+      <span>Organize os serviços por etapa. Arraste os cartões entre colunas ou mude a etapa pelo seletor.</span>
       ${locais.length?`<div class="tarefa-locais">${locais.map(l=>`<span>📍 ${esc(l)}</span>`).join('')}</div>`:''}
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -10986,45 +11004,46 @@ function htmlTarefas(){
     <div class="busca"><input id="buscaTarefa" placeholder="Buscar por local, serviço, cliente, endereço..." value="${esc(filtroTarefas.busca)}"></div>
     <select class="filtro" id="fEstadoTarefa">
       <option value="todas" ${filtroTarefas.estado==='todas'?'selected':''}>Todas (${sem.length})</option>
-      <option value="pendentes" ${filtroTarefas.estado==='pendentes'?'selected':''}>⏳ Pendentes (${pend})</option>
-      <option value="feitas" ${filtroTarefas.estado==='feitas'?'selected':''}>✅ Concluídas (${feitas})</option>
+      <option value="pendentes" ${filtroTarefas.estado==='pendentes'?'selected':''}>📥 ${esc(nomeStatusTarefa('pendente'))} (${pend})</option>
+      <option value="andamento" ${filtroTarefas.estado==='andamento'?'selected':''}>⚙️ ${esc(nomeStatusTarefa('andamento'))} (${andamento})</option>
+      <option value="feitas" ${filtroTarefas.estado==='feitas'?'selected':''}>✅ ${esc(nomeStatusTarefa('concluida'))} (${feitas})</option>
     </select>
     <div class="contagem" style="margin-left:auto">${lista.length} de ${sem.length} tarefa(s)</div>
   </div>`;
 
-  if(!sem.length){
-    return stats+topo+toolbar+`<div class="card" style="margin-top:16px"><div class="vazio" style="padding:46px 20px"><span class="big">✅</span>Nenhuma tarefa nesta semana!<br><br>
-      Toque em <b>＋ Nova tarefa</b> para anotar o local que você vai atender, o dia e o serviço.</div></div>`;
-  }
-
-  /* agrupado por dia (segunda a domingo) */
-  let html='';
-  for(let i=0;i<7;i++){
-    const d=new Date(ini.getFullYear(), ini.getMonth(), ini.getDate()+i);
-    const key=isoDeData(d);
-    const doDia=lista.filter(t=>t.data===key);
-    const doDiaTodos=sem.filter(t=>t.data===key);
-    const pDia=doDiaTodos.filter(t=>!t.feito).length;
-    html+=`<div class="tarefa-dia ${key===hojeKey?'hoje':''}">
-      <div class="td-h">
-        <div class="td-nome"><b>${DIAS_SEMANA[i].nome}</b><span>${fmtData(key)}</span>${key===hojeKey?'<span class="selo info">hoje</span>':''}</div>
-        ${doDiaTodos.length?`<span class="td-cnt">${pDia?`${pDia} pendente(s)`:`${doDiaTodos.length} concluída(s)`}</span>`:''}
-        <button class="link-btn" style="margin-left:auto;font-size:12px" data-act="tarefa-novo" data-data="${key}">＋ adicionar</button>
-      </div>
-      <div class="td-body">
-        ${doDia.length
-          ? doDia.map(itemTarefaHTML).join('')
-          : `<div class="td-vazio">Nenhuma tarefa neste dia. <button data-act="tarefa-novo" data-data="${key}">Adicionar tarefa</button></div>`}
-      </div>
-    </div>`;
-  }
-  return stats+topo+toolbar+html;
+  const colunas=STATUS_TAREFAS.map(s=>{
+    const cards=lista.filter(t=>statusTarefa(t)===s.id);
+    const total=sem.filter(t=>statusTarefa(t)===s.id).length;
+    const vazio=filtroTarefas.busca?'Nenhum cartão encontrado.':'Solte cartões aqui ou adicione uma tarefa.';
+    return `<section class="tarefas-coluna" data-tarefa-coluna="${s.id}"><div class="tc-topo"><span>${s.icone}</span><input class="tc-nome" data-nome-coluna="${s.id}" maxlength="32" value="${esc(nomeStatusTarefa(s.id))}" aria-label="Nome da coluna ${esc(nomeStatusTarefa(s.id))}" title="Clique para editar o nome da coluna" enterkeyhint="done"><span class="tc-contagem">${cards.length}${cards.length!==total?` de ${total}`:''}</span></div><div class="tc-lista">${cards.map(itemTarefaHTML).join('')||`<div class="td-vazio">${vazio}</div>`}</div><button class="tc-adicionar" data-act="tarefa-novo" data-status="${s.id}">＋ Adicionar cartão</button></section>`;
+  }).join('');
+  return stats+topo+toolbar+`<div class="tarefas-quadro" id="quadroTarefas">${colunas}</div>`;
 }
 function ligarTarefas(){
   const b=document.getElementById('buscaTarefa');
-  if(b) b.addEventListener('input', ()=>{ filtroTarefas.busca=b.value; render(); });
+  if(b) b.addEventListener('input', ()=>{ filtroTarefas.busca=b.value; const pos=b.selectionStart; render(); const novo=document.getElementById('buscaTarefa'); novo?.focus(); novo?.setSelectionRange(pos,pos); });
   const s=document.getElementById('fEstadoTarefa');
   if(s) s.addEventListener('change', ()=>{ filtroTarefas.estado=s.value; render(); });
+  document.querySelectorAll('[data-nome-coluna]').forEach(input=>{
+    input.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();input.blur();}};
+    input.onchange=()=>{
+      const status=input.dataset.nomeColuna, nome=String(input.value||'').trim().replace(/\s+/g,' ').slice(0,32);
+      if(!nome){input.value=nomeStatusTarefa(status);return;}
+      prefs().tarefasNomesEtapas=Object.assign({},prefs().tarefasNomesEtapas||{},{[status]:nome});
+      salvar();render();
+    };
+  });
+  document.querySelectorAll('[data-mover-tarefa]').forEach(sel=>sel.onchange=()=>moverTarefa(sel.dataset.moverTarefa,sel.value));
+  let arrastada='';
+  document.querySelectorAll('[data-tarefa-card]').forEach(card=>{
+    card.addEventListener('dragstart',e=>{arrastada=card.dataset.tarefaCard;card.style.opacity='.45';e.dataTransfer?.setData('text/plain',arrastada);if(e.dataTransfer)e.dataTransfer.effectAllowed='move';});
+    card.addEventListener('dragend',()=>{card.style.opacity='';document.querySelectorAll('[data-tarefa-coluna]').forEach(c=>c.classList.remove('arrastando-sobre'));});
+  });
+  document.querySelectorAll('[data-tarefa-coluna]').forEach(col=>{
+    col.addEventListener('dragover',e=>{e.preventDefault();col.classList.add('arrastando-sobre');if(e.dataTransfer)e.dataTransfer.dropEffect='move';});
+    col.addEventListener('dragleave',e=>{if(!col.contains(e.relatedTarget))col.classList.remove('arrastando-sobre');});
+    col.addEventListener('drop',e=>{e.preventDefault();col.classList.remove('arrastando-sobre');const id=e.dataTransfer?.getData('text/plain')||arrastada;if(id)moverTarefa(id,col.dataset.tarefaColuna);});
+  });
   /* navegação de semana */
   document.querySelectorAll('[data-t-sem]').forEach(bt=>{
     bt.onclick=()=>{
@@ -11038,13 +11057,14 @@ function ligarTarefas(){
   });
 }
 /* ---------- Formulário ---------- */
-function formTarefa(id, dataPre){
+function formTarefa(id, dataPre, statusPre='pendente'){
   const t0=id?buscarTarefa(id):null;
   if(id && !t0) return;
   const v=t0?Object.assign({},t0):{
     id:'', titulo:'', local:'', endereco:'', data:dataPre||hojeISO(), hora:'',
-    clienteId:'', obs:'', feito:false, feitoEm:'', criadoEm:agoraDT()
+    clienteId:'', obs:'', feito:false, feitoEm:'', status:statusPre, prioridade:'normal', criadoEm:agoraDT()
   };
+  v.status=statusTarefa(v); v.prioridade=['alta','normal','baixa'].includes(v.prioridade)?v.prioridade:'normal';
   const clientes=db.clientes.slice();
   const cliNome=(clientes.find(x=>x.id===v.clienteId)||{}).nome||'';
   abrirModal(`
@@ -11082,12 +11102,12 @@ function formTarefa(id, dataPre){
           <div class="campo"><label>Dia</label>
             <input name="data" type="date" value="${esc(v.data||hojeISO())}">
           </div>
-          <div class="campo"><label>Situação</label>
-            <select name="feito">
-              <option value="0" ${!v.feito?'selected':''}>⏳ Pendente</option>
-              <option value="1" ${v.feito?'selected':''}>✅ Já fiz</option>
+          <div class="campo"><label>Etapa</label>
+            <select name="status">
+              ${STATUS_TAREFAS.map(s=>`<option value="${s.id}" ${v.status===s.id?'selected':''}>${s.icone} ${esc(nomeStatusTarefa(s.id))}</option>`).join('')}
             </select>
           </div>
+          <div class="campo"><label>Prioridade</label><select name="prioridade"><option value="baixa" ${v.prioridade==='baixa'?'selected':''}>⚪ Baixa</option><option value="normal" ${v.prioridade==='normal'?'selected':''}>🔵 Normal</option><option value="alta" ${v.prioridade==='alta'?'selected':''}>🔴 Alta</option></select></div>
         </div>
       </div>
       <div class="modal-f" style="flex-wrap:wrap">
@@ -11114,14 +11134,15 @@ function formTarefa(id, dataPre){
       hora:f.querySelector('[name="hora"]').value||'',
       clienteId:sel.value||'',
       obs:f.querySelector('[name="obs"]').value.trim(),
-      feito:f.querySelector('[name="feito"]').value==='1'
+      status:f.querySelector('[name="status"]').value,
+      prioridade:f.querySelector('[name="prioridade"]').value
     };
     if(t0){
-      const mudou=dados.feito!==!!t0.feito;
       Object.assign(t0, dados);
-      if(mudou) t0.feitoEm = dados.feito ? hojeISO() : '';
+      definirStatusTarefa(t0,dados.status);
     }else{
-      listaTarefas().push(Object.assign({id:uid(), criadoEm:agoraDT(), feitoEm:dados.feito?hojeISO():''}, dados));
+      const nova=Object.assign({id:uid(), criadoEm:agoraDT(), feitoEm:''}, dados);
+      definirStatusTarefa(nova,dados.status);listaTarefas().push(nova);
     }
     salvar();
     fecharModal();
@@ -11139,7 +11160,7 @@ function verTodasTarefas(){
       <td class="num">${t.hora?esc(t.hora):'—'}</td>
       <td><b>${esc(t.titulo||'')}</b>${t.local?`<div class="mt">📍 ${esc(t.local)}</div>`:''}${t.endereco?`<div class="mt">🏠 ${esc(t.endereco)}</div>`:''}</td>
       <td>${cli?esc(cli.nome):'—'}</td>
-      <td><span class="selo ${t.feito?'ok':'vence'}">${t.feito?'Feita':'Pendente'}</span></td>
+      <td><span class="selo ${statusTarefa(t)==='concluida'?'ok':statusTarefa(t)==='andamento'?'info':'vence'}">${esc(nomeStatusTarefa(statusTarefa(t)))}</span>${t.prioridade==='alta'?'<div class="mini">🔴 Alta prioridade</div>':''}</td>
       <td><div class="acoes">
         <button class="icon-btn" data-act="tarefa-feito" data-id="${t.id}" title="${t.feito?'Reabrir':'Marcar como feita'}">${t.feito?'↩️':'✓'}</button>
         <button class="icon-btn" data-act="tarefa-editar" data-id="${t.id}" title="Editar">✏️</button>
@@ -11161,11 +11182,15 @@ function verTodasTarefas(){
 /* ---------- Ações ---------- */
 function concluirTarefa(id){
   const t=buscarTarefa(id); if(!t) return;
-  t.feito=!t.feito;
-  t.feitoEm=t.feito?hojeISO():'';
+  definirStatusTarefa(t,t.feito?'pendente':'concluida');
   salvar(); render();
   if(modal && modal.querySelector('[data-act="tarefa-editar"]')) verTodasTarefas();
   toast(t.feito?'✅ Tarefa concluída.':'Tarefa reaberta.');
+}
+function moverTarefa(id,status){
+  const t=buscarTarefa(id);if(!t||statusTarefa(t)===status)return;
+  definirStatusTarefa(t,status);salvar();render();
+  toast(`Cartão movido para ${nomeStatusTarefa(status)}.`);
 }
 function mapaTarefa(id){
   const t=buscarTarefa(id); if(!t) return;
