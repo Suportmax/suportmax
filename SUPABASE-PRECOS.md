@@ -17,7 +17,7 @@ O endpoint exige sessão autenticada e perfil `admin` em `crm_members`. O CRM fa
 
 ## Regra aplicada
 
-Markup padrão inicial: 40% sobre o custo. Fórmula: `custo × (1 + markup/100)`. O markup pode ser alterado no modal de importação e fica salvo junto às preferências da conta.
+Markup padrão: 65% sobre o custo. Fórmula: `custo × (1 + markup/100)`. O markup pode ser alterado no modal de importação e fica salvo junto às preferências da conta. Contas que ainda tinham o padrão anterior de 40% passam a mostrar 65%; outros percentuais salvos são mantidos.
 
 Quando há referências online, o CRM usa a mediana dos preços encontrados como sugestão, mas nunca abaixo do custo acrescido do markup. Ao atualizar um produto existente, preserva o preço atual se ele já for maior que a sugestão. O usuário pode revisar os preços e as fontes antes de concluir a importação.
 
