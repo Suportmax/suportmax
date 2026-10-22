@@ -648,18 +648,24 @@ body.tema-escuro .tarefa-locais span{background:#0f1b2e;color:#cbd5e1}
 .overlay.open{display:flex}
 #overlay2{z-index:70}
 .modal{background:var(--painel);color:var(--texto);border-radius:16px;width:100%;max-width:600px;box-shadow:0 25px 60px rgba(15,23,42,.35);animation:pop .18s ease}
-.modal.produto-compacto{max-width:520px;max-height:calc(100dvh - 32px);display:flex;flex-direction:column;overflow:hidden}
-.overlay.produto-overlay{align-items:center;padding:16px}
-.produto-compacto .modal-h,.produto-compacto .modal-f{flex:0 0 auto}
-.produto-compacto .modal-h{position:sticky;top:0;z-index:2;background:var(--painel);padding:12px 18px}
-.produto-compacto .modal-b{padding:14px 18px;overflow-y:auto;overscroll-behavior:contain}
-.produto-compacto .modal-f{position:sticky;bottom:0;z-index:2;padding:10px 18px}
-.produto-compacto .form-grid{gap:10px}
-.produto-compacto .campo{gap:4px}
-.produto-compacto .campo input,.produto-compacto .campo select{padding:9px 10px}
+.modal.cadastro-compacto{max-width:560px;max-height:calc(100dvh - 32px);display:flex;flex-direction:column;overflow:hidden}
+.overlay.cadastro-overlay{align-items:center;padding:16px}
+.cadastro-compacto .modal-h,.cadastro-compacto .modal-f{flex:0 0 auto}
+.cadastro-compacto .modal-h{position:sticky;top:0;z-index:2;background:var(--painel);padding:12px 18px}
+.cadastro-compacto .modal-b{padding:14px 18px;overflow-y:auto;overscroll-behavior:contain}
+.cadastro-compacto .modal-f{position:sticky;bottom:0;z-index:2;padding:10px 18px;flex-wrap:wrap}
+.cadastro-compacto .form-grid{gap:10px}
+.cadastro-compacto .campo{gap:4px}
+.cadastro-compacto .campo input,.cadastro-compacto .campo select{padding:9px 10px}
+.cadastro-secao{grid-column:1/-1;border:1px solid var(--borda);border-radius:10px;overflow:hidden}
+.cadastro-secao summary{padding:10px 12px;cursor:pointer;font-size:12.5px;font-weight:650;color:var(--prim);background:var(--bg)}
+.cadastro-secao-conteudo{padding:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.cadastro-secao-conteudo .campo.full{grid-column:1/-1}
+.cadastro-secao summary:focus-visible{outline-offset:-3px}
 .prod-avancado{grid-column:1/-1;border:1px solid var(--borda);border-radius:10px;overflow:hidden}
 .prod-avancado summary{padding:10px 12px;cursor:pointer;font-size:12.5px;font-weight:650;color:var(--prim);background:var(--bg)}
-.prod-avancado-conteudo{padding:12px;display:grid;gap:12px}
+.prod-avancado-conteudo{padding:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.prod-avancado-conteudo .campo.full,.prod-avancado-conteudo .campo:last-child{grid-column:1/-1}
 @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
 .modal-h{padding:18px 22px;border-bottom:1px solid var(--borda);display:flex;align-items:center;gap:10px}
 .modal-h h2{font-size:16.5px;font-weight:700}
@@ -872,12 +878,13 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
   .logo-img{max-width:200px}
 }
 @media(max-width:560px){
-  .overlay.produto-overlay{align-items:flex-end;padding:8px}
-  .modal.produto-compacto{max-height:calc(100dvh - 16px);border-radius:14px}
-  .produto-compacto .modal-h,.produto-compacto .modal-b,.produto-compacto .modal-f{padding-left:14px;padding-right:14px}
-  .produto-compacto .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-  .produto-compacto .campo.full,.produto-compacto .prod-avancado{grid-column:1/-1}
-  .produto-compacto .campo label{font-size:11.8px}
+  .overlay.cadastro-overlay{align-items:flex-end;padding:8px}
+  .modal.cadastro-compacto{max-height:calc(100dvh - 16px);border-radius:14px}
+  .cadastro-compacto .modal-h,.cadastro-compacto .modal-b,.cadastro-compacto .modal-f{padding-left:14px;padding-right:14px}
+  .cadastro-compacto .form-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .cadastro-compacto .campo.full,.cadastro-compacto .cadastro-secao,.cadastro-compacto .prod-avancado{grid-column:1/-1}
+  .cadastro-compacto .campo label{font-size:11.8px}
+  .cadastro-compacto .modal-f .btn.primary{margin-left:auto}
 }
 @media(max-width:980px){
   /* Busca e ações permanecem disponíveis sem ocupar a primeira linha do cabeçalho. */
@@ -2778,7 +2785,7 @@ function focarPrimeiro(modalEl){
   requestAnimationFrame(()=>alvo.focus());
 }
 function abrirModal(html, wide){ focoAnteriorModal=document.activeElement; modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); focarPrimeiro(modal); }
-function fecharModal(){ const devolver=focoAnteriorModal; focoAnteriorModal=null; overlay.classList.remove('open','produto-overlay'); modal.classList.remove('wide','produto-compacto'); modal.innerHTML=''; limparEspelho(); fecharModal2(); if(devolver&&devolver.isConnected) requestAnimationFrame(()=>devolver.focus()); }
+function fecharModal(){ const devolver=focoAnteriorModal; focoAnteriorModal=null; overlay.classList.remove('open','cadastro-overlay'); modal.classList.remove('wide','cadastro-compacto'); modal.innerHTML=''; limparEspelho(); fecharModal2(); if(devolver&&devolver.isConnected) requestAnimationFrame(()=>devolver.focus()); }
 /* Segunda camada de modal (ex.: seletor de produto sobre o formulário do orçamento) */
 function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); focarPrimeiro(modal2); }
 function fecharModal2(){ overlay2.classList.remove('open'); modal2.classList.remove('wide'); modal2.innerHTML=''; if(overlay.classList.contains('open')) focarPrimeiro(modal); }
@@ -3563,15 +3570,11 @@ function formCliente(id, etapaPre){
       <div class="modal-h"><h2>${c?'✏️ Editar cliente':'＋ Novo cliente'}</h2><button type="button" class="x" data-fechar>×</button></div>
       <div class="modal-b">
         <div class="form-grid">
-          <div class="campo full"><label>Nome * <span class="req">*</span></label><input name="nome" required maxlength="80" value="${esc(v.nome)}" placeholder="Ex.: Maria Silva" autofocus></div>
-          <div class="campo"><label>CNPJ</label><input id="cliCnpj" name="cnpj" maxlength="20" value="${esc(v.cnpj||'')}" placeholder="00.000.000/0000-00" inputmode="numeric" data-mask="cnpj"><small style="color:var(--suave);font-size:11px">Digite o CNPJ e saia do campo para preencher automático</small></div>
-          <div class="campo"><label>Empresa</label><input name="empresa" maxlength="80" value="${esc(v.empresa)}" placeholder="Ex.: Loja Central"></div>
-          <div class="campo"><label>CEP</label><input id="cliCep" name="cep" maxlength="9" value="${esc(v.cep||'')}" placeholder="00000-000" inputmode="numeric"><small style="color:var(--suave);font-size:11px">Digite o CEP e saia do campo para preencher endereço</small></div>
-          <div class="campo full"><label>Endereço</label><input name="endereco" maxlength="150" value="${esc(v.endereco||'')}" placeholder="Rua, número, bairro, cidade/UF"></div>
-          <div class="campo"><label>Telefone / WhatsApp</label><input name="telefone" maxlength="30" value="${esc(v.telefone)}" placeholder="(11) 99999-0000"></div>
-          <div class="campo"><label>E-mail</label><input name="email" type="email" maxlength="80" value="${esc(v.email)}" placeholder="email@exemplo.com"></div>
-          <div class="campo"><label>CPF</label><input name="cpf" maxlength="18" value="${esc(v.cpf||'')}" placeholder="000.000.000-00" inputmode="numeric" data-mask="cpf"></div>
-          <div class="campo"><label>Origem (como chegou)</label>
+          <div class="campo full"><label>Nome <span class="req">*</span></label><input name="nome" required maxlength="80" value="${esc(v.nome)}" placeholder="Ex.: Maria Silva" autocomplete="name" autofocus enterkeyhint="next"></div>
+          <div class="campo"><label>Empresa</label><input name="empresa" maxlength="80" value="${esc(v.empresa)}" placeholder="Ex.: Loja Central" autocomplete="organization"></div>
+          <div class="campo"><label>WhatsApp / telefone</label><input name="telefone" type="tel" inputmode="tel" autocomplete="tel" maxlength="30" value="${esc(v.telefone)}" placeholder="(71) 99999-0000"></div>
+          <div class="campo"><label>E-mail</label><input name="email" type="email" inputmode="email" autocomplete="email" maxlength="80" value="${esc(v.email)}" placeholder="email@exemplo.com"></div>
+          <div class="campo"><label>Origem</label>
             <select name="origem">
               <option value="">— Não informado —</option>
               ${ORIGENS.map(o=>`<option ${v.origem===o?'selected':''}>${o}</option>`).join('')}
@@ -3581,21 +3584,28 @@ function formCliente(id, etapaPre){
             <select name="status">${STAGES.map(s=>`<option value="${s.id}" ${v.status===s.id?'selected':''}>${s.label}</option>`).join('')}</select>
           </div>
 
-          ${c?`<div class="campo full"><div class="info-resumo" id="resumoOrcCli"></div></div>`:''}
-          ${c?`<div class="campo full">${blocoConversaoCliente(c)}</div>`:''}
-
-          <div class="subtitulo">⏰ Próximo follow-up (opcional)</div>          <div class="campo"><label>Data do próximo contato</label><input type="date" name="fup_data" value="${esc(fu.data||'')}"></div>
-          <div class="campo"><label>Prioridade</label>
-            <select name="fup_prio">
-              <option value="baixa" ${(fu.prioridade||'media')==='baixa'?'selected':''}>Baixa</option>
-              <option value="media" ${(fu.prioridade||'media')==='media'?'selected':''}>Média</option>
-              <option value="alta" ${(fu.prioridade||'media')==='alta'?'selected':''}>Alta</option>
-            </select>
-          </div>
-          <div class="campo full"><label>O que fazer nesse contato?</label><input name="fup_nota" maxlength="140" value="${esc(fu.nota||'')}" placeholder="Ex.: Enviar proposta revisada"></div>
-
-          <div class="subtitulo">📝 Observações</div>
-          <div class="campo full"><textarea name="notas" maxlength="1500" placeholder="Preferências, histórico, detalhes importantes...">${esc(v.notas)}</textarea></div>
+          <details class="cadastro-secao" ${v.cpf||v.cnpj||v.cep||v.endereco?'open':''}>
+            <summary>Documentos e endereço <span class="mini">(opcional)</span></summary>
+            <div class="cadastro-secao-conteudo">
+              <div class="campo"><label>CPF</label><input name="cpf" maxlength="18" value="${esc(v.cpf||'')}" placeholder="000.000.000-00" inputmode="numeric" autocomplete="off" data-mask="cpf"></div>
+              <div class="campo"><label>CNPJ</label><input id="cliCnpj" name="cnpj" maxlength="20" value="${esc(v.cnpj||'')}" placeholder="00.000.000/0000-00" inputmode="numeric" autocomplete="off" data-mask="cnpj"><small style="color:var(--suave);font-size:11px">Ao sair do campo, tentamos preencher os dados da empresa.</small></div>
+              <div class="campo"><label>CEP</label><input id="cliCep" name="cep" maxlength="9" value="${esc(v.cep||'')}" placeholder="00000-000" inputmode="numeric" autocomplete="postal-code"><small style="color:var(--suave);font-size:11px">Ao sair do campo, buscamos o endereço.</small></div>
+              <div class="campo full"><label>Endereço</label><input name="endereco" maxlength="150" value="${esc(v.endereco||'')}" placeholder="Rua, número, bairro, cidade/UF" autocomplete="street-address"></div>
+            </div>
+          </details>
+          <details class="cadastro-secao" ${fu.data||fu.nota?'open':''}>
+            <summary>Próximo follow-up <span class="mini">(opcional)</span></summary>
+            <div class="cadastro-secao-conteudo">
+              <div class="campo"><label>Data do próximo contato</label><input type="date" name="fup_data" value="${esc(fu.data||'')}"></div>
+              <div class="campo"><label>Prioridade</label><select name="fup_prio"><option value="baixa" ${(fu.prioridade||'media')==='baixa'?'selected':''}>Baixa</option><option value="media" ${(fu.prioridade||'media')==='media'?'selected':''}>Média</option><option value="alta" ${(fu.prioridade||'media')==='alta'?'selected':''}>Alta</option></select></div>
+              <div class="campo full"><label>O que fazer nesse contato?</label><input name="fup_nota" maxlength="140" value="${esc(fu.nota||'')}" placeholder="Ex.: Enviar proposta revisada"></div>
+            </div>
+          </details>
+          <details class="cadastro-secao" ${v.notas?'open':''}>
+            <summary>Observações <span class="mini">(opcional)</span></summary>
+            <div class="cadastro-secao-conteudo"><div class="campo full"><label>Preferências e detalhes importantes</label><textarea name="notas" maxlength="1500" placeholder="Anote informações úteis sobre o cliente...">${esc(v.notas)}</textarea></div></div>
+          </details>
+          ${c?`<details class="cadastro-secao"><summary>Histórico comercial</summary><div class="cadastro-secao-conteudo"><div class="campo full"><div class="info-resumo" id="resumoOrcCli"></div>${blocoConversaoCliente(c)}</div></div></details>`:''}
         </div>
       </div>
       <div class="modal-f">
@@ -3604,6 +3614,7 @@ function formCliente(id, etapaPre){
         <button type="submit" class="btn primary">${c?'Salvar alterações':'Cadastrar cliente'}</button>
       </div>
     </form>`);
+  modal.classList.add('cadastro-compacto'); overlay.classList.add('cadastro-overlay');
 
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
   modal.querySelector('[data-act="historico"]')?.addEventListener('click', ()=>{ fecharModal(); formHistorico(id); });
@@ -7040,15 +7051,15 @@ function formProduto(id){
       <div class="modal-b">
         <div class="form-grid">
           <div class="campo full"><label>Nome <span class="req">*</span></label><input name="nome" required maxlength="100" value="${esc(v.nome)}" placeholder="Ex.: Formatação com backup" autofocus enterkeyhint="next"></div>
-          <div class="campo"><label>Unidade</label><select name="un">${UN.map(u=>`<option ${v.un===u?'selected':''}>${u}</option>`).join('')}</select></div>
-          <div class="campo"><label>Fornecedor</label><select name="fornecedorId"><option value="">— Nenhum —</option>${listaFornecedores().map(f=>`<option value="${f.id}" ${v.fornecedorId===f.id?'selected':''}>${esc(f.nome)}</option>`).join('')}</select></div>
           <div class="campo"><label>Custo (R$)</label><input name="custo" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(v.custo)||0}"></div>
           <div class="campo"><label>Preço de venda (R$)</label><input name="preco" type="number" inputmode="decimal" min="0" step="0.01" value="${Number(v.preco)||0}"></div>
-          <details class="prod-avancado">
-            <summary>Descrição e foto <span class="mini">(opcional)</span></summary>
+          <details class="prod-avancado" ${v.fornecedorId||v.desc||v.foto?'open':''}>
+            <summary>Unidade, fornecedor, descrição e foto <span class="mini">(opcional)</span></summary>
             <div class="prod-avancado-conteudo">
-              <div class="campo"><label>Descrição padrão para orçamento</label><input name="desc" maxlength="160" value="${esc(v.desc||'')}"></div>
-              <div class="campo">
+              <div class="campo"><label>Unidade</label><select name="un">${UN.map(u=>`<option ${v.un===u?'selected':''}>${u}</option>`).join('')}</select></div>
+              <div class="campo"><label>Fornecedor</label><select name="fornecedorId"><option value="">— Nenhum —</option>${listaFornecedores().map(f=>`<option value="${f.id}" ${v.fornecedorId===f.id?'selected':''}>${esc(f.nome)}</option>`).join('')}</select></div>
+              <div class="campo full"><label>Descrição padrão para orçamento</label><input name="desc" maxlength="160" value="${esc(v.desc||'')}"></div>
+              <div class="campo full">
                 <label>Foto do item</label>
                 <div class="foto-prod">
                   <div class="foto-prod-prev" id="fotoPrev">${v.foto?`<img src="${v.foto}" alt="Foto do item">`:'<span class="foto-vazio">📷</span>'}</div>
@@ -7070,7 +7081,7 @@ function formProduto(id){
         <button type="submit" class="btn primary">${p?'Salvar alterações':'Adicionar ao catálogo'}</button>
       </div>
     </form>`, false);
-  modal.classList.add('produto-compacto'); overlay.classList.add('produto-overlay');
+  modal.classList.add('cadastro-compacto'); overlay.classList.add('cadastro-overlay');
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
   function calcMargem(){
     const custo = Number(modal.querySelector('[name="custo"]').value)||0;
