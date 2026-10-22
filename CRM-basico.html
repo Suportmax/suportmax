@@ -2379,6 +2379,12 @@ function statusOrc(id){ return STATUS_ORC.find(s=>s.id===id) || STATUS_ORC[0]; }
 function badgeOrc(id){ const s=statusOrc(id); return `<span class="badge" style="--c:${s.cor}">${s.label}</span>`; }
 function listaOrcamentos(){ return db.orcamentos || (db.orcamentos=[]); }
 function listaProdutos(){ return db.produtos || (db.produtos=[]); }
+function cTribNacPadrao(unidade, codigo=''){
+  const informado=String(codigo||'').replace(/\D/g,'');
+  if(informado) return informado;
+  const un=String(unidade||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  return ['servico','h','hora'].includes(un)?'010701':'';
+}
 function buscarOrc(id){ return listaOrcamentos().find(o=>o.id===id); }
 /* ---------- Arquivamento de orçamentos ----------
    Quando o serviço (ordem de serviço) é concluído ou vendido, o orçamento ligado é
@@ -6952,7 +6958,7 @@ function formProduto(id){
       gtin:String(f.get('gtin')||'').trim(), codigo:String(f.get('codigo')||'').trim(),
       ncm:String(f.get('ncm')||'').replace(/\D/g,''), cest:String(f.get('cest')||'').replace(/\D/g,''),
       cfop:String(f.get('cfop')||'').replace(/\D/g,''), csosn:String(f.get('csosn')||''),
-      origem:String(f.get('origem')||''), cTribNac:String(f.get('cTribNac')||'').replace(/\D/g,''),
+      origem:String(f.get('origem')||''), cTribNac:cTribNacPadrao(f.get('un'),f.get('cTribNac')),
       foto:fotoAtual
     };
     if(p){ Object.assign(p, dados); toast('Item atualizado.'); }
@@ -8790,7 +8796,7 @@ function catalogoProdutos(){
       gtin:document.getElementById('pGtin').value.trim(), codigo:document.getElementById('pCodigo').value.trim(),
       ncm:document.getElementById('pNcm').value.replace(/\D/g,''), cest:document.getElementById('pCest').value.replace(/\D/g,''),
       cfop:document.getElementById('pCfop').value.replace(/\D/g,''), csosn:document.getElementById('pCsosn').value, origem:document.getElementById('pOrigem').value,
-      cTribNac:document.getElementById('pTribNac').value.replace(/\D/g,'')
+      cTribNac:cTribNacPadrao(document.getElementById('pUn').value,document.getElementById('pTribNac').value)
     };
     if(editando){ Object.assign(editando, dados); toast('Produto atualizado.'); }
     else{ listaProdutos().push({id:uid(), ...dados}); toast('Produto adicionado ao catálogo.'); }
