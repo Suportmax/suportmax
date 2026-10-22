@@ -3276,6 +3276,8 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='tarefa-zap'){ zapTarefa(id); }
   else if(btn.dataset.act==='tarefa-imprimir'){ imprimirRoteiroSemana(); }
   else if(btn.dataset.act==='tarefa-todas'){ verTodasTarefas(); }
+  else if(btn.dataset.act==='tarefa-arquivar'){ arquivarTarefa(id); }
+  else if(btn.dataset.act==='tarefa-arquivadas'){ filtroTarefas.arquivo=!filtroTarefas.arquivo; filtroTarefas.busca=''; filtroTarefas.estado='todas'; render(); }
   else if(btn.dataset.act==='tarefa-excluir'){
     const t=buscarTarefa(id);
     if(t && confirm(`Excluir a tarefa "${t.titulo||''}"?`)){
@@ -10911,7 +10913,7 @@ const DIAS_SEMANA = [
   {dow:'Sáb', nome:'Sábado'},
   {dow:'Dom', nome:'Domingo'}
 ];
-let filtroTarefas = { busca:'', estado:'todas' };
+let filtroTarefas = { busca:'', estado:'todas', arquivo:false };
 const STATUS_TAREFAS=[{id:'pendente',nome:'A fazer',icone:'📥'},{id:'andamento',nome:'Em andamento',icone:'⚙️'},{id:'concluida',nome:'Concluída',icone:'✅'}];
 function nomeStatusTarefa(status){const padrao=STATUS_TAREFAS.find(s=>s.id===status)?.nome||'Etapa';return String(prefs().tarefasNomesEtapas?.[status]||padrao).trim()||padrao;}
 function statusTarefa(t){return STATUS_TAREFAS.some(s=>s.id===t.status)?t.status:(t.feito?'concluida':'pendente');}
@@ -10944,6 +10946,7 @@ function tarefasDaSemana(){
 function tarefasFiltradas(){
   const q=String(filtroTarefas.busca||'').trim().toLowerCase();
   return tarefasDaSemana().filter(t=>{
+    if(!!t.arquivada!==!!filtroTarefas.arquivo) return false;
     if(filtroTarefas.estado==='pendentes' && statusTarefa(t)==='concluida') return false;
     if(filtroTarefas.estado==='andamento' && statusTarefa(t)!=='andamento') return false;
     if(filtroTarefas.estado==='feitas' && statusTarefa(t)!=='concluida') return false;
@@ -10963,11 +10966,12 @@ function itemTarefaHTML(t){
     <div class="tk-card-topo"><div class="tk-card-titulo">${esc(t.titulo||'Sem título')}</div><span class="tk-prioridade ${prioridade}">${prioridade==='alta'?'🔴 Alta':prioridade==='baixa'?'⚪ Baixa':'🔵 Normal'}</span></div>
     <div class="tk-card-meta"><span>${atrasada?'⚠️ Atrasada':'📅 '+fmtData(t.data)}</span>${t.hora?`<span>⏰ ${esc(t.hora)}</span>`:''}${t.local?`<span>📍 ${esc(t.local)}</span>`:''}${cli?`<span>👤 ${esc(cli.nome)}${cli.empresa?' · '+esc(cli.empresa):''}</span>`:''}${t.endereco?`<span title="${esc(t.endereco)}">🏠 ${esc(t.endereco)}</span>`:''}</div>
     ${t.obs?`<div class="tk-card-obs">${esc(t.obs)}</div>`:''}${t.feito&&t.feitoEm?`<div class="mini" style="margin-top:6px">✅ Concluída em ${fmtData(t.feitoEm)}</div>`:''}
-    <div class="tk-card-acoes"><div class="tk-card-botoes">${t.endereco?`<button class="icon-btn" data-act="tarefa-mapa" data-id="${t.id}" title="Abrir no mapa">🗺️</button>`:''}${(cli&&cli.telefone)?`<button class="icon-btn" data-act="tarefa-zap" data-id="${t.id}" title="WhatsApp do cliente">💬</button>`:''}<button class="icon-btn" data-act="tarefa-editar" data-id="${t.id}" title="Editar">✏️</button><button class="icon-btn del" data-act="tarefa-excluir" data-id="${t.id}" title="Excluir">🗑️</button></div><select class="filtro tk-mover" data-mover-tarefa="${t.id}" aria-label="Mover tarefa de coluna">${STATUS_TAREFAS.map(s=>`<option value="${s.id}" ${status===s.id?'selected':''}>${esc(nomeStatusTarefa(s.id))}</option>`).join('')}</select></div>
+    <div class="tk-card-acoes"><div class="tk-card-botoes">${t.endereco?`<button class="icon-btn" data-act="tarefa-mapa" data-id="${t.id}" title="Abrir no mapa">🗺️</button>`:''}${(cli&&cli.telefone)?`<button class="icon-btn" data-act="tarefa-zap" data-id="${t.id}" title="WhatsApp do cliente">💬</button>`:''}<button class="icon-btn" data-act="tarefa-editar" data-id="${t.id}" title="Editar">✏️</button><button class="icon-btn" data-act="tarefa-arquivar" data-id="${t.id}" title="${t.arquivada?'Restaurar cartão':'Arquivar cartão'}">${t.arquivada?'↩️':'📦'}</button><button class="icon-btn del" data-act="tarefa-excluir" data-id="${t.id}" title="Excluir">🗑️</button></div><select class="filtro tk-mover" data-mover-tarefa="${t.id}" aria-label="Mover tarefa de coluna">${STATUS_TAREFAS.map(s=>`<option value="${s.id}" ${status===s.id?'selected':''}>${esc(nomeStatusTarefa(s.id))}</option>`).join('')}</select></div>
   </article>`;
 }
 function htmlTarefas(){
-  const sem=tarefasDaSemana();
+  const arq=tarefasDaSemana().filter(t=>t.arquivada);
+  const sem=tarefasDaSemana().filter(t=>!!t.arquivada===!!filtroTarefas.arquivo);
   const lista=tarefasFiltradas();
   const pend=sem.filter(t=>statusTarefa(t)==='pendente').length;
   const andamento=sem.filter(t=>statusTarefa(t)==='andamento').length;
@@ -10995,6 +10999,7 @@ function htmlTarefas(){
         <button class="btn ghost sm" data-t-sem="hoje">Esta semana</button>
       </div>
       <button class="btn ghost" data-act="tarefa-todas">📋 Todas</button>
+      <button class="btn ghost" data-act="tarefa-arquivadas">${filtroTarefas.arquivo?'↩️ Voltar ao quadro':'📦 Arquivados ('+arq.length+')'}</button>
       <button class="btn ghost" data-act="tarefa-imprimir">🖨️ Imprimir roteiro</button>
       <button class="btn primary" data-act="tarefa-novo">＋ Nova tarefa</button>
     </div>
@@ -11002,13 +11007,13 @@ function htmlTarefas(){
 
   const toolbar=`<div class="toolbar" style="margin-top:14px">
     <div class="busca"><input id="buscaTarefa" placeholder="Buscar por local, serviço, cliente, endereço..." value="${esc(filtroTarefas.busca)}"></div>
-    <select class="filtro" id="fEstadoTarefa">
+    ${filtroTarefas.arquivo?'<span class="selo info">📦 Arquivados</span>':''}<select class="filtro" id="fEstadoTarefa" ${filtroTarefas.arquivo?'disabled':''}>
       <option value="todas" ${filtroTarefas.estado==='todas'?'selected':''}>Todas (${sem.length})</option>
       <option value="pendentes" ${filtroTarefas.estado==='pendentes'?'selected':''}>📥 ${esc(nomeStatusTarefa('pendente'))} (${pend})</option>
       <option value="andamento" ${filtroTarefas.estado==='andamento'?'selected':''}>⚙️ ${esc(nomeStatusTarefa('andamento'))} (${andamento})</option>
       <option value="feitas" ${filtroTarefas.estado==='feitas'?'selected':''}>✅ ${esc(nomeStatusTarefa('concluida'))} (${feitas})</option>
     </select>
-    <div class="contagem" style="margin-left:auto">${lista.length} de ${sem.length} tarefa(s)</div>
+    <div class="contagem" style="margin-left:auto">${lista.length} de ${filtroTarefas.arquivo?arq.length:sem.length} tarefa(s)</div>
   </div>`;
 
   const colunas=STATUS_TAREFAS.map(s=>{
@@ -11055,6 +11060,12 @@ function ligarTarefas(){
       render();
     };
   });
+}
+function arquivarTarefa(id){
+  const t=buscarTarefa(id); if(!t) return;
+  t.arquivada=!t.arquivada; t.arquivadaEm=t.arquivada?agoraDT():'';
+  salvar(); render();
+  toast(t.arquivada?'Cartão arquivado.':'Cartão restaurado.');
 }
 /* ---------- Formulário ---------- */
 function formTarefa(id, dataPre, statusPre='pendente'){
