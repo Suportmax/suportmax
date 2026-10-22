@@ -971,6 +971,7 @@ body{font-size:14px;line-height:1.45}
 .nav-item.active{background:#1c355a;border-color:#284b7b;color:#fff;box-shadow:inset 3px 0 #60a5fa}
 .nav-item .ico{width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;color:#9aabc3}
 .nav-item.active .ico{color:#93c5fd}
+.nav-item.nav-item-locked{opacity:.62}
 .nav-item .ico svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .nav-item .pill{background:#dc3e55;padding:2px 7px}
 .card,.stat{border-radius:var(--radius);box-shadow:var(--sombra)}
@@ -2810,6 +2811,7 @@ document.addEventListener('keydown', e=>{
 document.querySelector('.nav').addEventListener('click', e=>{
   const b = e.target.closest('.nav-item');
   if(!b) return;
+  if(b.hasAttribute('data-needs-admin') && !souAdmin()){ toast('Acesso de administrador necessario. Confira o perfil desta conta no Supabase.','erro'); return; }
   if(b.dataset.act==='produto-novo'){ fecharMenu(); formProduto(null); return; }
   if(b.dataset.act==='produto-importar'){ fecharMenu(); abrirImportacaoNFeProdutos(); return; }
   const alvo = b.dataset.view;
@@ -9711,7 +9713,13 @@ function souAdmin(){ return db.role !== 'comum'; }
 function aplicarPermissoes(){
   const comum = !souAdmin();
   /* Contas "comum" não veem dados da empresa, fornecedores/custos nem apagar tudo */
-  document.querySelectorAll('[data-view="dados"], [data-view="catalogo"], [data-needs-admin]').forEach(b=>{ b.style.display = comum ? 'none' : ''; });
+  document.querySelectorAll('[data-view="dados"], [data-view="catalogo"]').forEach(b=>{ b.style.display = comum ? 'none' : ''; });
+  document.querySelectorAll('[data-needs-admin]').forEach(b=>{
+    b.style.display='';
+    b.classList.toggle('nav-item-locked',comum);
+    b.setAttribute('aria-disabled',String(comum));
+    b.title=comum?'Disponivel somente para perfil Administrador; confira crm_members no Supabase.':'';
+  });
   if(comum && (view==='dados' || view==='catalogo')) view = 'painel';
 }
 function membroValidadoOffline(user){
