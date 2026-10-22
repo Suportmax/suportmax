@@ -1099,6 +1099,8 @@ body.tema-escuro .stat .ico{background:#17263d}
       <button class="nav-item" data-view="financeiro"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="15" rx="2"/><path d="M2 10h20M16 15h2M6 5V3h12v2"/></svg></span><span>Financeiro</span><span class="pill" id="pillFin" style="display:none">0</span></button>
       <button class="nav-item" data-view="contratos"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/></svg></span><span>Contratos</span><span class="pill" id="pillContrato" style="display:none">0</span></button>
       <button class="nav-item" data-view="contratosServico"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6M8 13l2 2 5-5M8 18h8"/></svg></span><span>Contratos de serviço</span></button>
+      <button class="nav-item" type="button" data-act="produto-novo" data-needs-admin><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16zM3.3 7l8.7 5 8.7-5M12 22V12M16 4l-8 5"/></svg></span><span>Cadastrar produto</span></button>
+      <button class="nav-item" type="button" data-act="produto-importar" data-needs-admin><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v4h16v-4"/></svg></span><span>Importar produtos (XML)</span></button>
       <div class="nav-label">RELACIONAMENTO</div>
       <button class="nav-item" data-view="mensagens"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.5 8.5 0 0 1 8.7 3.9a8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg></span><span>Mensagens</span></button>
       <button class="nav-item" data-view="relatorios"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 3v18h18M8 16v-5M13 16V6M18 16v-8"/></svg></span><span>Relatórios</span></button>
@@ -2808,6 +2810,8 @@ document.addEventListener('keydown', e=>{
 document.querySelector('.nav').addEventListener('click', e=>{
   const b = e.target.closest('.nav-item');
   if(!b) return;
+  if(b.dataset.act==='produto-novo'){ fecharMenu(); formProduto(null); return; }
+  if(b.dataset.act==='produto-importar'){ fecharMenu(); abrirImportacaoNFeProdutos(); return; }
   const alvo = b.dataset.view;
   /* Ao abrir a agenda pelo sino, já mostra os follow-ups de hoje */
   if(alvo==='agenda' && view!=='agenda') filtroAgenda.periodo = 'hoje';
@@ -6906,6 +6910,7 @@ function htmlCatalogo(){
       <option value="margemDesc" ${filtroCat.ordem==='margemDesc'?'selected':''}>Maior margem</option>
     </select>
     <button class="btn ghost" id="btnCatModelo" title="Adiciona os itens de informática que ainda não estão no catálogo">📦 Modelo de informática</button>
+    <button class="btn ghost" id="btnImportarNFe">📥 Importar NF-e (XML)</button>
     <button class="btn primary" id="btnNovoItem">＋ Novo item</button>
   </div>
 
@@ -6930,6 +6935,7 @@ function ligarCatalogo(){
   document.getElementById('fCatMargem').addEventListener('change', e=>{ filtroCat.margem=e.target.value; renderTabelaCat(); });
   document.getElementById('fCatOrdem').addEventListener('change', e=>{ filtroCat.ordem=e.target.value; renderTabelaCat(); });
   document.getElementById('btnNovoItem').addEventListener('click', ()=>formProduto(null));
+  document.getElementById('btnImportarNFe').addEventListener('click', abrirImportacaoNFeProdutos);
   document.getElementById('btnCatModelo').addEventListener('click', ()=>{
     const n = carregarCatalogoInfo(); render(); toast(n?`${n} item(ns) adicionado(s) ao catálogo.`:'O modelo de informática já está completo.');
   });
@@ -6965,7 +6971,7 @@ function renderTabelaCat(){
   tb.innerHTML = l.length ? l.map(p=>{
     const m = margemProduto(p);
     return `<tr>
-      <td><div class="cat-item">${p.foto?`<img class="cat-foto" src="${p.foto}" alt="">`:''}<div style="min-width:0"><div class="nm">${esc(p.nome)}</div>${p.desc?`<div class="mt">${esc(p.desc)}</div>`:''}</div></div></td>
+      <td><div class="cat-item">${p.foto?`<img class="cat-foto" src="${p.foto}" alt="">`:''}<div style="min-width:0"><div class="nm">${esc(p.nome)}</div>${p.ncm||p.cest?`<div class="mt">${p.ncm?'NCM '+esc(p.ncm):''}${p.ncm&&p.cest?' · ':''}${p.cest?'CEST '+esc(p.cest):''}</div>`:''}</div></div></td>
       <td><span class="mini">${esc(p.un||'un')}</span></td>
       <td>${Number(p.custo)>0?brl(p.custo):'<span class="mini">—</span>'}</td>
       <td class="vl-total">${brl(p.preco)}</td>
@@ -6980,7 +6986,7 @@ function renderTabelaCat(){
     const m=margemProduto(p);
     const foto=p.foto?`<img class="cat-foto" src="${p.foto}" alt="">`:'<div class="cat-foto" aria-hidden="true" style="display:grid;place-items:center">📦</div>';
     return `<article class="cat-card">
-      <div class="cat-card-top">${foto}<div class="cat-card-main"><div class="cat-card-name">${esc(p.nome)}</div><div class="cat-card-desc">${esc(p.desc||'Sem descrição padrão')}</div></div><span class="mini">${esc(p.un||'un')}</span></div>
+      <div class="cat-card-top">${foto}<div class="cat-card-main"><div class="cat-card-name">${esc(p.nome)}</div><div class="cat-card-desc">${[p.ncm?'NCM '+p.ncm:'',p.cest?'CEST '+p.cest:'',p.cfop?'CFOP '+p.cfop:'',p.csosn?'CSOSN '+p.csosn:''].filter(Boolean).map(esc).join(' · ')||esc(p.desc||'Dados fiscais não cadastrados')}</div></div><span class="mini">${esc(p.un||'un')}</span></div>
       <div class="cat-card-values">
         <div class="cat-card-value"><span>Custo</span><b>${Number(p.custo)>0?brl(p.custo):'Não informado'}</b></div>
         <div class="cat-card-value"><span>Preço de venda</span><b>${brl(p.preco)}</b></div>
@@ -7025,7 +7031,7 @@ function renderFornecedores(){
 function formProduto(id){
   const p = id ? buscarProd(id) : null;
   const v = p || {nome:'', preco:0, custo:0, un:'un', desc:'', fornecedorId:''};
-  const UN = ['un','cx','kg','m','m²','h','hora','serviço','pacote'];
+  const UN = [...new Set(['un','cx','kg','m','m\u00b2','h','hora','servi\u00e7o','pacote',String(v.un||'un')])];
   abrirModal(`
     <form id="fProd2">
       <div class="modal-h"><h2>${p?'✏️ Editar item':'＋ Novo produto / serviço'}</h2><button type="button" class="x" data-fechar>×</button></div>
@@ -7052,6 +7058,20 @@ function formProduto(id){
                   </div>
                 </div>
               </div>
+            </div>
+          </details>
+          <details class="prod-avancado" ${v.ncm||v.cest||v.csosn||v.cfop||v.gtin||v.codigo||v.cTribNac?'open':''}>
+            <summary>Dados fiscais <span class="mini">(NCM, CEST, CSOSN e códigos da nota)</span></summary>
+            <div class="prod-avancado-conteudo">
+              <div class="campo"><label>GTIN / EAN</label><input name="gtin" inputmode="numeric" maxlength="14" value="${esc(v.gtin||'')}" placeholder="Código de barras"></div>
+              <div class="campo"><label>Código do produto</label><input name="codigo" maxlength="60" value="${esc(v.codigo||'')}" placeholder="SKU / código do fornecedor"></div>
+              <div class="campo"><label>NCM</label><input name="ncm" inputmode="numeric" maxlength="8" value="${esc(v.ncm||'')}" placeholder="8 dígitos" pattern="[0-9]{8}" title="Informe 8 dígitos, se aplicável"></div>
+              <div class="campo"><label>CEST</label><input name="cest" inputmode="numeric" maxlength="7" value="${esc(v.cest||'')}" placeholder="7 dígitos" pattern="[0-9]{7}" title="Informe 7 dígitos quando aplicável"></div>
+              <div class="campo"><label>CFOP usual</label><input name="cfop" inputmode="numeric" maxlength="4" value="${esc(v.cfop||'')}" placeholder="4 dígitos"></div>
+              <div class="campo"><label>CSOSN usual (MEI)</label><select name="csosn"><option value="">— Definir conforme operação —</option>${['102','300','400','900'].map(x=>`<option value="${x}" ${String(v.csosn||'')===x?'selected':''}>${x}</option>`).join('')}</select></div>
+              <div class="campo"><label>Origem da mercadoria</label><select name="origem"><option value="">— Selecione —</option>${[['0','Nacional'],['1','Importação direta'],['2','Importada adquirida no Brasil'],['3','Nacional com conteúdo de importação acima de 40%'],['4','Nacional conforme processo produtivo básico'],['5','Nacional com conteúdo de importação até 40%'],['6','Importação direta sem similar nacional'],['7','Importada adquirida no Brasil sem similar nacional'],['8','Nacional com conteúdo de importação acima de 70%']].map(([x,l])=>`<option value="${x}" ${String(v.origem??'')===x?'selected':''}>${x} — ${l}</option>`).join('')}</select></div>
+              <div class="campo"><label>cTribNac (serviços)</label><input name="cTribNac" inputmode="numeric" maxlength="6" value="${esc(v.cTribNac||'')}" placeholder="6 dígitos"></div>
+              <div class="campo full mini">Os códigos são sugestões por item; confirme NCM/CEST e CSOSN/CFOP com seu contador e revise conforme a operação.</div>
             </div>
           </details>
         </div>
@@ -7130,6 +7150,10 @@ function formProduto(id){
       preco:Math.max(0, Number(f.get('preco'))||0),
       desc:p?String(p.desc||'').trim():'',
       fornecedorId:String(f.get('fornecedorId')||''),
+      gtin:String(f.get('gtin')||'').trim(), codigo:String(f.get('codigo')||'').trim(),
+      ncm:String(f.get('ncm')||'').replace(/\D/g,''), cest:String(f.get('cest')||'').replace(/\D/g,''),
+      cfop:String(f.get('cfop')||'').replace(/\D/g,''), csosn:String(f.get('csosn')||''),
+      origem:String(f.get('origem')||''), cTribNac:String(f.get('cTribNac')||'').replace(/\D/g,''),
       foto:fotoAtual
     };
     if(p){ Object.assign(p, dados); toast('Item atualizado.'); }
@@ -7143,6 +7167,85 @@ function excluirProduto(id){
   const l = listaProdutos(); l.splice(l.indexOf(p),1);
   listaOrcamentos().forEach(o=>(o.itens||[]).forEach(i=>{ if(i.produtoId===id) i.produtoId=''; }));
   salvar(); render(); toast('Item excluído do catálogo.');
+}
+function abrirImportacaoNFeProdutos(){
+  abrirModal(`
+    <div class="modal-h"><h2>📥 Importar produtos da NF-e</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      <p class="mini" style="margin-bottom:12px">O XML preenche nome, c&oacute;digo, GTIN, unidade, custo, fornecedor e dados fiscais. A quantidade pode ser somada ao estoque. Pre&ccedil;o de venda e foto n&atilde;o constam na nota e ficam para cadastro manual.</p>
+      <div class="painel-inline" style="margin-bottom:12px"><div class="campo"><label>Chave de acesso da NF-e (44 dígitos)</label><input id="nfeChaveConsulta" inputmode="numeric" maxlength="44" placeholder="Digite ou cole a chave"></div><button type="button" class="btn ghost" id="nfeConsultarChave">Consultar situação na SEFAZ</button><div class="mini">A consulta pública não importa os itens. Para obter o XML completo, use o arquivo enviado pelo fornecedor ou a distribuição oficial de DF-e, quando você for destinatário autorizado.</div></div>
+      <div class="campo"><label>Selecionar XML para importar produtos da NF-e</label><input id="nfeXmlArquivo" type="file" accept=".xml,text/xml,application/xml"></div>
+      <label class="mini" style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="nfeImportarEstoque" type="checkbox" checked> Somar a quantidade da nota ao estoque dos produtos</label>
+      <div id="nfeXmlResumo" style="margin-top:12px"></div>
+      <div id="nfeXmlItens" style="margin-top:8px"></div>
+      <div id="nfeXmlErro" class="mini" style="color:var(--erro);margin-top:8px"></div>
+    </div>
+    <div class="modal-f"><button type="button" class="btn ghost" data-fechar>Cancelar</button><button type="button" class="btn primary" id="nfeXmlImportar" disabled>Importar selecionados</button></div>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  const chaveInput=document.getElementById('nfeChaveConsulta');
+  chaveInput.oninput=()=>{chaveInput.value=chaveInput.value.replace(/\D/g,'').slice(0,44);};
+  document.getElementById('nfeConsultarChave').onclick=()=>{
+    const chave=chaveInput.value.trim();
+    if(chave.length!==44){toast('A chave de acesso deve ter 44 d\u00edgitos.','erro');return;}
+    if(navigator.clipboard?.writeText) navigator.clipboard.writeText(chave).catch(()=>{});
+    window.open('https://www.nfe.fazenda.gov.br/portal/consulta.aspx','_blank','noopener');
+    toast('Chave copiada. Cole-a no campo de consulta da SEFAZ.');
+  };
+  const arquivo=document.getElementById('nfeXmlArquivo'), resumo=document.getElementById('nfeXmlResumo'), itensEl=document.getElementById('nfeXmlItens'), erro=document.getElementById('nfeXmlErro'), btn=document.getElementById('nfeXmlImportar');
+  let produtosXml=[];
+  arquivo.onchange=async()=>{
+    produtosXml=[]; resumo.innerHTML=''; itensEl.innerHTML=''; erro.textContent=''; btn.disabled=true;
+    const file=arquivo.files&&arquivo.files[0]; if(!file) return;
+    if(file.size>10*1024*1024){ erro.textContent='O XML excede o limite de 10 MB.'; return; }
+    try{
+      const xml=new DOMParser().parseFromString(await file.text(),'application/xml');
+      if(xml.getElementsByTagName('parsererror').length) throw new Error('O arquivo não é um XML válido.');
+      const all=[...xml.getElementsByTagName('*')], pick=(el,name)=>all.find(x=>x.localName===name&&el.contains(x))?.textContent?.trim()||'';
+      const inf=all.find(x=>x.localName==='infNFe');
+      const dets=all.filter(x=>x.localName==='det'&&x.parentElement?.localName==='infNFe');
+      if(!inf||!dets.length) throw new Error('Não encontrei itens de NF-e nesse arquivo. Selecione o XML autorizado (NFe ou nfeProc).');
+      const emit=all.find(x=>x.localName==='emit');
+      const emitNome=emit?pick(emit,'xNome'):'';
+      const emitDoc=emit?(pick(emit,'CNPJ')||pick(emit,'CPF')):'';
+      const chave=(inf.getAttribute('Id')||'').replace(/^NFe/,'')||pick(xml,'chNFe');
+      produtosXml=dets.map(det=>{
+        const prod=[...det.children].find(x=>x.localName==='prod'); if(!prod) return null;
+        const value=name=>[...prod.children].find(x=>x.localName===name)?.textContent?.trim()||'';
+        const impostos=[...det.children].find(x=>x.localName==='imposto');
+        const icms=impostos&&[...impostos.getElementsByTagName('*')].find(x=>x.localName.startsWith('ICMSSN'));
+        const nested=(el,name)=>el&&[...el.getElementsByTagName('*')].find(x=>x.localName===name)?.textContent?.trim()||'';
+        return {nome:value('xProd'),codigo:value('cProd'),gtin:(value('cEAN')||value('cEANTrib')).replace(/^SEM GTIN$/i,''),un:value('uCom')||'un',custo:Number(String(value('vUnCom')).replace(',','.'))||0,ncm:value('NCM'),cest:value('CEST'),cfop:value('CFOP'),csosn:nested(icms,'CSOSN'),origem:nested(icms,'orig'),qtd:Number(String(value('qCom')).replace(',','.'))||0,fornecedorNome:emitNome,fornecedorDoc:emitDoc};
+      }).filter(x=>x&&x.nome);
+      if(!produtosXml.length) throw new Error('A nota não contém produtos importáveis.');
+      resumo.innerHTML=`<div class="selo info">${produtosXml.length} item(ns) · ${esc(emitNome||'Fornecedor não identificado')}${chave?` · chave ${esc(chave)}`:''}</div>`;
+      itensEl.innerHTML=produtosXml.map((x,i)=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:9px;border-bottom:1px solid var(--borda);font-size:12.5px"><input type="checkbox" data-nfe-linha="${i}" checked style="margin-top:3px"><span style="flex:1;min-width:0"><b>${esc(x.nome)}</b><span class="mini"> · ${esc(x.codigo)} · ${x.qtd} ${esc(x.un)} × ${brl(x.custo)}</span><br><span class="mini">NCM ${esc(x.ncm||'—')} · CEST ${esc(x.cest||'—')} · CFOP ${esc(x.cfop||'—')} · CSOSN ${esc(x.csosn||'—')}</span></span></label>`).join('');
+      btn.disabled=false;
+    }catch(e){ produtosXml=[]; erro.textContent=e.message||'Falha ao ler o XML.'; }
+  };
+  btn.onclick=()=>{
+    const selecionados=[...itensEl.querySelectorAll('[data-nfe-linha]:checked')].map(c=>produtosXml[Number(c.dataset.nfeLinha)]).filter(Boolean);
+    if(!selecionados.length){ erro.textContent='Selecione pelo menos um item.'; return; }
+    let novos=0, atualizados=0;
+    const importarEstoque=document.getElementById('nfeImportarEstoque').checked;
+    const amostra=selecionados[0]||{};
+    const nomeFornecedor=String(amostra.fornecedorNome||'').trim();
+    const docFornecedor=String(amostra.fornecedorDoc||'').replace(/\D/g,'');
+    let fornecedorId='';
+    if(nomeFornecedor){
+      const nomeNormal=s=>String(s||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      let fornecedor=listaFornecedores().find(f=>nomeNormal(f.nome)===nomeNormal(nomeFornecedor)||(docFornecedor&&String(f.obs||'').replace(/\D/g,'')===docFornecedor));
+      if(!fornecedor){fornecedor={id:uid(),nome:nomeFornecedor,contato:'',telefone:'',email:'',obs:docFornecedor?'CNPJ/CPF '+docFornecedor+' (importado da NF-e)':''};listaFornecedores().push(fornecedor);}
+      fornecedorId=fornecedor.id;
+    }
+    selecionados.forEach(x=>{
+      const normal=s=>String(s||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const p=listaProdutos().find(y=>(x.gtin&&y.gtin&&x.gtin===y.gtin)||normal(y.nome)===normal(x.nome));
+      const dados={nome:x.nome,codigo:x.codigo,gtin:x.gtin,un:x.un,custo:x.custo,ncm:x.ncm.replace(/\D/g,''),cest:x.cest.replace(/\D/g,''),cfop:x.cfop.replace(/\D/g,''),csosn:x.csosn,origem:x.origem};
+      if(p){ const unidadeAnterior=p.un; Object.assign(p,dados); if(fornecedorId)p.fornecedorId=fornecedorId; if(importarEstoque){const saldo=Number(p.estoque)||0;p.estoque=p.estoque==null||String(unidadeAnterior||'un').toLowerCase()!==String(x.un||'un').toLowerCase()?x.qtd:saldo+x.qtd;} atualizados++; }
+      else{ listaProdutos().push({id:uid(),preco:0,desc:'',fornecedorId,...dados,...(importarEstoque?{estoque:x.qtd}: {})}); novos++; }
+    });
+    salvar(); fecharModal(); render(); toast(`Importação concluída: ${novos} novo(s), ${atualizados} atualizado(s).`);
+  };
 }
 function formFornecedor(id){
   const f0 = id ? buscarForn(id) : null;
@@ -8731,7 +8834,7 @@ function exportarRelatorioCSV(){
       '0.00', 'R$', valorVendaOS(o).toFixed(2)
     ].map(csvEsc).join(';'));
   });
-  baixar(`relatorio-orcamentos-${hojeISO()}.csv`, linhas.join('\r\n'), 'text/csv;charset=utf-8');
+  baixar(`relatorio-orcamentos-${hojeISO()}.csv`, linhas.join('\n'), 'text/csv;charset=utf-8');
   toast('Relatório exportado em CSV.');
 }
 
@@ -8763,6 +8866,19 @@ function catalogoProdutos(){
           <div class="campo full"><label>Nome * <span class="req">*</span></label><input id="pNome" maxlength="100" placeholder="Ex.: Convite impresso, Consultoria mensal, Hora técnica..."></div>
           <div class="campo"><label>Preço padrão (R$)</label><input id="pPreco" type="number" inputmode="decimal" min="0" step="0.01"></div>
           <div class="campo"><label>Unidade</label><select id="pUn">${['un','cx','kg','m','m²','h','hora','serviço','pacote'].map(u=>`<option>${u}</option>`).join('')}</select></div>
+          <details class="prod-avancado" id="pFiscal">
+            <summary>Dados fiscais e identificação</summary>
+            <div class="prod-avancado-conteudo">
+              <div class="campo"><label>GTIN / EAN</label><input id="pGtin" inputmode="numeric" maxlength="14"></div>
+              <div class="campo"><label>Código / SKU</label><input id="pCodigo" maxlength="60"></div>
+              <div class="campo"><label>NCM</label><input id="pNcm" inputmode="numeric" maxlength="8" placeholder="8 dígitos"></div>
+              <div class="campo"><label>CEST</label><input id="pCest" inputmode="numeric" maxlength="7" placeholder="7 dígitos, quando aplicável"></div>
+              <div class="campo"><label>CFOP usual</label><input id="pCfop" inputmode="numeric" maxlength="4"></div>
+              <div class="campo"><label>CSOSN usual (MEI)</label><select id="pCsosn"><option value="">— Definir por operação —</option>${['102','300','400','900'].map(x=>`<option>${x}</option>`).join('')}</select></div>
+              <div class="campo"><label>Origem da mercadoria</label><select id="pOrigem"><option value="">&#8212; Selecione &#8212;</option>${[['0','Nacional'],['1','Importa\u00e7\u00e3o direta'],['2','Importada adquirida no Brasil'],['3','Nacional com conte\u00fado de importa\u00e7\u00e3o acima de 40%'],['4','Nacional conforme processo produtivo b\u00e1sico'],['5','Nacional com conte\u00fado de importa\u00e7\u00e3o at\u00e9 40%'],['6','Importa\u00e7\u00e3o direta sem similar nacional'],['7','Importada adquirida no Brasil sem similar nacional'],['8','Nacional com conte\u00fado de importa\u00e7\u00e3o acima de 70%']].map(([x,l])=>`<option value="${x}">${x} &#8212; ${l}</option>`).join('')}</select></div>
+              <div class="campo"><label>cTribNac (serviço)</label><input id="pTribNac" inputmode="numeric" maxlength="6"></div>
+            </div>
+          </details>
         </div>
         <div style="margin-top:11px;display:flex;gap:8px;justify-content:flex-end">
           <button type="button" class="btn ghost sm" id="pCancelar" hidden>Cancelar edição</button>
@@ -8773,7 +8889,7 @@ function catalogoProdutos(){
       <div id="listaProd"></div>
     </div>
     <div class="modal-f" style="justify-content:space-between;flex-wrap:wrap;gap:8px">
-      <button type="button" class="btn ghost" id="btnCatInfo" title="Adiciona ao catálogo os itens de informática que ainda não estiverem cadastrados">📦 Modelo de informática</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button type="button" class="btn ghost" id="btnCatInfo" title="Adiciona ao catálogo os itens de informática que ainda não estiverem cadastrados">📦 Modelo de informática</button><button type="button" class="btn ghost" id="btnCatImportNFe">📥 Importar XML de NF-e</button></div>
       <button type="button" class="btn primary" data-fechar>Concluir</button>
     </div>`);
 
@@ -8783,6 +8899,8 @@ function catalogoProdutos(){
     editando = null;
     ['pNome','pPreco'].forEach(i=>document.getElementById(i).value='');
     document.getElementById('pUn').selectedIndex = 0;
+    ['pGtin','pCodigo','pNcm','pCest','pCfop','pTribNac'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('pCsosn').value=''; document.getElementById('pOrigem').value=''; document.getElementById('pFiscal').open=false;
     document.getElementById('pSalvar').textContent = '＋ Adicionar ao catálogo';
     document.getElementById('pCancelar').hidden = true;
     document.getElementById('prodTitulo').textContent = '＋ Novo produto / serviço';
@@ -8793,7 +8911,7 @@ function catalogoProdutos(){
       <div class="prod-item">
         <div style="flex:1;min-width:0">
           <b>${esc(p.nome)}</b> <span class="mini">${esc(p.un||'un')}</span>
-          <div style="font-size:12.3px;color:var(--suave)">${esc(p.desc||'Sem descrição padrão')}</div>
+          <div style="font-size:12.3px;color:var(--suave)">${[p.ncm?'NCM '+p.ncm:'',p.cest?'CEST '+p.cest:'',p.cfop?'CFOP '+p.cfop:'',p.csosn?'CSOSN '+p.csosn:''].filter(Boolean).map(esc).join(' · ')||esc(p.desc||'Sem dados fiscais')}</div>
         </div>
         <div class="preco">${brl(p.preco)}</div>
         <button type="button" class="icon-btn" data-pedit="${p.id}" title="Editar">✏️</button>
@@ -8808,6 +8926,7 @@ function catalogoProdutos(){
     renderLista();
     toast(n ? `${n} item(ns) de informática adicionado(s) ao catálogo.` : 'O catálogo de informática já está completo.');
   };
+  document.getElementById('btnCatImportNFe').onclick=()=>{fecharModal();abrirImportacaoNFeProdutos();};
 
   document.getElementById('fProd').onsubmit = e=>{
     e.preventDefault();
@@ -8817,7 +8936,11 @@ function catalogoProdutos(){
       nome,
       preco: Math.max(0, Number(document.getElementById('pPreco').value)||0),
       un: document.getElementById('pUn').value,
-      desc: editando ? String(editando.desc||'').trim() : ''
+      desc: editando ? String(editando.desc||'').trim() : '',
+      gtin:document.getElementById('pGtin').value.trim(), codigo:document.getElementById('pCodigo').value.trim(),
+      ncm:document.getElementById('pNcm').value.replace(/\D/g,''), cest:document.getElementById('pCest').value.replace(/\D/g,''),
+      cfop:document.getElementById('pCfop').value.replace(/\D/g,''), csosn:document.getElementById('pCsosn').value, origem:document.getElementById('pOrigem').value,
+      cTribNac:document.getElementById('pTribNac').value.replace(/\D/g,'')
     };
     if(editando){ Object.assign(editando, dados); toast('Produto atualizado.'); }
     else{ listaProdutos().push({id:uid(), ...dados}); toast('Produto adicionado ao catálogo.'); }
@@ -8834,6 +8957,10 @@ function catalogoProdutos(){
       document.getElementById('pNome').value = p.nome;
       document.getElementById('pPreco').value = (Number(p.preco)||0);
       document.getElementById('pUn').value = p.un || 'un';
+      document.getElementById('pGtin').value=p.gtin||''; document.getElementById('pCodigo').value=p.codigo||'';
+      document.getElementById('pNcm').value=p.ncm||''; document.getElementById('pCest').value=p.cest||'';
+      document.getElementById('pCfop').value=p.cfop||''; document.getElementById('pCsosn').value=p.csosn||''; document.getElementById('pOrigem').value=p.origem||'';
+      document.getElementById('pTribNac').value=p.cTribNac||''; document.getElementById('pFiscal').open=!!(p.ncm||p.cest||p.cfop||p.csosn||p.origem||p.cTribNac);
       document.getElementById('pSalvar').textContent = '💾 Salvar alterações';
       document.getElementById('pCancelar').hidden = false;
       document.getElementById('prodTitulo').textContent = '✏️ Editando: ' + p.nome;
@@ -9171,7 +9298,7 @@ function exportarCSV(){
     c.followup&&c.followup.data || '', c.followup&&c.followup.prioridade || '', c.followup&&c.followup.nota || '',
     c.notas
   ].map(csvEsc).join(';'));
-  baixar(`crm-clientes-${hojeISO()}.csv`, [cab.join(';'), ...linhas].join('\r\n'), 'text/csv;charset=utf-8');
+  baixar(`crm-clientes-${hojeISO()}.csv`, [cab.join(';'), ...linhas].join('\n'), 'text/csv;charset=utf-8');
   toast('Planilha CSV baixada.');
 }
 
@@ -9197,9 +9324,11 @@ function importarDados(texto, nome){
       }))
     }));
     const prodsImport = (Array.isArray(d.produtos)?d.produtos:[]).map(p=>({
-      id:p.id||uid(), nome:String(p.nome||'Produto'),
+      ...p, id:p.id||uid(), nome:String(p.nome||'Produto'),
       preco:Math.max(0,Number(p.preco)||0), un:p.un||'un', desc:p.desc||'',
-      custo:Math.max(0,Number(p.custo)||0), fornecedorId:p.fornecedorId||''
+      custo:Math.max(0,Number(p.custo)||0), fornecedorId:p.fornecedorId||'',
+      gtin:String(p.gtin||''), codigo:String(p.codigo||''), ncm:String(p.ncm||''), cest:String(p.cest||''),
+      cfop:String(p.cfop||''), csosn:String(p.csosn||''), origem:String(p.origem||''), cTribNac:String(p.cTribNac||'')
     }));
     db = normalizar({
       ...baseVazia(),
@@ -9582,7 +9711,7 @@ function souAdmin(){ return db.role !== 'comum'; }
 function aplicarPermissoes(){
   const comum = !souAdmin();
   /* Contas "comum" não veem dados da empresa, fornecedores/custos nem apagar tudo */
-  document.querySelectorAll('[data-view="dados"], [data-view="catalogo"]').forEach(b=>{ b.style.display = comum ? 'none' : ''; });
+  document.querySelectorAll('[data-view="dados"], [data-view="catalogo"], [data-needs-admin]').forEach(b=>{ b.style.display = comum ? 'none' : ''; });
   if(comum && (view==='dados' || view==='catalogo')) view = 'painel';
 }
 function membroValidadoOffline(user){
