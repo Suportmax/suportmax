@@ -564,6 +564,44 @@ body.tema-escuro .ff-etapa{background:#0d1728}
 .menu-pop button:hover{background:#f1f5f9}
 .secao-agenda h3 .link-btn{margin-left:auto;font-size:11.5px;text-transform:none;letter-spacing:0}
 
+/* ===== Plano de Hoje (acesso rápido à agenda) ===== */
+.plano-hoje{border-color:#bfdbfe;overflow:hidden}
+.plano-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 15px;
+  background:linear-gradient(180deg,#eff6ff,#fff);border-bottom:1px solid var(--borda)}
+.plano-h h3{margin:0;font-size:14.6px}
+.plano-h .plano-sub{font-size:12.3px;color:var(--suave)}
+.plano-h .cnt{background:#dbeafe;color:#1e40af}
+.plano-acoes{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap}
+.plano-lista{display:flex;flex-direction:column;gap:8px;padding:12px 14px}
+.plano-grupo{font-size:11.4px;font-weight:750;color:var(--suave);text-transform:uppercase;letter-spacing:.5px}
+.plano-item{display:flex;gap:10px;align-items:flex-start;padding:9px 11px;border:1px solid var(--borda);
+  border-radius:10px;background:var(--painel)}
+.plano-item.hoje{border-left:4px solid var(--alerta)}
+.plano-item.venc{border-left:4px solid var(--erro)}
+.plano-item.feita{opacity:.62}
+.plano-item.feita .pi-titulo{text-decoration:line-through}
+.pi-hora{flex:0 0 auto;font-weight:800;font-size:12.8px;color:var(--prim);min-width:46px;text-align:center;padding-top:1px}
+.pi-info{flex:1;min-width:0}
+.pi-titulo{font-size:13.6px;font-weight:650;word-break:break-word}
+.pi-sub{font-size:12.4px;color:var(--suave);margin-top:2px;word-break:break-word}
+.pi-acoes{display:flex;gap:5px;flex-wrap:wrap;flex:0 0 auto}
+.plano-vazio{text-align:center;padding:24px 14px;color:var(--suave);font-size:13px;line-height:1.6}
+.plano-vazio .big{font-size:30px;display:block;margin-bottom:6px}
+.plano-compacto .plano-lista{padding:10px 12px}
+body.tema-escuro .plano-h{background:linear-gradient(180deg,#132244,#0f1b2e)}
+body.tema-escuro .plano-h .cnt{background:#1e3a8a;color:#dbeafe}
+/* botão "Meu dia" na lateral (funciona no PC e no celular pelo menu) */
+.btn-hoje-lateral{width:100%;margin:0 0 10px;background:rgba(37,99,235,.2);color:#e2e8f0;
+  border:1px solid rgba(96,165,250,.38);border-radius:10px;padding:9px 12px;font-size:13.2px;
+  font-weight:650;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer}
+.btn-hoje-lateral:hover{background:rgba(37,99,235,.36)}
+.btn-hoje-lateral .cnt-hoje{background:#3b82f6;color:#fff;border-radius:999px;padding:1px 8px;font-size:11.5px;font-weight:800}
+/* botão flutuante do dia (celular) */
+.fab-hoje{display:none;position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0) + 68px);
+  width:50px;height:50px;border-radius:50%;background:#0f172a;color:#fff;font-size:21px;
+  box-shadow:0 10px 26px rgba(15,23,42,.38);align-items:center;justify-content:center;z-index:50;border:0}
+@media(max-width:980px){ .fab-hoje{display:flex} }
+
 /* ===== Tarefas da semana (locais que atendo) ===== */
 .tarefa-topo{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--painel);border:1px solid var(--borda);border-radius:var(--radius);box-shadow:var(--sombra);padding:14px 16px;margin-top:16px}
 .tarefa-topo-info{display:flex;flex-direction:column;gap:3px;min-width:220px;flex:1}
@@ -699,6 +737,13 @@ body.tema-escuro .tk-prioridade.alta{background:#451a1a;color:#fecaca}body.tema-
 .modal-h .x:hover{background:#f1f5f9}
 .modal-b{padding:20px 22px}
 .modal-f{padding:16px 22px;border-top:1px solid var(--borda);display:flex;gap:10px;justify-content:flex-end;background:var(--bg);border-radius:0 0 16px 16px}
+/* --- Rolagem dos modais: o conteúdo nunca fica cortado em telas pequenas ---
+   O formulário é o "corpo" do modal; ele encolhe e o miolo (.modal-b) rola.
+   Cabeçalho e rodapé ficam sempre visíveis. */
+.modal{max-height:calc(100dvh - 80px);display:flex;flex-direction:column;overflow:hidden}
+.modal > form{display:flex;flex-direction:column;min-height:0;flex:1 1 auto;overflow:hidden}
+.modal-b{flex:1 1 auto;min-height:0;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.modal-h,.modal-f{flex:0 0 auto}
 /* Lista de atalhos de teclado */
 .atalhos-lista{display:flex;flex-direction:column;gap:2px}
 .atalho-linha{display:flex;align-items:center;gap:12px;padding:7px 8px;border-radius:8px}
@@ -858,11 +903,11 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
 body.tema-escuro .assin-area,body.tema-escuro .assin-preview{background:#0d1728;border-color:#334155}
 @media print{
   body{background:#fff}
-  body.imprimindo .app,body.imprimindo .overlay,body.imprimindo #toast{display:none !important}
+  body.imprimindo .app,body.imprimindo .overlay,body.imprimindo #toast,body.imprimindo .fab-novo,body.imprimindo .fab-hoje{display:none !important}
   body.imprimindo #areaImpressao{display:block !important}
   /* Impressão pelo Ctrl+P (PC): havendo um documento na área de impressão, sai só o
      documento — sem a interface do CRM e sem nenhum botão sobre o preço */
-  body.com-doc .app,body.com-doc .overlay,body.com-doc .login-screen,body.com-doc #toast,body.com-doc .fab-novo{display:none !important}
+  body.com-doc .app,body.com-doc .overlay,body.com-doc .login-screen,body.com-doc #toast,body.com-doc .fab-novo,body.com-doc .fab-hoje{display:none !important}
   body.com-doc #areaImpressao{display:block !important}
   /* Botões de aceitar/recusar do link público não vão para o papel */
   .pub-acoes{display:none !important}
@@ -904,6 +949,8 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
   .logo-img{max-width:200px}
 }
 @media(max-width:560px){
+  .overlay{padding:8px}
+  .modal{max-height:calc(100dvh - 16px);border-radius:14px}
   .overlay.cadastro-overlay{align-items:flex-end;padding:8px}
   .modal.cadastro-compacto{max-height:calc(100dvh - 16px);border-radius:14px}
   .cadastro-compacto .modal-h,.cadastro-compacto .modal-b,.cadastro-compacto .modal-f{padding-left:14px;padding-right:14px}
@@ -931,10 +978,10 @@ body.imprimir-cupom .itens th.col-unit,body.imprimir-cupom .itens td.col-unit{di
 }
 
 /* ===== Tela de login ===== */
-.login-screen{position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;
-  background:linear-gradient(140deg,#0f172a 0%,#1e293b 55%,#0b1220 100%);padding:20px}
+.login-screen{position:fixed;inset:0;z-index:900;display:flex;align-items:flex-start;justify-content:center;
+  background:linear-gradient(140deg,#0f172a 0%,#1e293b 55%,#0b1220 100%);padding:20px;overflow-y:auto;overscroll-behavior:contain}
 .login-screen[hidden]{display:none}
-.login-box{width:100%;max-width:390px;background:#fff;border-radius:16px;padding:28px 26px 24px;
+.login-box{width:100%;max-width:390px;background:#fff;border-radius:16px;padding:28px 26px 24px;margin:auto;
   box-shadow:0 24px 60px rgba(2,6,23,.55)}
 .login-logo{display:flex;justify-content:center;margin-bottom:14px}
 .login-logo img{max-width:210px;max-height:92px;object-fit:contain}
@@ -1138,6 +1185,7 @@ body.tema-escuro .stat .ico{background:#17263d}
       <button class="nav-item" data-view="dados"><span class="ico" aria-hidden="true"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5M3 12c0 1.66 4 3 9 3s9-1.34 9-3"/></svg></span><span>Dados</span></button>
     </nav>
     <div class="sidebar-foot">
+      <button class="btn-hoje-lateral" type="button" id="btnHojeLateral" title="O que fazer hoje: visitas, tarefas e follow-ups (atalho H)">📅 Meu dia <span class="cnt-hoje" id="cntHoje" hidden></span></button>
       <button class="btn-tema-mobile only-mobile" type="button" id="btnTemaMovel" title="Alternar tema claro/escuro">🌙 Alternar tema</button>
       Os dados são salvos na nuvem e sincronizados entre celular e computador. Você também pode exportar um backup na aba Dados.
     </div>
@@ -1161,6 +1209,7 @@ body.tema-escuro .stat .ico{background:#17263d}
           <input id="buscaGlobal" placeholder="Buscar cliente, orçamento, produto..." autocomplete="off">
           <div class="busca-resultados" id="buscaResultados" hidden></div>
         </div>
+        <button class="btn ghost" id="btnHoje" title="O que fazer hoje — visitas, tarefas e follow-ups (atalho H)">📅 Hoje</button>
         <button class="btn ghost" id="btnTema" title="Alternar tema claro/escuro">🌙</button>
         <button class="btn ghost" id="btnInstalar" hidden title="Instalar o CRM no seu aparelho">📲 Instalar app</button>
         <button class="btn ghost only-desktop" id="btnBackupTopo" title="Baixar uma cópia de segurança dos seus dados">💾 Backup</button>
@@ -2669,6 +2718,10 @@ document.getElementById('btnBackupTopo').addEventListener('click', baixarBackupA
   if(b) b.addEventListener('click', alternarTema);
   const bm = document.getElementById('btnTemaMovel');
   if(bm) bm.addEventListener('click', alternarTema);
+  const bh = document.getElementById('btnHoje');
+  if(bh) bh.addEventListener('click', abrirPlanoHoje);
+  const bhl = document.getElementById('btnHojeLateral');
+  if(bhl) bhl.addEventListener('click', ()=>{ fecharMenu(); abrirPlanoHoje(); });
 })();
 /* No celular o tema é escolha do próprio aparelho (fica salvo só nele), senão o celular
    herda o tema escuro do computador pela sincronização e fica "preso" no escuro.
@@ -2726,6 +2779,9 @@ function render(){
   const pendTarefas = listaTarefas().filter(t=>!t.feito && t.data && diasAte(t.data)<=6).length;
   const pillTarefas = document.getElementById('pillTarefas');
   if(pillTarefas){ pillTarefas.style.display = pendTarefas ? '' : 'none'; pillTarefas.textContent = pendTarefas; }
+
+  /* contador do painel "Meu dia" (visitas + tarefas + follow-ups de hoje) */
+  try{ atualizarContadorHoje(); }catch(e){}
 
   const nVenc = contasReceber().filter(c=>c.vencido).length;
   const pillFin = document.getElementById('pillFin');
@@ -2857,6 +2913,7 @@ function htmlPainel(){
     ${stat('Follow-ups vencidos', vencidos, '⏰', vencidos>0)}
   </div>
 
+  ${htmlPlanoHoje({compacto:true, linkAgenda:true})}
   ${atencao}
   ${cartaoLigado('resumo')?resumoMensalCard():''}
   ${cartaoLigado('caixa')?caixaCard():''}
@@ -3203,6 +3260,11 @@ document.getElementById('view').addEventListener('click', e=>{
   else if(btn.dataset.act==='cli-zap') enviarClienteZap(id);
   else if(btn.dataset.act==='cli-fup-zap') enviarFollowupZap(id, true);
   else if(btn.dataset.act==='agenda-novo') formAgendarFollowup();
+  /* Plano de hoje (acesso rápido) */
+  else if(btn.dataset.act==='hoje-visita'){ formVisitaRapida(); }
+  else if(btn.dataset.act==='hoje-tarefa'){ formTarefa(null, hojeISO()); }
+  else if(btn.dataset.act==='hoje-rota'){ rotaDoDia(); }
+  else if(btn.dataset.act==='ir-agenda'){ view='agenda'; render(); }
   else if(btn.dataset.act==='visita-agendar'){ const id = btn.dataset.id; if(id) formAgendarVisita(id); }
   else if(btn.dataset.act==='visita-feito'){ concluirVisita(btn.dataset.cli, btn.dataset.vis); render(); }
   else if(btn.dataset.act==='visita-remarcar'){ remarcarVisita(btn.dataset.cli, btn.dataset.vis); }
@@ -3673,23 +3735,53 @@ function visitasDoDia(iso){
   const hoje = iso || hojeISO();
   return visitasAgendadasTodas().filter(v=>v.data===hoje);
 }
-function formAgendarVisita(idCliente){
-  const c = buscarCli(idCliente); if(!c) return;
+/* Cria a visita no cliente e registra na auditoria (usado pelos formulários) */
+function criarVisita(clienteId, dados){
+  const c = buscarCli(clienteId); if(!c) return null;
   garantirVisitas(c);
-  const hoje = hojeISO();
+  const v = {
+    id: uid(),
+    data: String(dados.data||hojeISO()),
+    hora: String(dados.hora||'').trim(),
+    endereco: String(dados.endereco||c.endereco||'').trim(),
+    obs: String(dados.obs||'').trim(),
+    status: 'agendada',
+    criadoEm: agoraDT()
+  };
+  garantirVisitas(c).push(v);
+  auditar('cliente', `Visita agendada para ${fmtData(v.data)}${v.hora?` às ${v.hora}`:''} — ${c.nome}`);
+  return v;
+}
+/* Agendar visita: abre o formulário de visita rápida já com o cliente escolhido */
+function formAgendarVisita(idCliente){ formVisitaRapida(idCliente); }
+/* Formulário de visita — acessível de qualquer tela (acesso rápido) */
+function formVisitaRapida(clienteIdPre){
+  const clientes = db.clientes.slice();
+  if(!clientes.length){
+    toast('Cadastre um cliente antes de agendar uma visita.','erro');
+    formCliente(null);
+    return;
+  }
+  const cliPre = clienteIdPre?buscarCli(clienteIdPre):null;
   abrirModal(`
-    <form id="fVisita">
+    <form id="fVisitaRapida">
       <div class="modal-h"><h2>📍 Agendar visita</h2><button type="button" class="x" data-fechar>×</button></div>
       <div class="modal-b">
         <div class="form-grid">
-          <div class="campo full"><label>Cliente</label>
-            <div style="padding:10px 12px;border:1px solid var(--borda);border-radius:10px;background:var(--prim-cl)">
-              <b>${esc(c.nome)}</b>${c.empresa?` — ${esc(c.empresa)}`:''}${c.telefone?` · ${esc(c.telefone)}`:''}
+          <div class="campo full">
+            <label>Cliente *</label>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <input id="buscaCliVisita" type="search" autocomplete="off" placeholder="Digite para buscar cliente por nome, empresa, telefone..." value="${esc(cliPre?cliPre.nome:'')}">
+              <select name="clienteId" id="selClienteVisita">
+                <option value="">— Escolha o cliente —</option>
+                ${opcoesClienteHTML(clientes, cliPre?cliPre.id:'')}
+              </select>
+              <div class="mini" id="dicaBuscaCliVisita">Digite para filtrar por nome, empresa, telefone, e-mail ou CPF/CNPJ.</div>
             </div>
           </div>
-          <div class="campo"><label>Data da visita *</label><input type="date" name="data" value="${hoje}" required></div>
+          <div class="campo"><label>Data da visita *</label><input type="date" name="data" value="${hojeISO()}" required></div>
           <div class="campo"><label>Horário</label><input type="time" name="hora" value=""></div>
-          <div class="campo full"><label>Endereço para visita</label><input name="endereco" maxlength="150" value="${esc(c.endereco||'')}" placeholder="Rua, número, bairro, cidade/UF"></div>
+          <div class="campo full"><label>Endereço para visita</label><input name="endereco" maxlength="150" placeholder="Rua, número, bairro, cidade/UF"></div>
           <div class="campo full"><label>Objetivo / Observação</label><textarea name="obs" maxlength="600" placeholder="Ex.: Apresentar proposta, fazer orçamento no local, vistoria..."></textarea></div>
         </div>
       </div>
@@ -3699,24 +3791,28 @@ function formAgendarVisita(idCliente){
       </div>
     </form>`, true);
   modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
-  document.getElementById('fVisita').onsubmit = e=>{
+  const inp = document.getElementById('buscaCliVisita');
+  const sel = document.getElementById('selClienteVisita');
+  const dica = document.getElementById('dicaBuscaCliVisita');
+  if(inp && sel) inp.addEventListener('input', ()=>filtrarOpcoesCliente(inp, sel, dica));
+  if(sel) sel.addEventListener('change', ()=>{
+    const c = buscarCli(sel.value);
+    const end = document.querySelector('[name="endereco"]');
+    if(c && c.endereco && end && !end.value) end.value = c.endereco;
+  });
+  document.getElementById('fVisitaRapida').onsubmit = e=>{
     e.preventDefault();
-    const f = new FormData(e.target);
-    const data = String(f.get('data')||'');
-    if(!data){ toast('Informe a data da visita.','erro'); return; }
-    const v = {
-      id: uid(),
-      data,
-      hora: String(f.get('hora')||'').trim(),
-      endereco: String(f.get('endereco')||c.endereco||'').trim(),
-      obs: String(f.get('obs')||'').trim(),
-      status: 'agendada',
-      criadoEm: agoraDT()
-    };
-    garantirVisitas(c).push(v);
-    auditar('cliente', `Visita agendada para ${fmtData(data)}${v.hora?` às ${v.hora}`:''} — ${c.nome}`);
-    salvar(); fecharModal(); render();
-    toast('Visita agendada com sucesso!', 'ok');
+    const f = e.target;
+    const cliId = sel.value;
+    if(!cliId){ toast('Escolha o cliente da visita.','erro'); return; }
+    const data = f.querySelector('[name="data"]').value || hojeISO();
+    const hora = f.querySelector('[name="hora"]').value || '';
+    const endereco = f.querySelector('[name="endereco"]').value.trim();
+    const obs = f.querySelector('[name="obs"]').value.trim();
+    criarVisita(cliId, {data, hora, endereco, obs});
+    salvar(); fecharModal();
+    view = 'agenda'; render();
+    toast(`Visita agendada para ${fmtData(data)}${hora?' às '+hora:''}!`,'ok');
   };
 }
 function concluirVisita(clienteId, visitaId){
@@ -4554,19 +4650,8 @@ function htmlAgenda(){
     ${stat('Total agendado', todas.length, '⏰')}
   </div>`;
 
-  /* Atalhos + como agendar */
-  const visHoje = visitasDoDia(hojeISO()).length;
-  const atalhos = `<div class="agenda-topo">
-    <div class="agenda-topo-info">
-      <b>Agenda de visitas e follow-ups</b>
-      <span>Agende visitas aos clientes, veja o roteiro do dia com endereço, telefone, traço rota no Google Maps e marque como visitado.</span>
-      ${visHoje?`<div style="margin-top:8px"><span class="pill" style="display:inline-flex;background:#dbeafe;color:#1e40af;border:1px solid #bfdbfe">${visHoje} visita${visHoje>1?'s':''} agendada${visHoje>1?'s':''} hoje</span></div>`:''}
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap">
-      <button class="btn ghost" onclick="rotaDoDia()">🗺️ Rota do dia</button>
-      <button class="btn primary" data-act="agenda-novo">＋ Agendar follow-up</button>
-    </div>
-  </div>`;
+  /* Painel de acesso rápido: o que fazer hoje (visitas + tarefas + follow-ups) */
+  const atalhos = htmlPlanoHoje();
 
   const toolbar = `<div class="toolbar" style="margin-top:14px">
     <div class="seg" id="segAgenda">
@@ -4589,6 +4674,7 @@ function htmlAgenda(){
       <option value="data" ${filtroAgenda.ordenar==='data'?'selected':''}>Ordenar por data</option>
       <option value="prioridade" ${filtroAgenda.ordenar==='prioridade'?'selected':''}>Ordenar por prioridade</option>
     </select>
+    <button class="btn primary" data-act="agenda-novo" style="margin-left:auto">＋ Agendar follow-up</button>
   </div>`;
 
   /* Visão de calendário */
@@ -4602,10 +4688,10 @@ function htmlAgenda(){
 
   if(!todas.length){
     return stats + atalhos + `<div class="card" style="margin-top:16px"><div class="vazio" style="padding:46px 20px"><span class="big">🎉</span>Nenhum follow-up agendado!<br><br>
-      Clique em <b>＋ Agendar follow-up</b> para marcar um contato, ou registre um contato no histórico do cliente.</div></div>`;
+      Use <b>📍 Visita</b> para marcar uma visita ao cliente, <b>＋ Agendar follow-up</b> para marcar um contato, ou registre o contato no histórico do cliente.</div></div>` + htmlVisitasAgendadas();
   }
   if(!lista.length){
-    return stats + atalhos + toolbar + `<div class="card" style="margin-top:16px"><div class="vazio" style="padding:46px 20px"><span class="big">🔍</span>Nenhum follow-up para este filtro.</div></div>`;
+    return stats + atalhos + toolbar + `<div class="card" style="margin-top:16px"><div class="vazio" style="padding:46px 20px"><span class="big">🔍</span>Nenhum follow-up para este filtro.</div></div>` + htmlVisitasAgendadas();
   }
 
   const grupos = {venc:[], hoje:[], amanha:[], semana:[], depois:[]};
@@ -4668,7 +4754,8 @@ function htmlAgenda(){
        + bloco('Hoje','📍',grupos.hoje,'hoje')
        + bloco('Amanhã','🌅',grupos.amanha,'')
        + bloco('Próximos 7 dias','📅',grupos.semana,'')
-       + bloco('Mais à frente','🗓️',grupos.depois,'');
+       + bloco('Mais à frente','🗓️',grupos.depois,'')
+       + htmlVisitasAgendadas();
 }
 
 function ligarAgenda(){
@@ -9766,6 +9853,16 @@ function criarFabMobile(){
     else formCliente(null);
   };
   document.body.appendChild(b);
+  /* 2º botão flutuante no celular: acesso rápido ao painel do dia */
+  if(!document.querySelector('.fab-hoje')){
+    const h = document.createElement('button');
+    h.className = 'fab-hoje';
+    h.innerHTML = '📅';
+    h.title = 'Meu dia — o que fazer hoje';
+    h.setAttribute('aria-label','Abrir o painel do dia');
+    h.onclick = ()=>abrirPlanoHoje();
+    document.body.appendChild(h);
+  }
 }
 criarFabMobile();
 
@@ -9830,6 +9927,8 @@ const ATALHOS = [
   {tecla:'P',      desc:'Novo item no catálogo', fn:()=>{ view='catalogo'; render(); formProduto(null); }},
   {tecla:'G',      desc:'Ir para o painel', fn:()=>{ view='painel'; render(); }},
   {tecla:'A',      desc:'Ir para a agenda', fn:()=>{ view='agenda'; filtroAgenda.periodo='hoje'; render(); }},
+  {tecla:'H',      desc:'Abrir o painel do dia (o que fazer hoje)', fn:()=>abrirPlanoHoje()},
+  {tecla:'V',      desc:'Agendar uma visita rápido', fn:()=>formVisitaRapida()},
   {tecla:'F',      desc:'Ir para o financeiro', fn:()=>{ view='financeiro'; render(); }},
   {tecla:'R',      desc:'Ir para os relatórios', fn:()=>{ view='relatorios'; render(); }},
   {tecla:'T',      desc:'Alternar tema claro/escuro', fn:()=>alternarTema()},
@@ -10899,6 +10998,196 @@ function imprimirListaContratos(){
       <tbody>${linhas}</tbody>
     </table>
     <div class="rodape-doc"><div>Emitido em ${fmtData(hojeISO())}</div></div>`);
+}
+
+/* =========================================================
+   PLANO DE HOJE — acesso rápido à agenda/visitas
+   ========================================================= */
+/* Tudo o que precisa ser feito hoje: visitas + tarefas + follow-ups */
+function planoHoje(){
+  const hoje = hojeISO();
+  const visitas = visitasDoDia(hoje).slice().sort((a,b)=>String(a.hora||'99:99').localeCompare(String(b.hora||'99:99')));
+  const tarefas = listaTarefas().filter(t=>t.data===hoje && !t.arquivada)
+    .sort((a,b)=>String(a.hora||'99:99').localeCompare(String(b.hora||'99:99')));
+  const fups = agendaPendentes().filter(c=>diasAte(c.followup.data)<=0)
+    .sort((a,b)=>String(a.followup.data).localeCompare(String(b.followup.data)));
+  return {hoje, visitas, tarefas, fups, total: visitas.length+tarefas.length+fups.length};
+}
+function itemPlanoVisita(v){
+  const c = buscarCli(v.clienteId)||{};
+  const end = v.endereco || c.endereco || '';
+  const tel = c.telefone||'';
+  const rota = end ? `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(end)}` : '#';
+  return `<div class="plano-item hoje">
+    <div class="pi-hora">${esc(v.hora||'—')}</div>
+    <div class="pi-info">
+      <div class="pi-titulo">📍 ${esc(c.nome||'Cliente')}${c.empresa?` — ${esc(c.empresa)}`:''}</div>
+      ${end?`<div class="pi-sub">🏠 ${esc(end)}</div>`:''}
+      ${v.obs?`<div class="pi-sub">📝 ${esc(v.obs)}</div>`:''}
+    </div>
+    <div class="pi-acoes">
+      ${tel?`<a class="btn sm ghost" href="https://wa.me/${telZap(tel)}" target="_blank" rel="noopener" title="WhatsApp do cliente">💬</a>`:''}
+      ${end?`<a class="btn sm ghost" href="${rota}" target="_blank" rel="noopener" title="Traçar rota">🗺️</a>`:''}
+      <button class="btn sm ok" data-act="visita-feito" data-cli="${v.clienteId}" data-vis="${v.id}" title="Marcar como visitado">✅</button>
+    </div>
+  </div>`;
+}
+function itemPlanoTarefa(t){
+  const st = statusTarefa(t);
+  const cli = buscarCli(t.clienteId);
+  return `<div class="plano-item ${st==='concluida'?'feita':'hoje'}">
+    <button class="tk-check" data-act="tarefa-feito" data-id="${t.id}" title="${st==='concluida'?'Reabrir':'Marcar como feita'}">✓</button>
+    <div class="pi-info">
+      <div class="pi-titulo">✅ ${esc(t.titulo||'Tarefa')}</div>
+      <div class="pi-sub">${esc(nomeStatusTarefa(st))}${t.hora?` · ⏰ ${esc(t.hora)}`:''}${t.local?` · 📍 ${esc(t.local)}`:''}</div>
+      ${t.endereco?`<div class="pi-sub">🏠 ${esc(t.endereco)}</div>`:''}
+      ${cli?`<div class="pi-sub">👤 ${esc(cli.nome)}${cli.telefone?` · 📞 ${esc(cli.telefone)}`:''}</div>`:''}
+    </div>
+    <div class="pi-acoes">
+      ${t.endereco?`<a class="btn sm ghost" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(t.endereco)}" target="_blank" rel="noopener" title="Abrir no mapa">🗺️</a>`:''}
+      ${(cli&&cli.telefone)?`<button class="btn sm ghost" data-act="tarefa-zap" data-id="${t.id}" title="WhatsApp do cliente">💬</button>`:''}
+      <button class="btn sm ghost" data-act="tarefa-editar" data-id="${t.id}" title="Editar">✏️</button>
+    </div>
+  </div>`;
+}
+function itemPlanoFollowup(c){
+  const d = diasAte(c.followup.data);
+  return `<div class="plano-item ${d<0?'venc':'hoje'}">
+    <div class="pi-hora">${d<0?'⏰':'📆'}</div>
+    <div class="pi-info">
+      <div class="pi-titulo">👤 ${esc(c.nome)}${c.empresa?` — ${esc(c.empresa)}`:''}</div>
+      ${c.followup.nota?`<div class="pi-sub">${esc(c.followup.nota)}</div>`:''}
+      <div class="pi-sub">📆 ${fmtData(c.followup.data)}${d<0?` · atrasado ${Math.abs(d)}d`:''}</div>
+    </div>
+    <div class="pi-acoes">
+      <button class="btn sm ok" data-act="concluir" data-id="${c.id}" title="Registrar contato e limpar follow-up">✓</button>
+      ${c.telefone?`<button class="btn sm ghost" data-act="cli-fup-zap" data-id="${c.id}" title="WhatsApp">💬</button>`:''}
+      <button class="btn sm ghost" data-act="visita-agendar" data-id="${c.id}" title="Agendar visita a este cliente">📍</button>
+    </div>
+  </div>`;
+}
+/* Atualiza o contador do botão "Meu dia" (sidebar) */
+function atualizarContadorHoje(){
+  const el = document.getElementById('cntHoje');
+  if(!el) return;
+  let n = 0;
+  try{ n = planoHoje().total; }catch(e){ n = 0; }
+  el.textContent = n ? String(n) : '';
+  el.hidden = !n;
+}
+/* Card "Hoje" — usado na Agenda, no Painel e no modal de acesso rápido */
+function htmlPlanoHoje(opt){
+  opt = opt||{};
+  const p = planoHoje();
+  const limite = opt.compacto ? 3 : 999;
+  let html='';
+  if(p.visitas.length){
+    html += `<div class="plano-grupo">📍 Visitas de hoje (${p.visitas.length})</div>`
+      + p.visitas.slice(0,limite).map(itemPlanoVisita).join('');
+    if(p.visitas.length>limite) html += `<div class="pi-sub">+ ${p.visitas.length-limite} outra(s) visita(s)</div>`;
+  }
+  if(p.tarefas.length){
+    html += `<div class="plano-grupo">✅ Tarefas de hoje (${p.tarefas.length})</div>`
+      + p.tarefas.slice(0,limite).map(itemPlanoTarefa).join('');
+    if(p.tarefas.length>limite) html += `<div class="pi-sub">+ ${p.tarefas.length-limite} outra(s) tarefa(s)</div>`;
+  }
+  if(p.fups.length){
+    html += `<div class="plano-grupo">⏰ Follow-ups (${p.fups.length})</div>`
+      + p.fups.slice(0,limite).map(itemPlanoFollowup).join('');
+    if(p.fups.length>limite) html += `<div class="pi-sub">+ ${p.fups.length-limite} outro(s) follow-up(s) — <button class="link-btn" data-act="ir-agenda">ver agenda</button></div>`;
+  }
+  if(!html) html = `<div class="plano-vazio"><span class="big">🎉</span>Nada marcado para hoje.<br>Agende uma visita, crie uma tarefa ou marque um follow-up.</div>`;
+
+  return `<div class="card plano-hoje ${opt.compacto?'plano-compacto':''}" style="margin-bottom:16px">
+    <div class="plano-h">
+      <h3>📅 Hoje — ${fmtData(p.hoje)}</h3>
+      <span class="cnt">${p.total}</span>
+      <span class="plano-sub">${p.total?`${p.total} coisa(s) para fazer`:'dia livre por enquanto'}</span>
+      <div class="plano-acoes">
+        <button class="btn sm ghost" data-act="hoje-visita" title="Agendar uma visita">📍 Visita</button>
+        <button class="btn sm ghost" data-act="hoje-tarefa" title="Criar uma tarefa para hoje">✅ Tarefa</button>
+        ${p.visitas.length?`<button class="btn sm ghost" data-act="hoje-rota" title="Ver o roteiro com o trajeto">🗺️ Rota</button>`:''}
+        ${opt.linkAgenda?`<button class="btn sm ghost" data-act="ir-agenda">Abrir agenda ›</button>`:''}
+      </div>
+    </div>
+    <div class="plano-lista">${html}</div>
+  </div>`;
+}
+/* Modal de acesso rápido — abre de qualquer tela pelo botão "📅 Hoje" */
+function abrirPlanoHoje(){
+  abrirModal(`
+    <div class="modal-h"><h2>📅 Meu dia</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b" style="padding:0">${htmlPlanoHoje({linkAgenda:true})}</div>
+    <div class="modal-f"><button type="button" class="btn ghost" data-fechar>Fechar</button></div>`, true);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  ligarPlanoHoje();
+}
+/* Liga os botões do painel "Hoje" quando ele aparece dentro de um modal */
+function ligarPlanoHoje(){
+  modal.querySelectorAll('[data-act]').forEach(b=>{
+    b.onclick = ()=>{
+      const act = b.dataset.act;
+      if(act==='hoje-visita'){ formVisitaRapida(); return; }
+      if(act==='hoje-tarefa'){ formTarefa(null, hojeISO()); return; }
+      if(act==='hoje-rota'){ rotaDoDia(); return; }
+      if(act==='ir-agenda'){ fecharModal(); view='agenda'; render(); return; }
+      if(act==='tarefa-feito'){
+        const t = buscarTarefa(b.dataset.id); if(!t) return;
+        definirStatusTarefa(t, t.feito?'pendente':'concluida');
+        salvar(); render(); abrirPlanoHoje();
+        toast(t.feito?'✅ Tarefa concluída.':'Tarefa reaberta.');
+        return;
+      }
+      if(act==='tarefa-editar'){ const id=b.dataset.id; fecharModal(); formTarefa(id); return; }
+      if(act==='tarefa-zap'){ zapTarefa(b.dataset.id); return; }
+      if(act==='visita-feito'){ concluirVisita(b.dataset.cli, b.dataset.vis); abrirPlanoHoje(); return; }
+      if(act==='visita-agendar'){ const id=b.dataset.id; fecharModal(); formVisitaRapida(id); return; }
+      if(act==='concluir'){ concluirFollowup(b.dataset.id); abrirPlanoHoje(); return; }
+      if(act==='cli-fup-zap'){ enviarFollowupZap(b.dataset.id, true); return; }
+    };
+  });
+}
+/* Visitas agendadas (futuras e atrasadas) — antes só existia a rota do dia */
+function htmlVisitasAgendadas(){
+  const pend = visitasAgendadasTodas();
+  if(!pend.length) return '';
+  const hoje = hojeISO();
+  const porDia = {};
+  pend.forEach(v=>{ (porDia[v.data]=porDia[v.data]||[]).push(v); });
+  const corpo = Object.keys(porDia).sort().map(k=>{
+    const lista = porDia[k].slice().sort((a,b)=>String(a.hora||'99:99').localeCompare(String(b.hora||'99:99')));
+    const venc = k < hoje;
+    return `<div class="secao-agenda">
+      <h3>${venc?'🚨':'📍'} ${fmtData(k)} ${venc?'<span class="cnt">atrasadas</span>':''} <span class="cnt">${lista.length}</span></h3>
+      ${lista.map(v=>{
+        const c = buscarCli(v.clienteId)||{};
+        const end = v.endereco || c.endereco || '';
+        const tel = c.telefone||'';
+        return `<div class="agenda-item ${venc?'venc':''}">
+          <div style="min-width:52px;text-align:center">
+            <div style="font-weight:800;font-size:14px">${esc(v.hora||'—')}</div>
+          </div>
+          <div class="info">
+            <div class="dt">📍 ${esc(c.nome||'Cliente')}${c.empresa?`<span class="mt" style="font-weight:400;color:var(--suave)">· ${esc(c.empresa)}</span>`:''}</div>
+            ${end?`<div class="nota">🏠 ${esc(end)}</div>`:''}
+            ${v.obs?`<div class="nota">📝 ${esc(v.obs)}</div>`:''}
+            ${tel?`<div class="mt" style="margin-top:3px">📞 ${esc(tel)}</div>`:''}
+          </div>
+          <div class="agenda-acoes">
+            ${tel?`<a class="btn sm ghost" href="https://wa.me/${telZap(tel)}" target="_blank" rel="noopener">💬</a>`:''}
+            ${end?`<a class="btn sm ghost" href="https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(end)}" target="_blank" rel="noopener">🗺️</a>`:''}
+            <button class="btn sm ok" data-act="visita-feito" data-cli="${v.clienteId}" data-vis="${v.id}">✅ Feita</button>
+            <button class="btn sm ghost" data-act="visita-remarcar" data-cli="${v.clienteId}" data-vis="${v.id}" title="Remarcar">📅</button>
+            <button class="btn sm ghost" data-act="visita-cancelar" data-cli="${v.clienteId}" data-vis="${v.id}" title="Cancelar visita">🗑️</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+  return `<div class="card" style="margin-top:16px">
+    <div class="card-h"><h2 style="margin:0">📍 Visitas agendadas</h2><span class="cal-info" style="margin-left:auto">${pend.length} visita(s) pendente(s)</span></div>
+    <div class="card-b">${corpo}</div>
+  </div>`;
 }
 
 /* =========================================================
