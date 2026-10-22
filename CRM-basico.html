@@ -7017,7 +7017,7 @@ function renderFornecedores(){
     <div class="prod-item">
       <div style="flex:1;min-width:0">
         <b>${esc(f.nome)}</b>
-        <div style="font-size:12.3px;color:var(--suave)">${esc([f.contato, f.telefone, f.email].filter(Boolean).join(' · ')||'Sem contato')}</div>
+        <div style="font-size:12.3px;color:var(--suave)">${esc([f.documento&&'CNPJ/CPF '+f.documento, f.contato, f.telefone, f.email, [f.municipio,f.uf].filter(Boolean).join('/')].filter(Boolean).join(' · ')||'Sem contato')}</div>
       </div>
       <button class="icon-btn" data-forn-edit="${f.id}" title="Editar">✏️</button>
       <button class="icon-btn del" data-forn-rm="${f.id}" title="Excluir">🗑️</button>
@@ -7179,6 +7179,8 @@ function abrirImportacaoNFeProdutos(){
       <div class="campo"><label>Selecionar XML para importar produtos da NF-e</label><input id="nfeXmlArquivo" type="file" accept=".xml,text/xml,application/xml"></div>
       <label class="mini" style="display:flex;gap:8px;align-items:center;margin-top:10px"><input id="nfeImportarEstoque" type="checkbox" checked> Somar a quantidade da nota ao estoque dos produtos</label>
       <div id="nfeXmlResumo" style="margin-top:12px"></div>
+      <div id="nfeFornecedorXml" style="margin-top:8px"></div>
+      <button type="button" class="btn ghost sm" id="nfeCadastrarFornecedor" style="display:none;margin-top:8px">🚚 Cadastrar/atualizar fornecedor com dados do XML</button>
       <div id="nfeXmlItens" style="margin-top:8px"></div>
       <div id="nfeXmlErro" class="mini" style="color:var(--erro);margin-top:8px"></div>
     </div>
@@ -7194,9 +7196,23 @@ function abrirImportacaoNFeProdutos(){
     toast('Chave copiada. Cole-a no campo de consulta da SEFAZ.');
   };
   const arquivo=document.getElementById('nfeXmlArquivo'), resumo=document.getElementById('nfeXmlResumo'), itensEl=document.getElementById('nfeXmlItens'), erro=document.getElementById('nfeXmlErro'), btn=document.getElementById('nfeXmlImportar');
-  let produtosXml=[];
+  let produtosXml=[], fornecedorXml=null, fornecedorIdXml='';
+  const fornecedorHtml=f=>`<div class="mini" style="margin-top:6px">${esc([f.documento&&'CNPJ/CPF '+f.documento, f.ie&&'IE '+f.ie, f.im&&'IM '+f.im, f.endereco, [f.municipio,f.uf].filter(Boolean).join('/'), f.cep&&'CEP '+f.cep, f.telefone&&'Fone '+f.telefone, f.crt&&'CRT '+f.crt].filter(Boolean).join(' · ')||'Sem dados adicionais no XML')}</div>`;
+  const salvarFornecedorDoXml=(notificar=true)=>{
+    if(!fornecedorXml||!fornecedorXml.nome) return '';
+    const docDigits=String(fornecedorXml.documento||'').replace(/\D/g,'');
+    const norm=s=>String(s||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    let f=listaFornecedores().find(x=>(docDigits&&String(x.documento||'').replace(/\D/g,'')===docDigits)||(docDigits&&String(x.obs||'').replace(/\D/g,'')===docDigits)||norm(x.nome)===norm(fornecedorXml.nome));
+    if(!f){ f={id:uid(),nome:fornecedorXml.nome,contato:'',telefone:'',email:'',obs:''}; listaFornecedores().push(f); }
+    Object.entries(fornecedorXml).forEach(([k,v])=>{if(v)f[k]=v;});
+    fornecedorIdXml=f.id;
+    salvar(); renderFornecedores();
+    if(notificar) toast('Fornecedor cadastrado/atualizado com os dados disponíveis no XML.','ok');
+    return f.id;
+  };
+  document.getElementById('nfeCadastrarFornecedor').onclick=()=>salvarFornecedorDoXml(true);
   arquivo.onchange=async()=>{
-    produtosXml=[]; resumo.innerHTML=''; itensEl.innerHTML=''; erro.textContent=''; btn.disabled=true;
+    produtosXml=[]; fornecedorXml=null; fornecedorIdXml=''; resumo.innerHTML=''; itensEl.innerHTML=''; erro.textContent=''; document.getElementById('nfeFornecedorXml').innerHTML=''; document.getElementById('nfeCadastrarFornecedor').style.display='none'; btn.disabled=true;
     const file=arquivo.files&&arquivo.files[0]; if(!file) return;
     if(file.size>10*1024*1024){ erro.textContent='O XML excede o limite de 10 MB.'; return; }
     try{
@@ -7207,8 +7223,11 @@ function abrirImportacaoNFeProdutos(){
       const dets=all.filter(x=>x.localName==='det'&&x.parentElement?.localName==='infNFe');
       if(!inf||!dets.length) throw new Error('Não encontrei itens de NF-e nesse arquivo. Selecione o XML autorizado (NFe ou nfeProc).');
       const emit=all.find(x=>x.localName==='emit');
-      const emitNome=emit?pick(emit,'xNome'):'';
+      const emitNome=emit?(pick(emit,'xNome')||pick(emit,'xFant')):'';
       const emitDoc=emit?(pick(emit,'CNPJ')||pick(emit,'CPF')):'';
+      const enderEmit=emit&&[...emit.children].find(x=>x.localName==='enderEmit');
+      const pe=name=>enderEmit&&[...enderEmit.children].find(x=>x.localName===name)?.textContent?.trim()||'';
+      fornecedorXml=emit?{nome:pick(emit,'xNome')||pick(emit,'xFant'),fantasia:pick(emit,'xFant'),documento:emitDoc,ie:pick(emit,'IE'),im:pick(emit,'IM'),telefone:pe('fone'),email:pick(emit,'email'),endereco:[pe('xLgr'),pe('nro'),pe('xCpl'),pe('xBairro')].filter(Boolean).join(', '),municipio:pe('xMun'),codigoMunicipio:pe('cMun'),uf:pe('UF'),cep:pe('CEP'),pais:pe('xPais'),codigoPais:pe('cPais'),crt:pick(emit,'CRT')}:null;
       const chave=(inf.getAttribute('Id')||'').replace(/^NFe/,'')||pick(xml,'chNFe');
       produtosXml=dets.map(det=>{
         const prod=[...det.children].find(x=>x.localName==='prod'); if(!prod) return null;
@@ -7216,11 +7235,12 @@ function abrirImportacaoNFeProdutos(){
         const impostos=[...det.children].find(x=>x.localName==='imposto');
         const icms=impostos&&[...impostos.getElementsByTagName('*')].find(x=>x.localName.startsWith('ICMSSN'));
         const nested=(el,name)=>el&&[...el.getElementsByTagName('*')].find(x=>x.localName===name)?.textContent?.trim()||'';
-        return {nome:value('xProd'),codigo:value('cProd'),gtin:(value('cEAN')||value('cEANTrib')).replace(/^SEM GTIN$/i,''),un:value('uCom')||'un',custo:Number(String(value('vUnCom')).replace(',','.'))||0,ncm:value('NCM'),cest:value('CEST'),cfop:value('CFOP'),csosn:nested(icms,'CSOSN'),origem:nested(icms,'orig'),qtd:Number(String(value('qCom')).replace(',','.'))||0,fornecedorNome:emitNome,fornecedorDoc:emitDoc};
+        return {nome:value('xProd'),codigo:value('cProd'),gtin:(value('cEAN')||value('cEANTrib')).replace(/^SEM GTIN$/i,''),un:value('uCom')||'un',custo:Number(String(value('vUnCom')).replace(',','.'))||0,ncm:value('NCM'),cest:value('CEST'),cfop:value('CFOP'),csosn:'400',origem:nested(icms,'orig'),qtd:Number(String(value('qCom')).replace(',','.'))||0,fornecedorNome:emitNome,fornecedorDoc:emitDoc};
       }).filter(x=>x&&x.nome);
       if(!produtosXml.length) throw new Error('A nota não contém produtos importáveis.');
       resumo.innerHTML=`<div class="selo info">${produtosXml.length} item(ns) · ${esc(emitNome||'Fornecedor não identificado')}${chave?` · chave ${esc(chave)}`:''}</div>`;
-      itensEl.innerHTML=produtosXml.map((x,i)=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:9px;border-bottom:1px solid var(--borda);font-size:12.5px"><input type="checkbox" data-nfe-linha="${i}" checked style="margin-top:3px"><span style="flex:1;min-width:0"><b>${esc(x.nome)}</b><span class="mini"> · ${esc(x.codigo)} · ${x.qtd} ${esc(x.un)} × ${brl(x.custo)}</span><br><span class="mini">NCM ${esc(x.ncm||'—')} · CEST ${esc(x.cest||'—')} · CFOP ${esc(x.cfop||'—')} · CSOSN ${esc(x.csosn||'—')}</span></span></label>`).join('');
+      if(fornecedorXml?.nome){document.getElementById('nfeFornecedorXml').innerHTML=`<b>Fornecedor da nota: ${esc(fornecedorXml.nome)}</b>${fornecedorHtml(fornecedorXml)}`; document.getElementById('nfeCadastrarFornecedor').style.display='inline-flex';}
+      itensEl.innerHTML=produtosXml.map((x,i)=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:9px;border-bottom:1px solid var(--borda);font-size:12.5px"><input type="checkbox" data-nfe-linha="${i}" checked style="margin-top:3px"><span style="flex:1;min-width:0"><b>${esc(x.nome)}</b><span class="mini"> · ${esc(x.codigo)} · ${x.qtd} ${esc(x.un)} × ${brl(x.custo)}</span><br><span class="mini">NCM ${esc(x.ncm||'—')} · CEST ${esc(x.cest||'—')} · CFOP ${esc(x.cfop||'—')} · CSOSN 400 · Origem ${esc(x.origem||'—')}</span></span></label>`).join('');
       btn.disabled=false;
     }catch(e){ produtosXml=[]; erro.textContent=e.message||'Falha ao ler o XML.'; }
   };
@@ -7229,20 +7249,11 @@ function abrirImportacaoNFeProdutos(){
     if(!selecionados.length){ erro.textContent='Selecione pelo menos um item.'; return; }
     let novos=0, atualizados=0;
     const importarEstoque=document.getElementById('nfeImportarEstoque').checked;
-    const amostra=selecionados[0]||{};
-    const nomeFornecedor=String(amostra.fornecedorNome||'').trim();
-    const docFornecedor=String(amostra.fornecedorDoc||'').replace(/\D/g,'');
-    let fornecedorId='';
-    if(nomeFornecedor){
-      const nomeNormal=s=>String(s||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-      let fornecedor=listaFornecedores().find(f=>nomeNormal(f.nome)===nomeNormal(nomeFornecedor)||(docFornecedor&&String(f.obs||'').replace(/\D/g,'')===docFornecedor));
-      if(!fornecedor){fornecedor={id:uid(),nome:nomeFornecedor,contato:'',telefone:'',email:'',obs:docFornecedor?'CNPJ/CPF '+docFornecedor+' (importado da NF-e)':''};listaFornecedores().push(fornecedor);}
-      fornecedorId=fornecedor.id;
-    }
+    const fornecedorId=fornecedorIdXml||salvarFornecedorDoXml(false);
     selecionados.forEach(x=>{
       const normal=s=>String(s||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
       const p=listaProdutos().find(y=>(x.gtin&&y.gtin&&x.gtin===y.gtin)||normal(y.nome)===normal(x.nome));
-      const dados={nome:x.nome,codigo:x.codigo,gtin:x.gtin,un:x.un,custo:x.custo,ncm:x.ncm.replace(/\D/g,''),cest:x.cest.replace(/\D/g,''),cfop:x.cfop.replace(/\D/g,''),csosn:x.csosn,origem:x.origem};
+      const dados={nome:x.nome,codigo:x.codigo,gtin:x.gtin,un:x.un,custo:x.custo,ncm:x.ncm.replace(/\D/g,''),cest:x.cest.replace(/\D/g,''),cfop:x.cfop.replace(/\D/g,''),csosn:'400',origem:x.origem};
       if(p){ const unidadeAnterior=p.un; Object.assign(p,dados); if(fornecedorId)p.fornecedorId=fornecedorId; if(importarEstoque){const saldo=Number(p.estoque)||0;p.estoque=p.estoque==null||String(unidadeAnterior||'un').toLowerCase()!==String(x.un||'un').toLowerCase()?x.qtd:saldo+x.qtd;} atualizados++; }
       else{ listaProdutos().push({id:uid(),preco:0,desc:'',fornecedorId,...dados,...(importarEstoque?{estoque:x.qtd}: {})}); novos++; }
     });
@@ -7260,7 +7271,19 @@ function formFornecedor(id){
         <div class="campo"><label>Pessoa de contato</label><input name="contato" maxlength="80" value="${esc(v.contato||'')}"></div>
         <div class="campo"><label>Telefone</label><input name="telefone" maxlength="30" value="${esc(v.telefone||'')}"></div>
         <div class="campo"><label>E-mail</label><input name="email" maxlength="90" value="${esc(v.email||'')}"></div>
-        <div class="campo full"><label>Observações</label><input name="obs" maxlength="200" value="${esc(v.obs||'')}"></div>
+      <div class="campo full"><label>Observações</label><input name="obs" maxlength="500" value="${esc(v.obs||'')}"></div>
+      <details class="prod-avancado" ${v.documento||v.endereco||v.ie||v.cep?'open':''}><summary>Dados fiscais e endereço</summary><div class="prod-avancado-conteudo">
+        <div class="campo"><label>CNPJ / CPF</label><input name="documento" inputmode="numeric" maxlength="18" value="${esc(v.documento||'')}"></div>
+        <div class="campo"><label>Nome fantasia</label><input name="fantasia" maxlength="100" value="${esc(v.fantasia||'')}"></div>
+        <div class="campo"><label>Inscrição estadual</label><input name="ie" maxlength="20" value="${esc(v.ie||'')}"></div>
+        <div class="campo"><label>Inscrição municipal</label><input name="im" maxlength="20" value="${esc(v.im||'')}"></div>
+        <div class="campo full"><label>Endereço</label><input name="endereco" maxlength="180" value="${esc(v.endereco||'')}"></div>
+        <div class="campo"><label>Município</label><input name="municipio" maxlength="80" value="${esc(v.municipio||'')}"></div>
+        <div class="campo"><label>UF</label><input name="uf" maxlength="2" value="${esc(v.uf||'')}"></div>
+        <div class="campo"><label>CEP</label><input name="cep" inputmode="numeric" maxlength="9" value="${esc(v.cep||'')}"></div>
+        <div class="campo"><label>País</label><input name="pais" maxlength="60" value="${esc(v.pais||'')}"></div>
+        <div class="campo"><label>CRT</label><input name="crt" maxlength="2" value="${esc(v.crt||'')}"></div>
+      </div></details>
       </div></div>
       <div class="modal-f">
         <button type="button" class="btn ghost" data-fechar>Cancelar</button>
@@ -7273,7 +7296,7 @@ function formFornecedor(id){
     const f = new FormData(e.target);
     const nome = String(f.get('nome')||'').trim();
     if(!nome){ toast('Informe o nome.','erro'); return; }
-    const dados = {nome, contato:String(f.get('contato')||'').trim(), telefone:String(f.get('telefone')||'').trim(), email:String(f.get('email')||'').trim(), obs:String(f.get('obs')||'').trim()};
+    const dados = {nome, contato:String(f.get('contato')||'').trim(), telefone:String(f.get('telefone')||'').trim(), email:String(f.get('email')||'').trim(), obs:String(f.get('obs')||'').trim(), documento:String(f.get('documento')||'').trim(), fantasia:String(f.get('fantasia')||'').trim(), ie:String(f.get('ie')||'').trim(), im:String(f.get('im')||'').trim(), endereco:String(f.get('endereco')||'').trim(), municipio:String(f.get('municipio')||'').trim(), uf:String(f.get('uf')||'').trim().toUpperCase(), cep:String(f.get('cep')||'').trim(), pais:String(f.get('pais')||'').trim(), crt:String(f.get('crt')||'').trim()};
     if(f0){ Object.assign(f0, dados); toast('Fornecedor atualizado.'); }
     else{ listaFornecedores().push({id:uid(), ...dados}); toast('Fornecedor adicionado.'); }
     salvar(); fecharModal(); render();
