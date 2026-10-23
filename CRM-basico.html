@@ -7877,13 +7877,20 @@ function htmlFinanceiro(){
     porForma[p.forma||'Outro'] = (porForma[p.forma||'Outro']||0) + (Number(p.valor)||0);
   }));
   const manualMes = resumoLancamentos('mes');
+  /* Pagamentos recebidos no mês APENAS de orçamentos com OS fechada ou sem OS vinculada */
+  const recebMesFechado = listaOrcamentos().filter(o=>{
+    if(o.status!=='aprovado' && o.status!=='entregue') return false;
+    const osv = (db.ordens||[]).find(x=>x.orcamentoId===o.id);
+    if(osv && osv.status!=='vendida' && osv.status!=='concluida') return false;
+    return true;
+  }).reduce((s,o)=>s+pagamentosDe(o).filter(p=>String(p.data||'').slice(0,7)===mesAtual).reduce((a,p)=>a+(Number(p.valor)||0),0),0);
   return `
   <div class="grid-stats">
     ${stat('Recebido (orçamentos)', brl(r.recebido), '💵')}
     ${stat('Recebido no mês', brl(r.recebMes), '📅')}
     ${stat('Em aberto', brl(r.aberto), '⏳', r.aberto>0)}
     ${stat('Vencido', brl(r.vencido), '🚨', r.vencido>0)}
-    ${stat('Saldo do mês (caixa)', brl(r.recebMes + manualMes.saldo), '🧮', (r.recebMes + manualMes.saldo)<0)}
+    ${stat('Saldo do mês (caixa)', brl(recebMesFechado + manualMes.saldo), '🧮', (recebMesFechado + manualMes.saldo)<0)}
   </div>
 
   <div class="card" style="margin-bottom:18px">
