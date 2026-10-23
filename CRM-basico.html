@@ -5755,7 +5755,11 @@ function orcDocHTML(o){
     </div>
 
     <div class="orc-rodape">
-      ${em.telefone||em.email||em.site?`${[em.telefone,em.email,em.site].filter(Boolean).map(x=>esc(x)).join(' | ')}`:''}
+      <div style="display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center;align-items:center">
+        ${em.telefone?`<a href="tel:${esc(soDigitos(em.telefone))}" style="color:#333;text-decoration:none">${esc(em.telefone)}</a>`:''}
+        ${em.email?`<a href="mailto:${esc(String(em.email).trim())}" style="color:#333;text-decoration:none">${esc(em.email)}</a>`:''}
+        ${em.site?`<a href="${esc(urlComHttp(em.site))}" target="_blank" rel="noopener" style="color:#333;text-decoration:underline">${esc(em.site)}</a>`:''}
+      </div>
     </div>
   </div>`;
 }
