@@ -1275,6 +1275,7 @@ const TITULOS = {
 const STATUS_ORC = [
   {id:'rascunho', label:'Rascunho', cor:'#64748b'},
   {id:'enviado',  label:'Enviado',  cor:'#2563eb'},
+  {id:'aguardando', label:'Aguardando aprovação do cliente', cor:'#f59e0b'},
   {id:'aprovado', label:'Aprovado', cor:'#10b981'},
   {id:'recusado', label:'Recusado', cor:'#ef4444'}
 ];
@@ -3246,7 +3247,7 @@ function tabelaHTML(){
       <td>${semContatoTexto(c)}</td>
       <td>${fu ? `<span class="${d<0?'atrasado':''}">${fmtData(c.followup.data)} <span class="mt">(${rotuloPrazo(c.followup.data)})</span></span>` : '<span class="mt">—</span>'}</td>
       <td>
-        <div class="acoes">
+          <div class="acoes">
           <button class="icon-btn" title="Falar no WhatsApp" data-act="cli-zap" data-id="${c.id}">💬</button>
           <button class="icon-btn" title="Usar modelo de mensagem" data-act="cli-modelo" data-id="${c.id}">📝</button>
           <button class="icon-btn" title="Registrar contato" data-act="historico" data-id="${c.id}">🗒️</button>
@@ -3481,7 +3482,10 @@ document.getElementById('view').addEventListener('change', e=>{
   if(!sel) return;
   const o = buscarOrc(sel.dataset.id);
   if(!o) return;
+  const stAnt = o.status;
   o.status = sel.value;
+  if(stAnt!=='enviado' && o.status==='enviado'){ o.aguardandoAprovacaoCliente = true; o.aguardandoAprovacaoEm = agoraDT(); }
+  if(o.status!=='enviado'){ o.aguardandoAprovacaoCliente = false; }
   salvar(); render();
   toast(`Orçamento ${o.numero} agora está "${statusOrc(o.status).label}".`);
 });
@@ -5604,9 +5608,19 @@ function formOrcamento(id){
       obs: String(f.get('obs')||'').trim(),
       itens
     };
-    if(o){ Object.assign(o, dados); toast('Orçamento atualizado.'); }
+    if(o){ 
+      const stAnt = o.status;
+      Object.assign(o, dados); 
+      if(stAnt!=='enviado' && o.status==='enviado'){ o.aguardandoAprovacaoCliente = true; o.aguardandoAprovacaoEm = agoraDT(); }
+      if(o.status!=='enviado'){ o.aguardandoAprovacaoCliente = false; }
+      toast('Orçamento atualizado.'); 
+    }
     else{
-      listaOrcamentos().unshift({id:uid(), criadoEm:agoraDT(), numero:novoNumeroOrc(), ...dados});
+      const stNovo = dados.status;
+      const novo = {id:uid(), criadoEm:agoraDT(), numero:novoNumeroOrc(), ...dados};
+      if(dados.status==='enviado'){ novo.aguardandoAprovacaoCliente = true; novo.aguardandoAprovacaoEm = agoraDT(); } else { novo.aguardandoAprovacaoCliente = false; }
+      if(stNovo==='enviado'){ novo.aguardandoAprovacaoCliente = true; novo.aguardandoAprovacaoEm = agoraDT(); }
+      listaOrcamentos().unshift(novo);
       toast('Orçamento criado com sucesso!');
     }
     salvar(); fecharModal(); view='orcamentos'; render();
@@ -5951,7 +5965,7 @@ function badgeNF(o){
     ? `<span class="badge" style="--c:#10b981">NF emitida${nfDe(o).numero?' · '+esc(nfDe(o).numero):''}</span>`
     : `<span class="badge" style="--c:#f59e0b">NF pendente</span>`;
 }
-function podeMarcarNF(o){ return o && o.status==='aprovado'; }
+function podeMarcarNF(o){ return o && (o.status==='aprovado' || o.status==='aguardando'); }
 
 function formNotaFiscal(id){
   const o = buscarOrc(id); if(!o) return;
@@ -6713,6 +6727,7 @@ function verComprovanteOS(id){
 function converterOrcEmOS(orcId){
   const o = buscarOrc(orcId); if(!o) return;
   if(o.status!=='aprovado'){ toast('Só é possível gerar OS de orçamentos Aprovados.','erro'); return; }
+  if(o.aguardandoAprovacaoCliente){ o.aguardandoAprovacaoCliente=false; }
   const existente = osDeOrcamento(o.id);
   if(existente){
     if(!confirm(`Este orçamento já tem a ordem ${existente.numero}. Abrir a ordem existente?`)) return;
