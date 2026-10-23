@@ -2808,10 +2808,10 @@ function focarPrimeiro(modalEl){
   const alvo=modalEl.querySelector('input:not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')||modalEl;
   requestAnimationFrame(()=>alvo.focus());
 }
-function abrirModal(html, wide){ focoAnteriorModal=document.activeElement; modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); focarPrimeiro(modal); try{ maiusculasEmTudo(modal); setTimeout(function(){ try{ maiusculasEmTudo(modal); }catch(e){} }, 60); }catch(e){} }
+function abrirModal(html, wide){ focoAnteriorModal=document.activeElement; modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); focarPrimeiro(modal); try{ maiusculasEmTudo(); maiusculasEmTudo(modal); setTimeout(function(){ try{ maiusculasEmTudo(); maiusculasEmTudo(modal); }catch(e){} }, 10); setTimeout(function(){ try{ maiusculasEmTudo(); maiusculasEmTudo(modal); }catch(e){} }, 80); setTimeout(function(){ try{ maiusculasEmTudo(); maiusculasEmTudo(modal); }catch(e){} }, 250); }catch(e){} }
 function fecharModal(){ const devolver=focoAnteriorModal; focoAnteriorModal=null; overlay.classList.remove('open','cadastro-overlay'); modal.classList.remove('wide','cadastro-compacto'); modal.innerHTML=''; limparEspelho(); fecharModal2(); if(devolver&&devolver.isConnected) requestAnimationFrame(()=>devolver.focus()); }
 /* Segunda camada de modal (ex.: seletor de produto sobre o formulário do orçamento) */
-function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); focarPrimeiro(modal2); try{ maiusculasEmTudo(modal2); setTimeout(function(){ try{ maiusculasEmTudo(modal2); }catch(e){} }, 60); }catch(e){} }
+function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); focarPrimeiro(modal2); try{ maiusculasEmTudo(); maiusculasEmTudo(modal2); setTimeout(function(){ try{ maiusculasEmTudo(); maiusculasEmTudo(modal2); }catch(e){} }, 10); setTimeout(function(){ try{ maiusculasEmTudo(); maiusculasEmTudo(modal2); }catch(e){} }, 80); setTimeout(function(){ try{ maiusculasEmTudo(); maiusculasEmTudo(modal2); }catch(e){} }, 250); }catch(e){} }
 function fecharModal2(){ overlay2.classList.remove('open'); modal2.classList.remove('wide'); modal2.innerHTML=''; if(overlay.classList.contains('open')) focarPrimeiro(modal); }
 overlay.addEventListener('mousedown', e=>{ if(e.target===overlay) fecharModal(); });
 overlay2.addEventListener('mousedown', e=>{ if(e.target===overlay2) fecharModal2(); });
@@ -12027,30 +12027,46 @@ function aplicarMaiusculasNoCampo(el){
 
 function maiusculasEmTudo(raiz){
   const base = (raiz && raiz.querySelectorAll) ? raiz : document;
-  let lista;
-  try{ lista = base.querySelectorAll('input,textarea,[contenteditable=""],[contenteditable="true"]'); }catch(e){ return; }
-  for(let i=0;i<lista.length;i++) aplicarMaiusculasNoCampo(lista[i]);
+  try{
+    const nodes = base.querySelectorAll('input,textarea,[contenteditable],[contenteditable=""],[contenteditable="true"],[contenteditable="plaintext-only"]');
+    for(let i=0;i<nodes.length;i++){
+      aplicarMaiusculasNoCampo(nodes[i]);
+    }
+    if(base === document){
+      const all = document.querySelectorAll('input,textarea');
+      for(let i=0;i<all.length;i++) aplicarMaiusculasNoCampo(all[i]);
+    }
+  }catch(e){}
 }
 
 function ativarMaiusculasGlobal(){
   if(!document.body) return;
   if(document.body.dataset && document.body.dataset.maiusculasOk === '1') return;
   if(document.body.dataset) document.body.dataset.maiusculasOk = '1';
-  const trata = function(ev){ if(ev && ev.target) aplicarMaiusculasNoCampo(ev.target); };
+  const trata = function(ev){
+    if(ev && ev.target) aplicarMaiusculasNoCampo(ev.target);
+    maiusculasEmTudo(ev && ev.currentTarget ? ev.currentTarget : document);
+  };
   document.addEventListener('input', trata, true);
   document.addEventListener('change', trata, true);
   document.addEventListener('blur', trata, true);
   document.addEventListener('focusin', trata, true);
-  document.addEventListener('paste', function(){ setTimeout(function(){ maiusculasEmTudo(); }, 0); }, true);
+  document.addEventListener('keydown', function(ev){
+    if(ev && ev.target) aplicarMaiusculasNoCampo(ev.target);
+  }, true);
+  document.addEventListener('paste', function(ev){
+    if(ev && ev.target) setTimeout(function(){ aplicarMaiusculasNoCampo(ev.target); maiusculasEmTudo(); }, 0);
+  }, true);
   maiusculasEmTudo();
+  try{ setInterval(function(){ maiusculasEmTudo(); }, 1200); }catch(e){}
   try{
     let agendado = false;
-    const mo = new MutationObserver(function(){
+    const mo = new MutationObserver(function(muts){
       if(agendado) return;
       agendado = true;
-      setTimeout(function(){ agendado = false; maiusculasEmTudo(); }, 40);
+      setTimeout(function(){ agendado = false; maiusculasEmTudo(); for(let i=0;i<muts.length;i++){ const n=muts[i]; if(n.addedNodes){ for(let j=0;j<n.addedNodes.length;j++){ const node=n.addedNodes[j]; if(node && node.querySelectorAll){ try{ maiusculasEmTudo(node); }catch(ex){} } } } } }, 25);
     });
-    mo.observe(document.body, {childList:true, subtree:true});
+    mo.observe(document.body, {childList:true, subtree:true, attributes:true, attributeFilter:['value']});
   }catch(e){}
 }
 window.aplicarMaiusculasNoCampo = aplicarMaiusculasNoCampo;
