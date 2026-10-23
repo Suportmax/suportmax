@@ -866,7 +866,7 @@ table.itens .prod-pick{overflow:hidden}
 #areaImpressao{display:none}
 body.modo-publico #areaImpressao{display:block}
 body.modo-publico{background:#f1f5f9;padding:20px 0}
-.orc-doc{font-size:14px;line-height:1.55;color:#0f172a;background:#fff}
+.orc-doc{font-size:12px;line-height:1.5;color:#000;background:#fff}
 .orc-doc .topo{display:flex;justify-content:space-between;gap:20px;border-bottom:3px solid #0f172a;padding-bottom:12px;margin-bottom:14px;flex-wrap:wrap}
 .orc-doc .num{font-size:19px;font-weight:800;letter-spacing:.5px}
 .orc-doc .emissor{text-align:right;font-size:12.8px}
@@ -5631,86 +5631,95 @@ function formOrcamento(id){
 function orcDocHTML(o){
   const em = db.emissor || emissorVazio();
   const cli = buscarCli(o.clienteId);
-  const st = statusOrc(o.status);
   const desc = descGeralV(o);
   const temEm = em.nome || em.telefone || em.email || em.endereco;
   return `
-    <div class="topo">
-      <div class="marca-doc">
-        <img class="doc-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
-        <div class="marca-txt">
-          <div style="font-size:16.5px;font-weight:800">${em.nome?esc(em.nome):esc(MARCA_NOME)}</div>
-          ${em.telefone?`<div>${esc(em.telefone)}</div>`:''}
-          ${em.email?`<div>${esc(em.email)}</div>`:''}
-          ${em.endereco?`<div>${esc(em.endereco)}</div>`:''}
-          ${em.doc?`<div>${esc(em.doc)}</div>`:''}
-          ${!temEm?`<div style="color:#94a3b8">Preencha seus dados na aba Dados</div>`:''}
+    <div class="orc-head">
+      <div class="orc-head-left">
+        <img class="orc-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
+        <div class="orc-emp">
+          <div class="orc-emp-nome">${em.nome?esc(em.nome):esc(MARCA_NOME)}</div>
+          ${em.endereco?`<div class="orc-emp-info">${esc(em.endereco)}</div>`:''}
+          ${em.telefone?`<div class="orc-emp-info">Tel.: ${esc(em.telefone)}</div>`:''}
+          ${em.email?`<div class="orc-emp-info">${esc(em.email)}</div>`:''}
+          ${em.doc?`<div class="orc-emp-info">${esc(em.doc)}</div>`:''}
+          ${!temEm?`<div class="orc-emp-info" style="color:#666">Preencha seus dados na aba Dados</div>`:''}
         </div>
       </div>
-      <div class="emissor">
-        <div class="num">ORÇAMENTO ${esc(o.numero||'')}</div>
-        <div style="color:#64748b;font-size:13px;margin-top:3px">Emitido em ${fmtData(o.data)}</div>
-        ${o.validade?`<div style="color:#64748b;font-size:13px">Válido até ${fmtData(o.validade)}</div>`:''}
-        <div style="margin-top:7px">${badgeOrc(o.status)}</div>
+      <div class="orc-head-right">
+        <div class="orc-titulo">ORÇAMENTO</div>
+        <div class="orc-num">Nº ${esc(o.numero||'')}</div>
+        <div class="orc-datas">
+          <div>Data: ${fmtData(o.data)}</div>
+          ${o.validade?`<div>Validade: ${fmtData(o.validade)}</div>`:`<div>Validade: 10 dias</div>`}
+        </div>
       </div>
     </div>
 
-    <div class="duas">
-      <div class="bloco">
-        <h4>Cliente</h4>
-        <b>${esc(cli?cli.nome:nomeClienteOrc(o))}</b>
-        ${cli&&cli.empresa?`<div>${esc(cli.empresa)}</div>`:''}
-        ${docCliente(cli)?`<div>${docCliente(cli).rotulo}: ${esc(docCliente(cli).valor)}</div>`:''}
-        ${cli&&cli.telefone?`<div>${esc(cli.telefone)}</div>`:''}
-        ${cli&&cli.email?`<div>${esc(cli.email)}</div>`:''}
-        ${!cli?`<div style="color:#64748b">${esc(o.clienteNome||'')}</div>`:''}
+    <div class="orc-blocos">
+      <div class="orc-bloco">
+        <div class="orc-bloco-titulo">Dados do Cliente</div>
+        <div class="orc-bloco-corpo">
+          <div><b>Nome:</b> ${esc(cli?cli.nome:nomeClienteOrc(o))}</div>
+          ${cli&&cli.empresa?`<div><b>Empresa:</b> ${esc(cli.empresa)}</div>`:''}
+          ${docCliente(cli)?`<div><b>${docCliente(cli).rotulo}:</b> ${esc(docCliente(cli).valor)}</div>`:''}
+          ${cli&&cli.telefone?`<div><b>Telefone:</b> ${esc(cli.telefone)}</div>`:''}
+          ${cli&&cli.email?`<div><b>E-mail:</b> ${esc(cli.email)}</div>`:''}
+          ${!cli&&o.clienteNome&&!docCliente(cli)&&!(cli&&cli.telefone)?`<div>${esc(o.clienteNome)}</div>`:''}
+        </div>
       </div>
-      <div class="bloco" style="text-align:right">
-        <h4>Condições</h4>
-        <div>Emissão: ${fmtData(o.data)}</div>
-        <div>Validade: ${o.validade?fmtData(o.validade):'10 dias'}</div>
-        <div>Itens: ${(o.itens||[]).length}</div>
+      <div class="orc-bloco">
+        <div class="orc-bloco-titulo">Condições</div>
+        <div class="orc-bloco-corpo">
+          <div>Itens: ${(o.itens||[]).length}</div>
+          <div>Forma de Pagamento: A combinar</div>
+        </div>
       </div>
     </div>
 
     <table>
-      <thead><tr><th>Descrição</th><th class="num-c">Qtd</th><th class="num-c">Valor unit.</th><th class="num-c">Total</th></tr></thead>
+      <thead><tr><th>DESCRIÇÃO</th><th class="num-c">QTDE</th><th class="num-c">UN</th><th class="num-c">VLR UNIT.</th><th class="num-c">VLR TOTAL</th></tr></thead>
       <tbody>
-        ${(o.itens||[]).map(i=>`<tr>
-          <td>${(()=>{ const pf = i.produtoId?buscarProd(i.produtoId):null; return pf&&pf.foto?`<img src="${pf.foto}" alt="" style="width:34px;height:34px;object-fit:cover;border-radius:6px;float:left;margin:0 8px 4px 0">`:''; })()}${esc(i.desc||'—')}${itemDescV(i)>0?`<div style="color:#ef4444;font-size:11.5px">desconto: − ${brl(itemDescV(i))}${i.descTipo==='%'?` (${Number(i.descItem)||0}%)`:''}</div>`:''}</td>
-          <td class="num-c">${Number(i.qtd)||0}</td>
-          <td class="num-c">${brl(i.unit)}</td>
-          <td class="num-c">${brl(itemTotal(i))}</td>
-        </tr>`).join('')}
+        ${(o.itens||[]).map(i=>{
+          const pf = i.produtoId?buscarProd(i.produtoId):null;
+          const un = pf&&pf.un ? pf.un : (i.un||'UN');
+          return `<tr>
+            <td>${esc(i.desc||'—')}${itemDescV(i)>0?`<div style="font-size:10px">Desconto item: - ${brl(itemDescV(i))}${i.descTipo==='%'?` (${Number(i.descItem)||0}%)`:''}</div>`:''}</td>
+            <td class="num-c">${Number(i.qtd)||0}</td>
+            <td class="num-c">${esc(un)}</td>
+            <td class="num-c">${brl(i.unit)}</td>
+            <td class="num-c">${brl(itemTotal(i))}</td>
+          </tr>`;
+        }).join('')}
       </tbody>
     </table>
 
-    <div style="margin-top:9px">
-      <div class="tot-line"><span>Subtotal</span><b>${brl(subtotalBrutoOrc(o))}</b></div>
-      ${descItensOrc(o)>0?`<div class="tot-line"><span>Descontos nos itens</span><b>− ${brl(descItensOrc(o))}</b></div>`:''}
-      ${freteOrc(o)>0?`<div class="tot-line"><span>Frete / instalação</span><b>+ ${brl(freteOrc(o))}</b></div>`:''}
-      ${desc>0?`<div class="tot-line"><span>Desconto geral${o.descGeralTipo==='%'?` (${Number(o.desconto)||0}%)`:''}</span><b>− ${brl(desc)}</b></div>`:''}
-      <div class="tot-line geral"><span>TOTAL</span><b>${brl(totalOrc(o))}</b></div>
+    <div class="orc-totais-wrap">
+      <div class="orc-totais">
+        <div class="orc-tot-linha"><span>SUBTOTAL</span><span>${brl(subtotalBrutoOrc(o))}</span></div>
+        ${descItensOrc(o)>0?`<div class="orc-tot-linha"><span>DESCONTOS NOS ITENS</span><span>- ${brl(descItensOrc(o))}</span></div>`:''}
+        ${freteOrc(o)>0?`<div class="orc-tot-linha"><span>FRETE/INSTALAÇÃO</span><span>+ ${brl(freteOrc(o))}</span></div>`:''}
+        ${desc>0?`<div class="orc-tot-linha"><span>DESCONTO GERAL${o.descGeralTipo==='%'?` (${Number(o.desconto)||0}%)`:''}</span><span>- ${brl(desc)}</span></div>`:''}
+        <div class="orc-tot-linha geral"><span>TOTAL GERAL</span><span>${brl(totalOrc(o))}</span></div>
+      </div>
     </div>
 
-    ${o.obs?`<div class="obs"><b>Observações e condições:</b><br>${esc(o.obs)}</div>`:''}
-    ${nfEmitida(o)?`<div class="obs" style="background:#f0fdf4;border-color:#bbf7d0;color:#166534"><b>Nota fiscal:</b> emitida${nfDe(o).numero?` nº ${esc(nfDe(o).numero)}`:''}${nfDe(o).emitidaEm?` em ${fmtData(nfDe(o).emitidaEm)}`:''}.</div>`:''}
-    <div class="assinaturas">
-      <div>${o.assinatura
-        ? `<img class="assin-img" src="${o.assinatura.img}" alt="Assinatura de ${esc(o.assinatura.nome||'cliente')}">
-           <div style="margin-top:2px"><b>${esc(o.assinatura.nome||'')}</b></div>
-           <div style="font-size:10.5px;color:#64748b">Assinado digitalmente em ${fmtData(o.assinatura.data)}</div>`
-        : 'Assinatura do cliente'}</div>
-      <div>Responsável pela emissão</div>
+    ${o.obs?`<div class="orc-obs"><div class="orc-obs-titulo">OBSERVAÇÕES</div><div class="orc-obs-corpo">${esc(o.obs)}</div></div>`:''}
+    ${nfEmitida(o)?`<div class="orc-obs"><div class="orc-obs-titulo">NOTA FISCAL</div><div class="orc-obs-corpo">NF emitida${nfDe(o).numero?` nº ${esc(nfDe(o).numero)}`:''}${nfDe(o).emitidaEm?` em ${fmtData(nfDe(o).emitidaEm)}`:''}.</div></div>`:''}
+
+    <div class="orc-pagto">
+      <div class="orc-pagto-titulo">FORMA DE PAGAMENTO</div>
+      <div class="orc-pagto-corpo">A combinar</div>
     </div>
-    <div class="rodape-doc">
-      ${(em.telefone||em.email||em.site||em.instagram) ? `<div class="rodape-contato">
-        ${em.telefone?`<span>📞 <a href="tel:${esc(soDigitos(em.telefone))}">${esc(em.telefone)}</a></span>`:''}
-        ${em.email?`<span>✉️ <a href="mailto:${esc(String(em.email).trim())}">${esc(em.email)}</a></span>`:''}
-        ${em.site?`<span>🌐 <a href="${esc(urlComHttp(em.site))}" target="_blank" rel="noopener">${esc(em.site)}</a></span>`:''}
-        ${em.instagram?`<span>📷 <a href="${esc(urlComHttp(urlInstagram(em.instagram)))}" target="_blank" rel="noopener">${esc(em.instagram)}</a></span>`:''}
-      </div>`:''}
-      <div>Emitido em ${fmtData(hojeISO())} · ${esc(o.numero||'')}</div>
+
+    <div class="orc-assin-linha">
+      <div class="orc-assin-bloco">${o.assinatura
+        ? `<img class="assin-img" src="${o.assinatura.img}" alt="Assinatura de ${esc(o.assinatura.nome||'cliente')}"><div><b>${esc(o.assinatura.nome||'')}</b></div><div style="font-size:10px">Assinado em ${fmtData(o.assinatura.data)}</div>`
+        : 'ASSINATURA DO CLIENTE'}</div>
+    </div>
+
+    <div class="orc-rodape">
+      ${em.telefone||em.email||em.site?`${[em.telefone,em.email,em.site].filter(Boolean).map(x=>esc(x)).join(' | ')}`:''}
     </div>`;
 }
 
@@ -6917,6 +6926,7 @@ function htmlCatalogo(){
     </select>
     <button class="btn danger" id="btnEsvaziarCatalogo" type="button">🗑️ Esvaziar catálogo</button>
     <button class="btn ghost" id="btnImportarNFe">📥 Importar NF-e (XML)</button>
+    <button class="btn ghost" id="btnImportarExcel">📊 Importar Excel/CSV</button>
     <button class="btn primary" id="btnNovoItem">＋ Novo item</button>
   </div>
 
@@ -6942,6 +6952,8 @@ function ligarCatalogo(){
   document.getElementById('fCatOrdem').addEventListener('change', e=>{ filtroCat.ordem=e.target.value; renderTabelaCat(); });
   document.getElementById('btnNovoItem').addEventListener('click', ()=>formProduto(null));
   document.getElementById('btnImportarNFe').addEventListener('click', abrirImportacaoNFeProdutos);
+  const btnImpExcel = document.getElementById('btnImportarExcel');
+  if(btnImpExcel) btnImpExcel.addEventListener('click', abrirImportacaoExcelProdutos);
   document.getElementById('btnEsvaziarCatalogo').addEventListener('click', limparCatalogoProdutos);
   document.getElementById('btnNovoForn').addEventListener('click', ()=>formFornecedor(null));
   renderTabelaCat();
@@ -7323,6 +7335,92 @@ function abrirImportacaoNFeProdutos(){
       const dados={nome:x.nome,codigo:x.codigo,gtin:x.gtin,un:x.un,custo:Number(x.custoTotal||x.custo),preco:Number(p?.preco||0)>Number(x.precoSugerido||0)?Number(p.preco):Number(x.precoSugerido||0),ncm:x.ncm.replace(/\D/g,''),cest:x.cest.replace(/\D/g,''),cfop:x.cfop.replace(/\D/g,''),csosn:'400',origem:x.origem};
       if(p){ const unidadeAnterior=p.un; Object.assign(p,dados); if(fornecedorId)p.fornecedorId=fornecedorId; if(importarEstoque){const saldo=Number(p.estoque)||0;p.estoque=p.estoque==null||String(unidadeAnterior||'un').toLowerCase()!==String(x.un||'un').toLowerCase()?x.qtd:saldo+x.qtd;} atualizados++; }
       else{ listaProdutos().push({id:uid(),preco:0,desc:'',fornecedorId,...dados,...(importarEstoque?{estoque:x.qtd}: {})}); novos++; }
+    });
+    salvar(); fecharModal(); render(); toast(`Importação concluída: ${novos} novo(s), ${atualizados} atualizado(s).`);
+  };
+}
+function abrirImportacaoExcelProdutos(){
+  abrirModal(`
+    <div class="modal-h"><h2>📊 Importar produtos (Excel/CSV/XML)</h2><button type="button" class="x" data-fechar>×</button></div>
+    <div class="modal-b">
+      <p class="mini" style="margin-bottom:12px">Importe planilha <b>.XLSX/.XLS/.CSV</b> ou arquivo <b>.XML</b>. Aceita colunas como Nome/Descrição, Código/SKU, GTIN/EAN, NCM, CEST, Unidade/UN, Custo/Preço Compra, Preço/Venda, Fornecedor.</p>
+      <div class="campo"><label>Selecionar arquivo</label><input id="impProdArquivo" type="file" accept=".xlsx,.xls,.csv,.xml,text/csv,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/xml,application/xml"></div>
+      <div id="impProdResumo" style="margin-top:12px"></div>
+      <div id="impProdItens" style="margin-top:8px;max-height:260px;overflow:auto;border:1px solid var(--borda);border-radius:10px"></div>
+      <div id="impProdErro" class="mini" style="color:var(--erro);margin-top:8px"></div>
+    </div>
+    <div class="modal-f"><button type="button" class="btn ghost" data-fechar>Cancelar</button><button type="button" class="btn primary" id="impProdImportar" disabled>Importar</button></div>`);
+  modal.querySelectorAll('[data-fechar]').forEach(b=>b.onclick=fecharModal);
+  const arquivo=document.getElementById('impProdArquivo'), resumo=document.getElementById('impProdResumo'), itensEl=document.getElementById('impProdItens'), erro=document.getElementById('impProdErro'), btn=document.getElementById('impProdImportar');
+  let itens=[];
+  arquivo.onchange=async()=>{
+    itens=[]; resumo.innerHTML=''; itensEl.innerHTML=''; erro.textContent=''; btn.disabled=true;
+    const file=arquivo.files&&arquivo.files[0]; if(!file) return;
+    const nome=file.name.toLowerCase();
+    try{
+      if(nome.endsWith('.xml')){
+        const xml=new DOMParser().parseFromString(await file.text(),'application/xml');
+        if(xml.getElementsByTagName('parsererror').length) throw new Error('XML inválido.');
+        const all=[...xml.getElementsByTagName('*')];
+        const dets=all.filter(x=>x.localName==='det'&&x.parentElement?.localName==='infNFe');
+        if(dets.length){
+          itens=dets.map(det=>{
+            const prod=[...det.children].find(x=>x.localName==='prod'); if(!prod) return null;
+            const value=n=>[...prod.children].find(x=>x.localName===n)?.textContent?.trim()||'';
+            const dec=n=>Number(String(value(n)).replace(',','.'))||0;
+            return {nome:value('xProd'),codigo:value('cProd'),gtin:(value('cEAN')||value('cEANTrib')).replace(/^SEM GTIN$/i,''),un:value('uCom')||'un',custo:dec('vUnCom'),preco:0,ncm:value('NCM'),cest:value('CEST'),cfop:value('CFOP')};
+          }).filter(x=>x&&x.nome);
+        }else{
+          const rows=[...xml.querySelectorAll('produto, item, row, Product')];
+          itens=rows.map(r=>{
+            const get=(tag)=>r.querySelector(tag)?.textContent?.trim()||r.getAttribute(tag)||'';
+            return {nome:get('nome')||get('descricao')||get('Descricao')||get('xProd'),codigo:get('codigo')||get('cProd')||get('sku')||get('SKU'),gtin:get('gtin')||get('ean')||get('cEAN'),un:get('un')||get('uCom')||get('Unidade')||'un',custo:Number((get('custo')||get('vUnCom')||'0').replace(',','.'))||0,preco:Number((get('preco')||get('venda')||'0').replace(',','.'))||0,ncm:(get('ncm')||get('NCM')||'').replace(/\D/g,''),cest:(get('cest')||get('CEST')||'').replace(/\D/g,''),fornecedor:get('fornecedor')||get('Fornecedor')||''};
+          }).filter(x=>x&&x.nome);
+        }
+      }else{
+        const text=await file.text();
+        const XLSX = window.XLSX;
+        if(XLSX){
+          const wb=XLSX.read(text,{type:'binary'});
+          const ws=wb.Sheets[wb.SheetNames[0]];
+          const json=XLSX.utils.sheet_to_json(ws,{defval:''});
+          itens=json.map(row=>{
+            const keys=Object.keys(row);
+            const k=key=>{const f=keys.find(x=>x.toString().toLowerCase().replace(/[^a-z0-9]/g,'')===key); return f?row[f]:'';};
+            const nome=k('nome')||k('descricao')||k('produto')||k('servico');
+            if(!nome) return null;
+            return {nome:String(nome).trim(),codigo:k('codigo')||k('sku')||k('cod'),gtin:k('gtin')||k('ean')||k('barcode'),un:k('un')||k('unidade')||'un',custo:Number(String(k('custo')||k('precocompra')||'0').replace(',','.'))||0,preco:Number(String(k('preco')||k('precovenda')||k('valor')||'0').replace(',','.'))||0,ncm:String(k('ncm')||'').replace(/\D/g,''),cest:String(k('cest')||'').replace(/\D/g,''),fornecedor:k('fornecedor')||k('fornecedor')};
+          }).filter(Boolean);
+        }else{
+          const lines=text.split(/\r?\n/).filter(Boolean);
+          if(!lines.length) throw new Error('Arquivo vazio.');
+          const sep=lines[0].includes(';')?';':(lines[0].includes('\t')?'\t':',');
+          const head=lines[0].split(sep).map(x=>x.replace(/^"|"$/g,'').trim().toLowerCase());
+          for(let i=1;i<lines.length;i++){
+            const cols=lines[i].split(sep).map(x=>x.replace(/^"|"$/g,'').trim());
+            const obj={}; head.forEach((h,j)=>obj[h]=cols[j]||'');
+            const nome=obj.nome||obj.descricao||obj.produto||obj.servico;
+            if(!nome) continue;
+            itens.push({nome,codigo:obj.codigo||obj.sku||'',gtin:obj.gtin||obj.ean||'',un:obj.un||obj.unidade||'un',custo:Number((obj.custo||obj.precocompra||'0').replace(',','.'))||0,preco:Number((obj.preco||obj.precovenda||obj.valor||'0').replace(',','.'))||0,ncm:(obj.ncm||'').replace(/\D/g,''),cest:(obj.cest||'').replace(/\D/g,''),fornecedor:obj.fornecedor||''});
+          }
+        }
+      }
+      if(!itens.length) throw new Error('Nenhum item encontrado no arquivo.');
+      resumo.innerHTML=`<div class="selo info">${itens.length} item(ns) encontrados</div>`;
+      itensEl.innerHTML=itens.slice(0,200).map((x,i)=>`<div style="padding:6px 10px;border-bottom:1px solid var(--borda);font-size:12px"><b>${esc(x.nome)}</b> <span class="mini">· ${esc(x.codigo||'s/cod')} · ${esc(x.un)} · Custo ${brl(x.custo)} · Preço ${brl(x.preco)}</span></div>`).join('')+(itens.length>200?`<div class="mini" style="padding:6px 10px">... e mais ${itens.length-200} itens</div>`:'');
+      btn.disabled=false;
+    }catch(e){ erro.textContent=e.message||'Falha ao ler arquivo.'; }
+  };
+  btn.onclick=()=>{
+    if(!itens.length){erro.textContent='Nenhum item para importar.';return;}
+    let novos=0, atualizados=0;
+    itens.forEach(x=>{
+      const normal=s=>String(s||'').trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+      const p=listaProdutos().find(y=>(x.gtin&&y.gtin&&x.gtin===y.gtin)||(x.codigo&&y.codigo&&x.codigo===y.codigo)||normal(y.nome)===normal(x.nome));
+      const dados={nome:x.nome,codigo:x.codigo||'',gtin:x.gtin||'',un:x.un||'un',custo:Number(x.custo)||0,preco:Number(x.preco)||0,ncm:x.ncm||'',cest:x.cest||''};
+      if(x.fornecedor){let f=listaFornecedores().find(ff=>normal(ff.nome)===normal(x.fornecedor)); if(!f){f={id:uid(),nome:x.fornecedor};listaFornecedores().push(f);}dados.fornecedorId=f.id;}
+      if(p){Object.assign(p,dados);atualizados++;}
+      else{listaProdutos().push({id:uid(),desc:'',fornecedorId:'',...dados});novos++;}
     });
     salvar(); fecharModal(); render(); toast(`Importação concluída: ${novos} novo(s), ${atualizados} atualizado(s).`);
   };
