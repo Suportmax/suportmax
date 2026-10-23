@@ -2552,6 +2552,41 @@ function statusOrc(id){ return STATUS_ORC.find(s=>s.id===id) || STATUS_ORC[0]; }
 function badgeOrc(id){ const s=statusOrc(id); return `<span class="badge" style="--c:${s.cor}">${s.label}</span>`; }
 function listaOrcamentos(){ return db.orcamentos || (db.orcamentos=[]); }
 function listaProdutos(){ return db.produtos || (db.produtos=[]); }
+function catalogoServicosPadrao(){
+  return [
+    {id:'srv_d2064k2y5',nome:'Formatação com backup',preco:150,custo:0,un:'UN',desc:'Formatação e reinstalação com backup dos dados',fornecedorId:''},
+    {id:'srv_m15svaavh',nome:'Formatação sem backup',preco:100,custo:0,un:'UN',desc:'Formatação e reinstalação sem backup',fornecedorId:''},
+    {id:'srv_rf2lflice',nome:'Remoção de vírus/malware',preco:80,custo:0,un:'UN',desc:'Limpeza e remoção de vírus e malwares',fornecedorId:''},
+    {id:'srv_jjymkfrnt',nome:'Instalação de programas',preco:40,custo:0,un:'UN',desc:'Instalação e configuração de softwares',fornecedorId:''},
+    {id:'srv_11mlgnube',nome:'Configuração de impressora',preco:60,custo:0,un:'UN',desc:'Instalação e configuração de impressora',fornecedorId:''},
+    {id:'srv_8p7fymukw',nome:'Recuperação de dados',preco:250,custo:0,un:'UN',desc:'Recuperação de arquivos',fornecedorId:''},
+    {id:'srv_u7kxxm6yd',nome:'Instalação de sistema Windows/Linux',preco:120,custo:0,un:'UN',desc:'Instalação e configuração de sistema operacional',fornecedorId:''},
+    {id:'srv_37932dgna',nome:'Troca de HD/SSD',preco:80,custo:0,un:'UN',desc:'Troca ou upgrade de armazenamento',fornecedorId:''},
+    {id:'srv_uf8mk84zm',nome:'Limpeza e revisão de PC/Notebook',preco:60,custo:0,un:'UN',desc:'Limpeza interna, revisão e testes',fornecedorId:''},
+    {id:'srv_yyxcnfjra',nome:'Instalação de câmeras IP',preco:150,custo:0,un:'UN',desc:'Instalação, configuração e apontamento',fornecedorId:''},
+    {id:'srv_zd0wzlppx',nome:'Manutenção em sistema de CFTV',preco:120,custo:0,un:'UN',desc:'Revisão, configuração e correção',fornecedorId:''},
+    {id:'srv_541cudslz',nome:'Configuração DVR/NVR',preco:100,custo:0,un:'UN',desc:'Configuração, acesso remoto e gravação',fornecedorId:''},
+    {id:'srv_m3mk1htuu',nome:'Cabeamento estruturado',preco:25,custo:0,un:'M',desc:'Passagem e organização de cabos',fornecedorId:''},
+    {id:'srv_tc04h0yf9',nome:'Instalação de rede Wi-Fi',preco:150,custo:0,un:'UN',desc:'Configuração de roteador/AP e cobertura',fornecedorId:''},
+    {id:'srv_qrc8qcu4t',nome:'Configuração de roteador/ONU',preco:70,custo:0,un:'UN',desc:'Configuração, senha e segurança',fornecedorId:''},
+    {id:'srv_b2po19m49',nome:'Reparo em placa/motherboard',preco:150,custo:0,un:'UN',desc:'Diagnóstico e reparo em placa',fornecedorId:''},
+    {id:'srv_xvl9wsqgf',nome:'Troca de fonte',preco:70,custo:0,un:'UN',desc:'Troca de fonte de alimentação',fornecedorId:''},
+    {id:'srv_c6vupmw80',nome:'Troca de tela notebook',preco:150,custo:0,un:'UN',desc:'Substituição de tela LCD/LED',fornecedorId:''},
+    {id:'srv_tatkr69zr',nome:'Reparo em carregador/notebook',preco:70,custo:0,un:'UN',desc:'Diagnóstico e correção',fornecedorId:''},
+    {id:'srv_vc9poy23f',nome:'Solda/componentes eletrônicos',preco:100,custo:0,un:'UN',desc:'Reparo com solda e componentes',fornecedorId:''},
+    {id:'srv_f8rkf971o',nome:'Visita técnica',preco:60,custo:0,un:'UN',desc:'Visita para diagnóstico/orçamento',fornecedorId:''},
+    {id:'srv_83lncmgz1',nome:'Deslocamento',preco:40,custo:0,un:'UN',desc:'Taxa de deslocamento',fornecedorId:''},
+    {id:'srv_x2jpem6n6',nome:'Suporte remoto',preco:40,custo:0,un:'UN',desc:'Atendimento via acesso remoto',fornecedorId:''},
+    {id:'srv_tqgcpqba2',nome:'Manutenção preventiva',preco:80,custo:0,un:'UN',desc:'Manutenção preventiva em equipamentos',fornecedorId:''}
+  ];
+}
+
+function popularCatalogoServicos(){
+  if(listaProdutos().length) return;
+  catalogoServicosPadrao().forEach(p=>listaProdutos().push(p));
+  salvar();
+}
+
 function cTribNacPadrao(unidade, codigo=''){
   const informado=String(codigo||'').replace(/\D/g,'');
   if(informado) return informado;
@@ -11971,6 +12006,7 @@ function verificarOrcPublico(){
 }
 
 /* ---------- Início ---------- */
+try{ popularCatalogoServicos(); }catch(e){}
 aplicarMarca();
 aplicarTema();
 iniciarPWA();
