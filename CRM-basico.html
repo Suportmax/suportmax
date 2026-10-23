@@ -7012,7 +7012,6 @@ function htmlCatalogo(){
 
   <div class="subtitulo" style="margin:14px 0 8px">📦 Produtos e serviços</div>
   <div class="contagem" id="contCat" aria-live="polite"></div>
-  <div class="cat-cards" id="catCards"></div>
   <div class="tabela-wrap" id="catalogoTabelaWrap"><table>
     <thead><tr><th>Item</th><th>Un.</th><th>Custo</th><th>Preço</th><th>Margem</th><th style="text-align:right">Ações</th></tr></thead>
     <tbody id="tabelaCat"></tbody>
@@ -7062,12 +7061,12 @@ function listaCatFiltrada(){
   });
 }
 function renderTabelaCat(){
-  const tb = document.getElementById('tabelaCat'); const cards=document.getElementById('catCards'); if(!tb||!cards) return;
+  const tb = document.getElementById('tabelaCat'); if(!tb) return;
   const l = listaCatFiltrada();
   tb.innerHTML = l.length ? l.map(p=>{
     const m = margemProduto(p);
     return `<tr>
-      <td><div class="cat-item">${p.foto?`<img class="cat-foto" src="${p.foto}" alt="">`:''}<div style="min-width:0"><div class="nm">${esc(p.nome)}</div>${p.ncm||p.cest?`<div class="mt">${p.ncm?'NCM '+esc(p.ncm):''}${p.ncm&&p.cest?' · ':''}${p.cest?'CEST '+esc(p.cest):''}</div>`:''}</div></div></td>
+      <td><div class="cat-item"><div style="min-width:0"><div class="nm">${esc(p.nome)}</div>${p.desc?`<div class="mt">${esc(p.desc)}</div>`:''}${p.ncm||p.cest?`<div class="mt">${p.ncm?'NCM '+esc(p.ncm):''}${p.ncm&&p.cest?' · ':''}${p.cest?'CEST '+esc(p.cest):''}</div>`:''}</div></div></td>
       <td><span class="mini">${esc(p.un||'un')}</span></td>
       <td>${Number(p.custo)>0?brl(p.custo):'<span class="mini">—</span>'}</td>
       <td class="vl-total">${brl(p.preco)}</td>
@@ -7078,31 +7077,10 @@ function renderTabelaCat(){
       </div></td>
     </tr>`;
   }).join('') : `<tr><td colspan="6"><div class="vazio"><span class="big">📦</span>${listaProdutos().length?'Nenhum item corresponde aos filtros.':'Seu catálogo ainda está vazio.'}</div></td></tr>`;
-  cards.innerHTML=l.length?l.map(p=>{
-    const m=margemProduto(p);
-    const foto=p.foto?`<img class="cat-foto" src="${p.foto}" alt="">`:'<div class="cat-foto" aria-hidden="true" style="display:grid;place-items:center">📦</div>';
-    return `<article class="cat-card">
-      <div class="cat-card-top">${foto}<div class="cat-card-main"><div class="cat-card-name">${esc(p.nome)}</div><div class="cat-card-desc">${[p.ncm?'NCM '+p.ncm:'',p.cest?'CEST '+p.cest:'',p.cfop?'CFOP '+p.cfop:'',p.csosn?'CSOSN '+p.csosn:''].filter(Boolean).map(esc).join(' · ')||esc(p.desc||'Dados fiscais não cadastrados')}</div></div><span class="mini">${esc(p.un||'un')}</span></div>
-      <div class="cat-card-values">
-        <div class="cat-card-value"><span>Custo</span><b>${Number(p.custo)>0?brl(p.custo):'Não informado'}</b></div>
-        <div class="cat-card-value"><span>Preço de venda</span><b>${brl(p.preco)}</b></div>
-        <div class="cat-card-value"><span>Margem</span><b>${m&&m.custo?`${seloMargem(p)} ${brl(m.valor)}`:'Cadastre o custo'}</b></div>
-        <div class="cat-card-value"><span>Fornecedor</span><b>${esc(listaFornecedores().find(f=>f.id===p.fornecedorId)?.nome||'—')}</b></div>
-      </div>
-      <div class="cat-card-actions"><button class="btn ghost sm" type="button" data-cat-edit="${p.id}">✏️ Editar</button><button class="btn danger sm" type="button" data-cat-rm="${p.id}">🗑️ Excluir</button></div>
-    </article>`;
-  }).join(''):`<div class="card"><div class="vazio"><span class="big">📦</span>${listaProdutos().length?'Nenhum item corresponde aos filtros.':'Seu catálogo ainda está vazio.'}<br><button class="btn ${listaProdutos().length?'ghost':'primary'} sm" type="button" data-cat-empty>${listaProdutos().length?'Limpar busca e filtros':'＋ Cadastrar primeiro item'}</button></div></div>`;
   const c = document.getElementById('contCat');
   if(c) c.textContent = `${l.length} de ${listaProdutos().length} item(ns)`;
   tb.querySelectorAll('[data-cat-edit]').forEach(b=>b.onclick=()=>formProduto(b.dataset.catEdit));
   tb.querySelectorAll('[data-cat-rm]').forEach(b=>b.onclick=()=>excluirProduto(b.dataset.catRm));
-  cards.querySelectorAll('[data-cat-edit]').forEach(b=>b.onclick=()=>formProduto(b.dataset.catEdit));
-  cards.querySelectorAll('[data-cat-rm]').forEach(b=>b.onclick=()=>excluirProduto(b.dataset.catRm));
-  const vazio=cards.querySelector('[data-cat-empty]');
-  if(vazio) vazio.onclick=()=>{
-    if(listaProdutos().length){ filtroCat.busca=''; filtroCat.margem='todos'; filtroCat.ordem='nome'; document.getElementById('buscaCat').value=''; document.getElementById('fCatMargem').value='todos'; document.getElementById('fCatOrdem').value='nome'; renderTabelaCat(); }
-    else formProduto(null);
-  };
 }
 function renderFornecedores(){
   const el = document.getElementById('listaForn'); if(!el) return;
