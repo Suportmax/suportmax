@@ -1552,6 +1552,53 @@ function normalizar(d){
   if(typeof d.prefs.tema!=='string') d.prefs.tema = 'claro';
   if(typeof d.prefs.cartoes!=='object' || !d.prefs.cartoes) d.prefs.cartoes = {stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true};
   if(typeof d.prefs.densidade!=='string') d.prefs.densidade = 'normal';
+  /* Sanitiza o conteúdo dos arrays: um registro inválido (null, número, texto)
+     não pode derrubar as telas, e itens/checklists precisam ser listas. */
+  const soObjetos = a => (Array.isArray(a)?a:[]).filter(x=>x && typeof x==='object' && !Array.isArray(x));
+  const listaItens = a => soObjetos(a).map(i=>Object.assign({id:i.id||uid()}, i));
+  d.clientes = soObjetos(d.clientes).map(c=>{
+    if(!c.id) c.id = uid();
+    if(typeof c.nome!=='string') c.nome = c.nome==null?'':String(c.nome);
+    c.contatos = soObjetos(c.contatos);
+    c.visitas = soObjetos(c.visitas);
+    if(c.followup && (typeof c.followup!=='object' || Array.isArray(c.followup))) c.followup = null;
+    return c;
+  });
+  d.orcamentos = soObjetos(d.orcamentos).map(o=>{
+    if(!o.id) o.id = uid();
+    o.itens = listaItens(o.itens);
+    o.pagamentos = soObjetos(o.pagamentos);
+    return o;
+  });
+  d.produtos = soObjetos(d.produtos).map(p=>{ if(!p.id) p.id = uid(); return p; });
+  d.fornecedores = soObjetos(d.fornecedores).map(f=>{ if(!f.id) f.id = uid(); return f; });
+  d.ordens = soObjetos(d.ordens).map(o=>{
+    if(!o.id) o.id = uid();
+    o.itens = listaItens(o.itens);
+    o.checklist = soObjetos(o.checklist);
+    return o;
+  });
+  d.lancamentos = soObjetos(d.lancamentos).map(l=>{ if(!l.id) l.id = uid(); return l; });
+  d.mensagens = soObjetos(d.mensagens).map(m=>{ if(!m.id) m.id = uid(); return m; });
+  d.contratos = soObjetos(d.contratos).map(c=>{ if(!c.id) c.id = uid(); return c; });
+  d.contratosServico = soObjetos(d.contratosServico).map(c=>{
+    if(!c.id) c.id = uid();
+    c.itens = listaItens(c.itens);
+    c.pagamentos = soObjetos(c.pagamentos);
+    return c;
+  });
+  d.tarefas = soObjetos(d.tarefas).map(t=>{ if(!t.id) t.id = uid(); return t; });
+  d.backups = soObjetos(d.backups).filter(b=>b.dados && typeof b.dados==='object' && !Array.isArray(b.dados)).map(b=>{ if(!b.id) b.id = uid(); return b; });
+  d.auditoria = soObjetos(d.auditoria);
+  /* Mantém a numeração acima do maior número já usado (importações/backups antigos
+     podem trazer seq zerado e gerar ORC/OS/CT repetidos). */
+  const maiorSeq = (lista, campo) => (lista||[]).reduce((m,x)=>{
+    const achou = String((x&&x[campo])||'').match(/(\d+)\s*$/);
+    return achou ? Math.max(m, Number(achou[1])||0) : m;
+  }, 0);
+  d.seqOrc = Math.max(Number(d.seqOrc)||0, maiorSeq(d.orcamentos,'numero'));
+  d.seqOS = Math.max(Number(d.seqOS)||0, maiorSeq(d.ordens,'numero'));
+  d.seqCT = Math.max(Number(d.seqCT)||0, maiorSeq(d.contratosServico,'numero'));
   return d;
 }
 function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], lancamentos:[], mensagens:mensagemPadrao(), contratos:[], contratosServico:[], tarefas:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, seqCT:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
@@ -1574,7 +1621,8 @@ function vencidoOrc(o){
   const st = statusFin(o);
   if(st==='pago' || st==='na') return false;
   const v = o.vencimento || o.validade || '';
-  return v && diasAte(v) < 0;
+  const d = diasAte(v);
+  return d!=null && d<0;
 }
 function contasReceber(){
   return listaOrcamentos()
@@ -2041,7 +2089,7 @@ function backupDiarioAuto(){
 
 function aplicarDadosRemotos(remoto){
   const anterior = db;
-  db = prepararPrimeiroUso(remoto.dados);
+  db = prepararPrimeiroUso(normalizar(remoto && remoto.dados) || baseVazia());
   db.role = 'comum';
   if(!persistirDadosLocal()){
     db = anterior;
@@ -2101,20 +2149,33 @@ function uid(){ return Date.now().toString(36) + Math.random().toString(36).slic
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 function hojeISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function agoraDT(){ return hojeISO()+'T'+String(new Date().getHours()).padStart(2,'0')+':'+String(new Date().getMinutes()).padStart(2,'0'); }
+function dataDeISO(iso){
+  const s = String(iso==null?'':iso).slice(0,10);
+  const p = s.split('-');
+  if(p.length!==3) return null;
+  const a = Number(p[0]), m = Number(p[1]), d = Number(p[2]);
+  if(!a || !m || !d) return null;
+  const dt = new Date(a, m-1, d);
+  if(dt.getFullYear()!==a || dt.getMonth()!==m-1 || dt.getDate()!==d) return null;
+  return dt;
+}
 function fmtData(iso){
   if(!iso) return '—';
+  const dt = dataDeISO(iso);
+  if(!dt) return '—';
   const p = String(iso).slice(0,10).split('-');
-  return p.length===3 ? `${p[2]}/${p[1]}/${p[0]}` : iso;
+  return `${p[2]}/${p[1]}/${p[0]}`;
 }
 function fmtDT(iso){
   if(!iso) return '—';
-  if(String(iso).includes('T')){ const [d,h]=String(iso).split('T'); return fmtData(d)+' '+h.slice(0,5); }
+  if(String(iso).includes('T')){ const [d,h]=String(iso).split('T'); const data=fmtData(d); return data==='—' ? '—' : data+' '+String(h).slice(0,5); }
   return fmtData(iso);
 }
 function diasAte(iso){
   if(!iso) return null;
-  const a = new Date(String(iso).slice(0,10)+'T00:00:00');
-  const b = new Date(hojeISO()+'T00:00:00');
+  const a = dataDeISO(iso);
+  if(!a) return null;
+  const b = dataDeISO(hojeISO());
   return Math.round((a-b)/86400000);
 }
 function rotuloPrazo(iso){
@@ -2491,18 +2552,20 @@ function seloArquivado(o){
   return `<span class="selo info" title="${esc(o.arquivadoMotivo||'Serviço concluído')}${quando?' — '+esc(quando):''}${o.arquivadoOS?' — OS '+esc(o.arquivadoOS):''}">📦 arquivado</span>`;
 }
 function buscarProd(id){ return listaProdutos().find(p=>p.id===id); }
-function itemBruto(i){ return (Number(i.qtd)||0)*(Number(i.unit)||0); }
+function itensDe(o){ return Array.isArray(o && o.itens) ? o.itens.filter(i=>i && typeof i==='object') : []; }
+function itemBruto(i){ return i ? (Number(i.qtd)||0)*(Number(i.unit)||0) : 0; }
 function itemDescV(i){
+  if(!i) return 0;
   const bruto = itemBruto(i);
   const d = Number(i.descItem)||0;
   if(!d) return 0;
   return i.descTipo==='%' ? bruto*(d/100) : Math.min(bruto, d);
 }
 function itemTotal(i){ return Math.max(0, itemBruto(i) - itemDescV(i)); }
-function subtotalBrutoOrc(o){ return (o.itens||[]).reduce((s,i)=>s+itemBruto(i),0); }
-function descItensOrc(o){ return (o.itens||[]).reduce((s,i)=>s+itemDescV(i),0); }
-function subtotalOrc(o){ return (o.itens||[]).reduce((s,i)=>s+itemTotal(i),0); }
-function freteOrc(o){ return Math.max(0, Number(o.frete)||0); }
+function subtotalBrutoOrc(o){ return itensDe(o).reduce((s,i)=>s+itemBruto(i),0); }
+function descItensOrc(o){ return itensDe(o).reduce((s,i)=>s+itemDescV(i),0); }
+function subtotalOrc(o){ return itensDe(o).reduce((s,i)=>s+itemTotal(i),0); }
+function freteOrc(o){ return Math.max(0, Number(o && o.frete)||0); }
 function descGeralV(o){
   const d = Math.max(0, Number(o.desconto)||0);
   if(!d) return 0;
@@ -2514,8 +2577,14 @@ function nomeClienteOrc(o){
   const c = buscarCli(o.clienteId);
   return c ? c.nome : (o.clienteNome || 'Cliente removido');
 }
+function maiorSeqAtual(lista, campo){
+  return (lista||[]).reduce((m,x)=>{
+    const achou = String((x&&x[campo])||'').match(/(\d+)\s*$/);
+    return achou ? Math.max(m, Number(achou[1])||0) : m;
+  }, 0);
+}
 function novoNumeroOrc(){
-  const n = (db.seqOrc||0) + 1;
+  const n = Math.max(Number(db.seqOrc)||0, maiorSeqAtual(listaOrcamentos(),'numero')) + 1;
   db.seqOrc = n;
   return 'ORC-' + new Date().getFullYear() + '-' + String(n).padStart(4,'0');
 }
@@ -5984,7 +6053,7 @@ function statusOS(id){ return STATUS_OS.find(s=>s.id===id) || STATUS_OS[0]; }
 function listaOrdens(){ return db.ordens || (db.ordens=[]); }
 function buscarOrdem(id){ return listaOrdens().find(o=>o.id===id); }
 function badgeOS(id){ const s=statusOS(id); return `<span class="badge" style="--c:${s.cor}">${s.label}</span>`; }
-function novoNumeroOS(){ const n = (db.seqOS||0)+1; db.seqOS = n; return 'OS-'+new Date().getFullYear()+'-'+String(n).padStart(4,'0'); }
+function novoNumeroOS(){ const n = Math.max(Number(db.seqOS)||0, maiorSeqAtual(listaOrdens(),'numero')) + 1; db.seqOS = n; return 'OS-'+new Date().getFullYear()+'-'+String(n).padStart(4,'0'); }
 function osProgresso(os){
   const itens = os.checklist||[];
   const feito = itens.filter(i=>i.feito).length;
@@ -5992,7 +6061,7 @@ function osProgresso(os){
 }
 function osDeOrcamento(orcId){ return listaOrdens().find(o=>o.orcamentoId===orcId); }
 /* Itens (produtos/serviços) e totais da ordem de serviço */
-function itensOS(os){ return Array.isArray(os && os.itens) ? os.itens : []; }
+function itensOS(os){ return Array.isArray(os && os.itens) ? os.itens.filter(i=>i && typeof i==='object') : []; }
 function subtotalOS(os){ return itensOS(os).reduce((s,i)=>s+itemTotal(i),0); }
 function valorServicoOS(os){ return Math.max(0, Number(os && os.valor)||0); }
 /* Total da OS = soma dos itens + valor de serviço avulso (OS antigas, sem itens, valem só o valor) */
@@ -10297,10 +10366,10 @@ Lauro de Freitas/BA, {{data}}.`;
 
 function listaCT(){ if(!Array.isArray(db.contratosServico)) db.contratosServico = []; return db.contratosServico; }
 function buscarCT(id){ return listaCT().find(c=>c.id===id); }
-function novoNumeroCT(){ const n=(Number(db.seqCT)||0)+1; db.seqCT=n; return 'CT-'+new Date().getFullYear()+'-'+String(n).padStart(4,'0'); }
+function novoNumeroCT(){ const n=Math.max(Number(db.seqCT)||0, maiorSeqAtual(listaCT(),'numero'))+1; db.seqCT=n; return 'CT-'+new Date().getFullYear()+'-'+String(n).padStart(4,'0'); }
 function statusCT(id){ return STATUS_CT.find(s=>s.id===id) || STATUS_CT[0]; }
 function seloCT(c){ const s=statusCT(c.status); return `<span class="selo ${s.cls||'info'}">${esc(s.label)}</span>`; }
-function ctSubtotal(c){ return (c.itens||[]).reduce((s,i)=>s+itemTotal(i),0); }
+function ctSubtotal(c){ return itensDe(c).reduce((s,i)=>s+itemTotal(i),0); }
 function ctFrete(c){ return Math.max(0, Number(c.frete)||0); }
 function ctDescGeral(c){
   const d=Math.max(0, Number(c.desconto)||0); if(!d) return 0;
