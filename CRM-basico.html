@@ -892,6 +892,42 @@ body.modo-publico{background:#f1f5f9;padding:20px 0}
 .orc-doc .assinaturas div{flex:1;border-top:1px solid #0f172a;padding-top:6px;font-size:12.3px;text-align:center;color:#334155}
 .orc-doc .ct-clausulas{line-height:1.62;font-size:13px;text-align:justify}
 .orc-doc .ct-clausulas b{letter-spacing:.4px}
+/* ----- Layout do orçamento (modelo em blocos com bordas) ----- */
+.orc-doc .orc-orcamento{font-size:12px;line-height:1.45;color:#000}
+.orc-doc .orc-orcamento .orc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:10px;flex-wrap:wrap}
+.orc-doc .orc-orcamento .orc-head-left{display:flex;gap:10px;align-items:flex-start;min-width:0}
+.orc-doc .orc-orcamento .orc-logo{width:96px;max-width:96px;height:auto;max-height:60px;object-fit:contain;flex:0 0 auto;border-radius:0;background:#fff;border:none;padding:0}
+.orc-doc .orc-orcamento .orc-emp{min-width:0}
+.orc-doc .orc-orcamento .orc-emp-nome{font-size:15px;font-weight:800;text-transform:uppercase;line-height:1.2}
+.orc-doc .orc-orcamento .orc-emp-info{font-size:10.5px;line-height:1.35}
+.orc-doc .orc-orcamento .orc-head-right{text-align:right;flex:0 0 auto}
+.orc-doc .orc-orcamento .orc-titulo{font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;line-height:1.2}
+.orc-doc .orc-orcamento .orc-num{font-size:13.5px;font-weight:800;margin-top:1px}
+.orc-doc .orc-orcamento .orc-datas{font-size:10.5px;margin-top:3px;line-height:1.35}
+.orc-doc .orc-orcamento .orc-blocos{display:flex;gap:10px;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap}
+.orc-doc .orc-orcamento .orc-bloco{border:1px solid #000;flex:1 1 240px;min-width:200px}
+.orc-doc .orc-orcamento .orc-bloco-titulo{background:#f1f1f1;border-bottom:1px solid #000;padding:2px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.orc-doc .orc-orcamento .orc-bloco-corpo{padding:4px 6px;font-size:11px;line-height:1.35}
+.orc-doc .orc-orcamento .orc-bloco-corpo div{margin:1px 0}
+.orc-doc .orc-orcamento table{width:100%;border-collapse:collapse;border:1px solid #000;margin:0}
+.orc-doc .orc-orcamento th{background:#f1f1f1;color:#000;border:1px solid #000;padding:3px 5px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;text-align:left}
+.orc-doc .orc-orcamento td{padding:3px 5px;border:1px solid #000;font-size:11px;border-bottom:1px solid #000}
+.orc-doc .orc-orcamento .num-c{text-align:right;white-space:nowrap}
+.orc-doc .orc-orcamento .orc-totais-wrap{display:flex;justify-content:flex-end;margin-top:8px}
+.orc-doc .orc-orcamento .orc-totais{border:1px solid #000;min-width:240px;max-width:340px}
+.orc-doc .orc-orcamento .orc-tot-linha{display:flex;justify-content:space-between;gap:16px;padding:2px 6px;font-size:11px;border-bottom:1px solid #000}
+.orc-doc .orc-orcamento .orc-tot-linha:last-child{border-bottom:none}
+.orc-doc .orc-orcamento .orc-tot-linha.geral{background:#f1f1f1;font-size:12.5px;font-weight:800}
+.orc-doc .orc-orcamento .orc-obs{border:1px solid #000;margin-top:10px}
+.orc-doc .orc-orcamento .orc-obs-titulo{background:#f1f1f1;border-bottom:1px solid #000;padding:2px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.orc-doc .orc-orcamento .orc-obs-corpo{padding:4px 6px;font-size:11px;white-space:pre-wrap;line-height:1.4}
+.orc-doc .orc-orcamento .orc-pagto{border:1px solid #000;margin-top:10px}
+.orc-doc .orc-orcamento .orc-pagto-titulo{background:#f1f1f1;border-bottom:1px solid #000;padding:2px 6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.orc-doc .orc-orcamento .orc-pagto-corpo{padding:4px 6px;font-size:11px;line-height:1.4}
+.orc-doc .orc-orcamento .orc-rodape{margin-top:12px;text-align:center;font-size:10px;color:#333}
+.orc-doc .orc-orcamento .orc-assin-linha{margin-top:30px;display:flex;justify-content:center}
+.orc-doc .orc-orcamento .orc-assin-bloco{border-top:1px solid #000;padding-top:3px;min-width:220px;text-align:center;font-size:10.5px}
+.orc-doc .orc-orcamento .assin-img{width:100%;max-width:170px;height:auto;display:block;margin:0 auto 2px}
 .orc-doc .assin-img{width:100%;max-width:210px;height:auto;display:block;margin:0 auto 2px}
 /* Captura de assinatura */
 .assin-area{position:relative;border:2px dashed var(--borda);border-radius:12px;background:#fff;overflow:hidden;touch-action:none}
@@ -5633,7 +5669,7 @@ function orcDocHTML(o){
   const cli = buscarCli(o.clienteId);
   const desc = descGeralV(o);
   const temEm = em.nome || em.telefone || em.email || em.endereco;
-  return `
+  return `<div class="orc-orcamento">
     <div class="orc-head">
       <div class="orc-head-left">
         <img class="orc-logo" src="${LOGO_DATA_URI}" alt="${esc(MARCA_NOME)}">
@@ -5720,7 +5756,8 @@ function orcDocHTML(o){
 
     <div class="orc-rodape">
       ${em.telefone||em.email||em.site?`${[em.telefone,em.email,em.site].filter(Boolean).map(x=>esc(x)).join(' | ')}`:''}
-    </div>`;
+    </div>
+  </div>`;
 }
 
 function verOrc(id){
