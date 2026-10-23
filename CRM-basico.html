@@ -2892,11 +2892,15 @@ function alternarTema(){
     const novo = temaAtual()==='escuro' ? 'claro' : 'escuro';
     try{ localStorage.setItem(TEMA_CELULAR, novo); }catch(e){}
     aplicarTema();
+  try{ ativarMaiusculasGlobal(); }catch(e){}
+
     toast('Tema ' + (novo==='escuro'?'escuro':'claro') + ' ativado neste aparelho.');
     return;
   }
   prefs().tema = prefs().tema==='escuro' ? 'claro' : 'escuro';
-  aplicarTema(); salvar();
+  aplicarTema();
+  try{ ativarMaiusculasGlobal(); }catch(e){}
+ salvar();
   toast('Tema ' + (prefs().tema==='escuro'?'escuro':'claro') + ' ativado.');
 }
 try{
@@ -9949,6 +9953,8 @@ async function entrarNoApp(user){
   if(userEmail) userEmail.textContent = (user && user.email) ? user.email : '';
   aplicarMarca();
   aplicarTema();
+  try{ ativarMaiusculasGlobal(); }catch(e){}
+
   render();
   /* Sincroniza os dados com a nuvem (celular + computador juntos) */
   await iniciarNuvem();
@@ -10362,7 +10368,9 @@ function restaurarBackup(id){
   db = normalizar(JSON.parse(JSON.stringify(b.dados))) || baseVazia();
   db.backups = backups;
   db.ultimoBackup = agoraDT();
-  salvar(); aplicarTema(); aplicarMarca(); render();
+  salvar(); aplicarTema();
+  try{ ativarMaiusculasGlobal(); }catch(e){}
+ aplicarMarca(); render();
   toast('♻️ Backup restaurado.', 'ok');
 }
 function talvezAvisarBackup(){
@@ -12009,8 +12017,12 @@ function verificarOrcPublico(){
 try{ popularCatalogoServicos(); }catch(e){}
 aplicarMarca();
 aplicarTema();
+  try{ ativarMaiusculasGlobal(); }catch(e){}
+
 iniciarPWA();
 registrarServiceWorker();
+try{ ativarMaiusculasGlobal(); }catch(e){}
+
 iniciarNotificacoes();
 iniciarAtalhos();
 try{
