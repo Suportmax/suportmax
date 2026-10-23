@@ -7887,7 +7887,7 @@ function htmlFinanceiro(){
   return `
   <div class="grid-stats">
     ${stat('Recebido (orçamentos)', brl(r.recebido), '💵')}
-    ${stat('Recebido no mês', brl(r.recebMes), '📅')}
+    ${stat('Recebido no mês', brl(recebMesFechado), '📅')}
     ${stat('Em aberto', brl(r.aberto), '⏳', r.aberto>0)}
     ${stat('Vencido', brl(r.vencido), '🚨', r.vencido>0)}
     ${stat('Saldo do mês (caixa)', brl(recebMesFechado + manualMes.saldo), '🧮', (recebMesFechado + manualMes.saldo)<0)}
