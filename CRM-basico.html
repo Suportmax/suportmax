@@ -11999,10 +11999,22 @@ function campoSemMaiusculas(el){
   if(tag === 'INPUT'){
     const tp = (el.getAttribute('type') || 'text').toLowerCase();
     if(['password','file','hidden','radio','checkbox','button','submit','reset','image',
-        'color','date','time','datetime-local','month','week','range'].includes(tp)) return true;
+        'color','date','time','datetime-local','month','week','range','number'].includes(tp)) return true;
+    const im = (el.getAttribute('inputmode') || '').toLowerCase();
+    if(im && (im.includes('numeric') || im.includes('decimal') || im === 'tel' || im === 'email')) return true;
+    if(el.getAttribute('pattern') && /[0-9\[\]\+\-\.\,\s]/.test(el.getAttribute('pattern')) && /[A-Za-z]/.test(el.getAttribute('pattern'))===false) return true;
   }
   if(el.dataset && el.dataset.naoMaiusculas === '1') return true;
-  if(el.getAttribute && el.getAttribute('data-nao-maiusculas') === '1') return true;
+  if(el.getAttribute && (el.getAttribute('data-nao-maiusculas') === '1' || el.getAttribute('data-sem-maiusculas') === '1')) return true;
+  if(el.getAttribute && el.getAttribute('data-campo')){
+    const c = el.getAttribute('data-campo');
+    if(['qtd','unit','preco','valor','custo','descItem','desconto','frete','total','vlr'].includes(c)) return true;
+  }
+  if(el.name && /^(qtd|quant|unit|preco|valor|custo|desc|frete|total)$/i.test(el.name)) return true;
+  if(el.id && /(qtd|quant|unit|preco|valor|custo|frete|total)/i.test(el.id)) return true;
+  if(el.classList){
+    if(el.classList.contains('num') || el.classList.contains('monetario') || el.classList.contains('decimal')) return true;
+  }
   return false;
 }
 
