@@ -1180,7 +1180,7 @@ body.tema-escuro .stat .ico{background:#17263d}
     <form id="loginForm" autocomplete="on">
       <div class="login-campo">
         <label for="loginEmail">Usuário (e-mail)</label>
-        <input type="email" id="loginEmail" name="email" placeholder="seuemail@exemplo.com" autocomplete="username" required>
+        <input type="email" id="loginEmail" name="email" placeholder="seuemail@exemplo.com" autocomplete="username" required data-nao-maiusculas="1">
       </div>
       <div class="login-campo">
         <label for="loginSenha">Senha</label>
@@ -2808,10 +2808,10 @@ function focarPrimeiro(modalEl){
   const alvo=modalEl.querySelector('input:not([disabled]),select:not([disabled]),textarea:not([disabled]),button:not([disabled]),a[href],[tabindex]:not([tabindex="-1"])')||modalEl;
   requestAnimationFrame(()=>alvo.focus());
 }
-function abrirModal(html, wide){ focoAnteriorModal=document.activeElement; modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); focarPrimeiro(modal); }
+function abrirModal(html, wide){ focoAnteriorModal=document.activeElement; modal.innerHTML = html; modal.classList.toggle('wide', !!wide); overlay.classList.add('open'); focarPrimeiro(modal); try{ maiusculasEmTudo(modal); setTimeout(function(){ try{ maiusculasEmTudo(modal); }catch(e){} }, 60); }catch(e){} }
 function fecharModal(){ const devolver=focoAnteriorModal; focoAnteriorModal=null; overlay.classList.remove('open','cadastro-overlay'); modal.classList.remove('wide','cadastro-compacto'); modal.innerHTML=''; limparEspelho(); fecharModal2(); if(devolver&&devolver.isConnected) requestAnimationFrame(()=>devolver.focus()); }
 /* Segunda camada de modal (ex.: seletor de produto sobre o formulário do orçamento) */
-function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); focarPrimeiro(modal2); }
+function abrirModal2(html, wide){ modal2.innerHTML = html; modal2.classList.toggle('wide', !!wide); overlay2.classList.add('open'); focarPrimeiro(modal2); try{ maiusculasEmTudo(modal2); setTimeout(function(){ try{ maiusculasEmTudo(modal2); }catch(e){} }, 60); }catch(e){} }
 function fecharModal2(){ overlay2.classList.remove('open'); modal2.classList.remove('wide'); modal2.innerHTML=''; if(overlay.classList.contains('open')) focarPrimeiro(modal); }
 overlay.addEventListener('mousedown', e=>{ if(e.target===overlay) fecharModal(); });
 overlay2.addEventListener('mousedown', e=>{ if(e.target===overlay2) fecharModal2(); });
@@ -11990,6 +11990,71 @@ function verificarOrcPublico(){
   document.title = 'Orçamento ' + (dados.n||'') + ' — SUPORT MAX';
   return true;
 }
+
+/* ---------- CAIXA ALTA automática em todos os campos ---------- */
+function campoSemMaiusculas(el){
+  if(!el || !el.tagName) return true;
+  const tag = el.tagName.toUpperCase();
+  if(tag !== 'INPUT' && tag !== 'TEXTAREA' && !el.isContentEditable) return true;
+  if(tag === 'INPUT'){
+    const tp = (el.getAttribute('type') || 'text').toLowerCase();
+    if(['password','file','hidden','radio','checkbox','button','submit','reset','image',
+        'color','date','time','datetime-local','month','week','range'].includes(tp)) return true;
+  }
+  if(el.dataset && el.dataset.naoMaiusculas === '1') return true;
+  if(el.getAttribute && el.getAttribute('data-nao-maiusculas') === '1') return true;
+  return false;
+}
+
+function aplicarMaiusculasNoCampo(el){
+  if(campoSemMaiusculas(el)) return;
+  if(el.isContentEditable && !el.value){
+    const t = el.innerText;
+    if(t && t !== t.toUpperCase()) el.innerText = t.toUpperCase();
+    return;
+  }
+  let v;
+  try{ v = el.value; }catch(e){ return; }
+  if(typeof v !== 'string' || !v) return;
+  if(v === v.toUpperCase()) return;
+  let s = null, e2 = null;
+  try{ s = el.selectionStart; e2 = el.selectionEnd; }catch(e){}
+  try{ el.value = v.toUpperCase(); }catch(e){ return; }
+  if(s !== null){
+    try{ el.setSelectionRange(s, e2); }catch(e){}
+  }
+}
+
+function maiusculasEmTudo(raiz){
+  const base = (raiz && raiz.querySelectorAll) ? raiz : document;
+  let lista;
+  try{ lista = base.querySelectorAll('input,textarea,[contenteditable=""],[contenteditable="true"]'); }catch(e){ return; }
+  for(let i=0;i<lista.length;i++) aplicarMaiusculasNoCampo(lista[i]);
+}
+
+function ativarMaiusculasGlobal(){
+  if(!document.body) return;
+  if(document.body.dataset && document.body.dataset.maiusculasOk === '1') return;
+  if(document.body.dataset) document.body.dataset.maiusculasOk = '1';
+  const trata = function(ev){ if(ev && ev.target) aplicarMaiusculasNoCampo(ev.target); };
+  document.addEventListener('input', trata, true);
+  document.addEventListener('change', trata, true);
+  document.addEventListener('blur', trata, true);
+  document.addEventListener('focusin', trata, true);
+  document.addEventListener('paste', function(){ setTimeout(function(){ maiusculasEmTudo(); }, 0); }, true);
+  maiusculasEmTudo();
+  try{
+    let agendado = false;
+    const mo = new MutationObserver(function(){
+      if(agendado) return;
+      agendado = true;
+      setTimeout(function(){ agendado = false; maiusculasEmTudo(); }, 40);
+    });
+    mo.observe(document.body, {childList:true, subtree:true});
+  }catch(e){}
+}
+window.aplicarMaiusculasNoCampo = aplicarMaiusculasNoCampo;
+window.maiusculasEmTudo = maiusculasEmTudo;
 
 /* ---------- Início ---------- */
 try{ popularCatalogoServicos(); }catch(e){}
