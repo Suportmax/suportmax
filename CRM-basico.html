@@ -7028,15 +7028,25 @@ function htmlCatalogo(){
   </div>`;
 }
 function ligarCatalogo(){
-  document.getElementById('buscaCat').addEventListener('input', e=>{ filtroCat.busca=e.target.value; renderTabelaCat(); });
-  document.getElementById('fCatMargem').addEventListener('change', e=>{ filtroCat.margem=e.target.value; renderTabelaCat(); });
-  document.getElementById('fCatOrdem').addEventListener('change', e=>{ filtroCat.ordem=e.target.value; renderTabelaCat(); });
-  document.getElementById('btnNovoItem').addEventListener('click', ()=>formProduto(null));
-  document.getElementById('btnImportarNFe').addEventListener('click', abrirImportacaoNFeProdutos);
+  const bc = document.getElementById('buscaCat'); if(bc){ bc.oninput = ()=>{ filtroCat.busca = bc.value; if(typeof renderTabelaCat==='function'){ renderTabelaCat(); } else if(typeof render==='function'){ render(); } }; }
+  const fM = document.getElementById('fCatMargem'); if(fM && !fM.dataset.ligado){ fM.dataset.ligado='1'; fM.addEventListener('change', e=>{ filtroCat.margem=e.target.value; renderTabelaCat(); }); }
+  const fO = document.getElementById('fCatOrdem'); if(fO && !fO.dataset.ligado){ fO.dataset.ligado='1'; fO.addEventListener('change', e=>{ filtroCat.ordem=e.target.value; renderTabelaCat(); }); }
+  const bN = document.getElementById('btnNovoItem'); if(bN && !bN.dataset.ligado){ bN.dataset.ligado='1'; bN.addEventListener('click', ()=>formProduto(null)); }
+  const bIN = document.getElementById('btnImportarNFe'); if(bIN && !bIN.dataset.ligado){ bIN.dataset.ligado='1'; bIN.addEventListener('click', abrirImportacaoNFeProdutos); }
   const btnImpExcel = document.getElementById('btnImportarExcel');
-  if(btnImpExcel) btnImpExcel.addEventListener('click', abrirImportacaoExcelProdutos);
-  document.getElementById('btnEsvaziarCatalogo').addEventListener('click', limparCatalogoProdutos);
-  document.getElementById('btnNovoForn').addEventListener('click', ()=>formFornecedor(null));
+  if(btnImpExcel && !btnImpExcel.dataset.ligado){ btnImpExcel.dataset.ligado='1'; btnImpExcel.addEventListener('click', abrirImportacaoExcelProdutos); }
+  const bE = document.getElementById('btnEsvaziarCatalogo'); if(bE && !bE.dataset.ligado){ bE.dataset.ligado='1'; bE.addEventListener('click', limparCatalogoProdutos); }
+  const bNF = document.getElementById('btnNovoForn'); if(bNF && !bNF.dataset.ligado){ bNF.dataset.ligado='1'; bNF.addEventListener('click', ()=>formFornecedor(null)); }
+  const tb = document.getElementById('tabelaCat');
+  if(tb && !tb.dataset.delegado){
+    tb.dataset.delegado='1';
+    tb.addEventListener('click', e=>{
+      const be = e.target.closest('[data-cat-edit]');
+      if(be){ e.preventDefault(); e.stopPropagation(); formProduto(be.dataset.catEdit); return; }
+      const br = e.target.closest('[data-cat-rm]');
+      if(br){ e.preventDefault(); e.stopPropagation(); excluirProduto(br.dataset.catRm); return; }
+    });
+  }
   renderTabelaCat();
   renderFornecedores();
 }
@@ -7074,15 +7084,22 @@ function renderTabelaCat(){
       <td class="vl-total">${brl(p.preco)}</td>
       <td>${m&&m.custo?`${seloMargem(p)}<div class="mt">${brl(m.valor)}</div>`:'<span class="mini">—</span>'}</td>
       <td><div class="acoes">
-        <button class="icon-btn" title="Editar" data-cat-edit="${p.id}">✏️</button>
-        <button class="icon-btn del" title="Excluir" data-cat-rm="${p.id}">🗑️</button>
+        <button class="icon-btn" type="button" title="Editar" data-cat-edit="${p.id}">✏️</button>
+        <button class="icon-btn del" type="button" title="Excluir" data-cat-rm="${p.id}">🗑️</button>
       </div></td>
     </tr>`;
   }).join('') : `<tr><td colspan="6"><div class="vazio"><span class="big">📦</span>${listaProdutos().length?'Nenhum item corresponde aos filtros.':'Seu catálogo ainda está vazio.'}</div></td></tr>`;
   const c = document.getElementById('contCat');
   if(c) c.textContent = `${l.length} de ${listaProdutos().length} item(ns)`;
-  tb.querySelectorAll('[data-cat-edit]').forEach(b=>b.onclick=()=>formProduto(b.dataset.catEdit));
-  tb.querySelectorAll('[data-cat-rm]').forEach(b=>b.onclick=()=>excluirProduto(b.dataset.catRm));
+  if(!tb.dataset.delegado){
+    tb.dataset.delegado='1';
+    tb.addEventListener('click', e=>{
+      const be = e.target.closest('[data-cat-edit]');
+      if(be){ e.preventDefault(); e.stopPropagation(); formProduto(be.dataset.catEdit); return; }
+      const br = e.target.closest('[data-cat-rm]');
+      if(br){ e.preventDefault(); e.stopPropagation(); excluirProduto(br.dataset.catRm); return; }
+    });
+  }
 }
 function renderFornecedores(){
   const el = document.getElementById('listaForn'); if(!el) return;
