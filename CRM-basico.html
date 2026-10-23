@@ -5817,6 +5817,7 @@ function verOrc(id){
       <button type="button" class="btn ghost" id="btnAssinarOrc">✍️ ${o.assinatura?'Ver assinatura':'Assinar'}</button>
       <button type="button" class="btn ghost" id="btnContratoOrc">📜 Contrato</button>
       <button type="button" class="btn ghost" data-act="orc-copiar" data-id="${o.id}">📋 Copiar texto</button>
+      ${(o.status==='aprovado'||o.status==='entregue'||o.status==='fechado'||o.status==='venda'||o.status==='concluida'||o.status==='convertido')?`<button type="button" class="btn ghost" id="btnNfeXml">📄 Gerar XML p/ UniNFe</button>`:''}
       ${(o.status==='aprovado'||o.status==='entregue')?`<button type="button" class="btn ghost" id="btnRecibo">🧾 Recibo</button>`:''}
       <button type="button" class="btn ok" data-act="orc-mail" data-id="${o.id}">✉️ E-mail</button>
       <button type="button" class="btn ok" data-act="orc-zap" data-id="${o.id}">💬 WhatsApp</button>
@@ -5828,6 +5829,7 @@ function verOrc(id){
   document.getElementById('btnContratoOrc').onclick = ()=>{ fecharModal(); formContratoServico(null, o.id); };
   document.getElementById('btnImprimir').onclick = ()=>imprimirOrc(o);
   const br = document.getElementById('btnRecibo'); if(br) br.onclick = ()=>imprimirRecibo(o.id);
+  const bn = document.getElementById('btnNfeXml'); if(bn) bn.onclick = ()=>gerarXmlNFeOrc(o.id);
   modal.querySelector('[data-act="orc-copiar"]').onclick = ()=>copiarOrc(o.id);
   modal.querySelector('[data-act="orc-mail"]').onclick = ()=>enviarMail(o.id);
   modal.querySelector('[data-act="orc-zap"]').onclick = ()=>enviarZap(o.id);
@@ -9280,6 +9282,32 @@ function htmlDados(){
   </div>
 
   <div class="op-card" style="margin-bottom:16px">
+    <h4>📄 NF-e / UniNFe (Modelo 55)</h4>
+    <p>Configuração para gerar XML da NF-e sem assinatura e salvar na pasta monitorada pelo UniNFe.</p>
+    <form id="fNfe" class="form-grid" style="gap:12px">
+      <div class="campo"><label>CNPJ do emitente</label><input name="cnpj" maxlength="18" value="${esc((db.emissor&&db.emissor.cnpj)||'')}" placeholder="Somente números ou formatado"></div>
+      <div class="campo"><label>Inscrição Estadual (IE)</label><input name="ie" maxlength="20" value="${esc((db.emissor&&db.emissor.ie)||'')}" placeholder="IE do emitente"></div>
+      <div class="campo"><label>CRT (1=Simples Nacional)</label><input name="crt" maxlength="1" value="${esc((db.nfe&&db.nfe.crt)||'1')}"></div>
+      <div class="campo"><label>Série NF-e</label><input name="serie" maxlength="3" value="${esc((db.nfe&&db.nfe.serie)||'1')}"></div>
+      <div class="campo"><label>Último nº NF-e</label><input name="nNF" maxlength="9" value="${esc((db.nfe&&db.nfe.nNF)||'1')}"></div>
+      <div class="campo"><label>Ambiente</label><select name="tpAmb"><option value="2" ${(db.nfe&&db.nfe.tpAmb)==='1'?'':'selected'}>2 - Homologação</option><option value="1" ${(db.nfe&&db.nfe.tpAmb)==='1'?'selected':''}>1 - Produção</option></select></div>
+      <div class="campo"><label>Tipo de Emissão</label><input name="tpEmis" maxlength="1" value="${esc((db.nfe&&db.nfe.tpEmis)||'1')}"></div>
+      <div class="campo"><label>CFOP padrão</label><input name="cfopPadrao" maxlength="4" value="${esc((db.nfe&&db.nfe.cfopPadrao)||'5102')}"></div>
+      <div class="campo"><label>Natureza da Operação</label><input name="natOp" maxlength="60" value="${esc((db.nfe&&db.nfe.natOp)||'VENDA DE MERCADORIA')}"></div>
+      <div class="campo"><label>Modalidade do frete (modFrete)</label><input name="modFrete" maxlength="1" value="${esc((db.nfe&&db.nfe.modFrete)||'9')}"></div>
+      <div class="campo full"><label>Pasta UniNFe para salvar XML</label><input name="pasta" maxlength="200" value="${esc((db.nfe&&db.nfe.pasta)||'C:\\Unimake\\UniNFe\\64103177000104')}" placeholder="C:\Unimake\UniNFe\..."></div>
+      <div class="campo"><label>cMun do emitente</label><input name="codMun" maxlength="7" value="${esc((db.emissor&&db.emissor.codMun)||'')}" placeholder="Ex.: 2919207"></div>
+      <div class="campo"><label>CEP do emitente</label><input name="cep" maxlength="9" value="${esc((db.emissor&&db.emissor.cep)||'')}" placeholder="Ex.: 42700000"></div>
+      <div class="campo"><label>UF do emitente</label><input name="uf" maxlength="2" value="${esc((db.emissor&&db.emissor.uf)||'BA')}" placeholder="BA"></div>
+      <div class="campo"><label>Cidade do emitente</label><input name="cidade" maxlength="60" value="${esc((db.emissor&&db.emissor.cidade)||'')}" placeholder="Lauro de Freitas"></div>
+      <div class="campo"><label>Bairro do emitente</label><input name="bairro" maxlength="60" value="${esc((db.emissor&&db.emissor.bairro)||'')}" placeholder="Recreio Ipitanga"></div>
+      <div class="campo"><label>Número do emitente</label><input name="numero" maxlength="10" value="${esc((db.emissor&&db.emissor.numero)||'15')}" placeholder="15"></div>
+      <div class="campo full"><div><button class="btn primary" type="submit">💾 Salvar NF-e / UniNFe</button></div></div>
+    </form>
+  </div>
+
+
+  <div class="op-card" style="margin-bottom:16px">
     <h4>🎯 Metas e comissão</h4>
     <p>A meta mensal aparece no resumo do painel. A comissão é usada no relatório de comissões.</p>
     <form id="fMeta" class="form-grid" style="gap:12px">
@@ -9478,7 +9506,32 @@ function ligarDados(){
       leitor.readAsText(arq, 'utf-8');
     });
   }
-  document.getElementById('fEmissor').addEventListener('submit', e=>{
+    document.getElementById('fNfe').addEventListener('submit', e=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    if(!db.emissor) db.emissor = {};
+    db.emissor.cnpj = String(f.get('cnpj')||'').trim();
+    db.emissor.ie = String(f.get('ie')||'').trim();
+    db.emissor.codMun = String(f.get('codMun')||'').trim();
+    db.emissor.cep = String(f.get('cep')||'').trim();
+    db.emissor.uf = String(f.get('uf')||'').trim();
+    db.emissor.cidade = String(f.get('cidade')||'').trim();
+    db.emissor.bairro = String(f.get('bairro')||'').trim();
+    db.emissor.numero = String(f.get('numero')||'').trim();
+    if(!db.nfe) db.nfe = {};
+    db.nfe.crt = String(f.get('crt')||'1').trim();
+    db.nfe.serie = String(f.get('serie')||'1').trim();
+    db.nfe.nNF = String(f.get('nNF')||'1').trim();
+    db.nfe.tpAmb = String(f.get('tpAmb')||'2').trim();
+    db.nfe.tpEmis = String(f.get('tpEmis')||'1').trim();
+    db.nfe.cfopPadrao = String(f.get('cfopPadrao')||'5102').trim();
+    db.nfe.natOp = String(f.get('natOp')||'VENDA DE MERCADORIA').trim();
+    db.nfe.modFrete = String(f.get('modFrete')||'9').trim();
+    db.nfe.pasta = String(f.get('pasta')||'C:\\Unimake\\UniNFe\\64103177000104').trim();
+    auditar('config', 'Configuração NF-e/UniNFe atualizada');
+    salvar(); toast('Configuração NF-e/UniNFe salva!');
+  });
+document.getElementById('fEmissor').addEventListener('submit', e=>{
     e.preventDefault();
     const f = new FormData(e.target);
     db.emissor = {
@@ -12120,6 +12173,197 @@ window.addEventListener('online', ()=>{
     else if(nuvemLigada && nuvemPronta) nuvemSalvarAgendado();
   }catch(e){}
 });
+
+
+
+function cfgNfe(){ 
+  const c = (typeof db!=='undefined' && db.nfe) ? db.nfe : {}; 
+  return { 
+    tpAmb: c.tpAmb||'2', 
+    tpEmis: c.tpEmis||'1', 
+    mod: c.mod||'55', 
+    serie: c.serie||'1', 
+    nNF: c.nNF||'1', 
+    natOp: c.natOp||'VENDA DE MERCADORIA', 
+    cfopPadrao: c.cfopPadrao||'5102', 
+    modFrete: c.modFrete||'9', 
+    indFinal: c.indFinal||'1', 
+    indPres: c.indPres||'1', 
+    crt: c.crt||'1', 
+    pasta: c.pasta||'C:\\\\Unimake\\\\UniNFe\\\\64103177000104', 
+    verProc: c.verProc||'SUPORTMAX-CRM' 
+  }; 
+}
+
+function soDigitosXml(s){ return String(s||'').replace(/\D+/g,''); }
+
+function escXml(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;'); }
+
+function ufParaCuf(uf){ 
+  const m={'RO':'11','AC':'12','AM':'13','RR':'14','PA':'15','AP':'16','TO':'17','MA':'21','PI':'22','CE':'23','RN':'24','PB':'25','PE':'26','AL':'27','SE':'28','BA':'29','MG':'31','ES':'32','RJ':'33','SP':'35','PR':'41','SC':'42','RS':'43','MS':'50','MT':'51','GO':'52','DF':'53'}; 
+  return m[String(uf||'').toUpperCase()]||'29'; 
+}
+
+function calcDvChave(chave43){ 
+  const pesos=[2,3,4,5,6,7,8,9]; 
+  let soma=0, p=0; 
+  for(let i=chave43.length-1;i>=0;i--){ 
+    soma += parseInt(chave43[i],10)*pesos[p%8]; 
+    p++; 
+  } 
+  const resto = soma % 11; 
+  let dv = 11 - resto; 
+  if(dv>=10) dv = 0; 
+  return dv; 
+}
+
+function dhEmiXml(){ 
+  try { 
+    const d=new Date(); 
+    const tz = d.getTimezoneOffset(); 
+    const s=new Date(d.getTime() - tz*60000).toISOString(); 
+    return s.slice(0,19)+'-03:00'; 
+  } catch(e){ 
+    const d=new Date(); 
+    const pad=n=>String(n).padStart(2,'0'); 
+    return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())+'T'+pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds())+'-03:00'; 
+  } 
+}
+
+function montarChaveNFe(cfg, em, cnpjEm){ 
+  const dh = dhEmiXml(); 
+  const data = new Date(); 
+  const AAMM = String(data.getFullYear()).slice(2)+String(data.getMonth()+1).padStart(2,'0'); 
+  const cUF = ufParaCuf(em.uf); 
+  const mod = cfg.mod||'55'; 
+  const serie = String(cfg.serie||'1'); 
+  const nNF = String(cfg.nNF||'1'); 
+  const tpEmis = cfg.tpEmis||'1'; 
+  const cNF = String(Math.floor(Math.random()*99999999)).padStart(8,'0'); 
+  const chave43 = cUF + AAMM + cnpjEm.padEnd(14,'0').slice(0,14) + mod.padStart(2,'0') + serie.padStart(3,'0') + nNF.padStart(9,'0') + tpEmis + cNF; 
+  const cDV = calcDvChave(chave43); 
+  const chave44 = chave43 + String(cDV); 
+  return {chave44, cDV, cNF, dh}; 
+}
+
+function gerarXmlNFeOrc(id){ 
+  try { 
+    if(typeof buscarOrc!=='function'){ toast('Função buscarOrc não disponível','erro'); return; } 
+    const o = buscarOrc(id); 
+    if(!o){ toast('Orçamento não encontrado','erro'); return; } 
+    const cfg = cfgNfe(); 
+    const em = (typeof db!=='undefined' && db.emissor) ? db.emissor : {}; 
+    const cli = (typeof buscarCli==='function') ? buscarCli(o.clienteId) : null; 
+    if(!em.nome){ toast('Preencha os dados da empresa em Configurações > Dados','erro'); return; } 
+    const cnpjEm = soDigitosXml(em.cnpj||em.doc||em.cpf); 
+    if(cnpjEm.length!==14){ toast('CNPJ do emissor inválido ou não informado (use 14 dígitos)','erro'); return; } 
+    const docCliRaw = cli ? (cli.cnpj||cli.cpf||'') : (o.clienteDoc||''); 
+    const docCli = soDigitosXml(docCliRaw); 
+    if(docCli.length<11){ toast('Informe CPF ou CNPJ do cliente para gerar o XML','erro'); return; } 
+    const isPJ = docCli.length===14; 
+    const itens = Array.isArray(o.itens)?o.itens:[]; 
+    if(!itens.length){ toast('Orçamento sem itens','erro'); return; } 
+    for(let i=0;i<itens.length;i++){ 
+      const it = itens[i]; 
+      const p = (it.produtoId && typeof buscarProd==='function') ? buscarProd(it.produtoId) : null; 
+      const ncm = soDigitosXml(p?p.ncm:it.ncm); 
+      if(ncm.length<8){ toast('NCM não informado no item: '+(it.desc||('Item '+(i+1))),'erro'); return; } 
+      const cfopIt = soDigitosXml(p?p.cfop:it.cfop) || cfg.cfopPadrao; 
+      if(cfopIt.length<4){ toast('CFOP não informado no item: '+(it.desc||('Item '+(i+1))),'erro'); return; } 
+    } 
+    const mont = montarChaveNFe(cfg, em, cnpjEm); 
+    const {chave44, cDV, dh} = mont; 
+    const cUF = ufParaCuf(em.uf); 
+    const mod = cfg.mod||'55'; 
+    const serie = String(cfg.serie||'1'); 
+    const nNF = String(cfg.nNF||'1'); 
+    const natOp = cfg.natOp||'VENDA DE MERCADORIA'; 
+    const tpNF='1'; 
+    const tpAmb = cfg.tpAmb||'2'; 
+    const finNFe='1'; 
+    const indFinal = cfg.indFinal||'1'; 
+    const indPres = cfg.indPres||'1'; 
+    const modFrete = cfg.modFrete||'9'; 
+    const crt = cfg.crt||'1'; 
+    const verProc = cfg.verProc||'SUPORTMAX-CRM'; 
+    const cMunFG = soDigitosXml(em.codMun||''); 
+    if(!cMunFG){ toast('Informe Código do Município (cMun) do emitente em Dados da empresa','erro'); return; } 
+    const cMunDest = soDigitosXml(cli?cli.codMun:o.clienteCodMun)||cMunFG; 
+    const ufEmit = String(em.uf||'BA').toUpperCase(); 
+    const ufDest = String((cli&&cli.uf)||(o.clienteUf)||ufEmit).toUpperCase(); 
+    const idDest = (ufEmit===ufDest)?'1':'2'; 
+    let vProd=0, vDesc=0; 
+    for(let i=0;i<itens.length;i++){ 
+      const it = itens[i]; 
+      const q = Number(it.qtd)||0; 
+      const pu = Number(it.preco)||0; 
+      vProd += q*pu; 
+      vDesc += Number(it.descItem)||0; 
+    } 
+    const descGeral = Number(o.descGeral)||0; 
+    const frete = Number(o.frete)||0; 
+    vDesc += descGeral; 
+    const vNF = Math.max(0, vProd + frete - vDesc); 
+    let detXml=''; 
+    for(let i=0;i<itens.length;i++){ 
+      const it = itens[i]; 
+      const p = (it.produtoId && typeof buscarProd==='function') ? buscarProd(it.produtoId) : null; 
+      const ncm = soDigitosXml(p?p.ncm:it.ncm); 
+      const cfop = soDigitosXml(p?p.cfop:it.cfop) || cfg.cfopPadrao; 
+      const q = Number(it.qtd)||0; 
+      const pu = Number(it.preco)||0; 
+      const vItem = q*pu; 
+      const cProd = String(p?p.codigo:it.codigo||('PROD'+(i+1))).replace(/[^A-Za-z0-9]/g,''); 
+      const xProd = escXml(it.desc||p&&p.nome||'ITEM'); 
+      const uCom = escXml(it.un||p&&p.un||'UN'); 
+      const uTrib = uCom; 
+      const csosn = soDigitosXml(p?p.csosn:it.csosn)||'102'; 
+      const cEAN='SEM GTIN'; 
+      detXml += '<det nItem="'+(i+1)+'"><prod><cProd>'+escXml(cProd)+'</cProd><cEAN>'+cEAN+'</cEAN><xProd>'+xProd+'</xProd><NCM>'+ncm+'</NCM><CFOP>'+cfop+'</CFOP><uCom>'+uCom+'</uCom><qCom>'+q.toFixed(4)+'</qCom><vUnCom>'+pu.toFixed(4)+'</vUnCom><vProd>'+vItem.toFixed(2)+'</vProd><cEANTrib>'+cEAN+'</cEANTrib><uTrib>'+uTrib+'</uTrib><qTrib>'+q.toFixed(4)+'</qTrib><vUnTrib>'+pu.toFixed(4)+'</vUnTrib><indTot>1</indTot></prod><imposto><ICMS><ICMSSN'+csosn+'><orig>0</orig><CSOSN>'+csosn+'</CSOSN></ICMSSN'+csosn+'></ICMS><PIS><PISOutr><CST>49</CST><vBC>0.00</vBC><pPIS>0.00</pPIS><vPIS>0.00</vPIS></PISOutr></PIS><COFINS><COFINSOutr><CST>49</CST><vBC>0.00</vBC><pCOFINS>0.00</pCOFINS><vCOFINS>0.00</vCOFINS></COFINSOutr></COFINS></imposto></det>'; 
+    } 
+    const infCpl = escXml('ORCAMENTO Nº '+(o.numero||'')+' - GERADO PELO CRM SUPORTMAX'); 
+    const emitEndNum = escXml(em.numero||'S/N'); 
+    const emitBairro = escXml(em.bairro||'CENTRO'); 
+    const emitFone = soDigitosXml(em.telefone); 
+    const emitCep = soDigitosXml(em.cep); 
+    const destEndNum = escXml((cli&&cli.numero)||(o.clienteNumero)||'S/N'); 
+    const destBairro = escXml((cli&&cli.bairro)||(o.clienteBairro)||'CENTRO'); 
+    const destFone = soDigitosXml((cli&&cli.telefone)||(o.clienteTelefone)); 
+    const destCep = soDigitosXml((cli&&cli.cep)||(o.clienteCep)); 
+    const xml = '<?xml version="1.0" encoding="UTF-8"?><NFe xmlns="http://www.portalfiscal.inf.br/nfe"><infNFe versao="4.00" Id="NFe'+chave44+'"><ide><cUF>'+cUF+'</cUF><cNF>'+mont.cNF+'</cNF><natOp>'+escXml(natOp)+'</natOp><mod>'+mod+'</mod><serie>'+serie+'</serie><nNF>'+nNF+'</nNF><dhEmi>'+dh+'</dhEmi><tpNF>'+tpNF+'</tpNF><idDest>'+idDest+'</idDest><cMunFG>'+cMunFG+'</cMunFG><tpImp>1</tpImp><tpEmis>'+tpEmis+'</tpEmis><cDV>'+cDV+'</cDV><tpAmb>'+tpAmb+'</tpAmb><finNFe>'+finNFe+'</finNFe><indFinal>'+indFinal+'</indFinal><indPres>'+indPres+'</indPres><procEmi>0</procEmi><verProc>'+escXml(verProc)+'</verProc></ide><emit><CNPJ>'+cnpjEm+'</CNPJ><xNome>'+escXml(em.nome)+'</xNome><xFant>'+escXml(em.fantasia||em.nome)+'</xFant><enderEmit><xLgr>'+escXml(em.endereco||'')+'</xLgr><nro>'+emitEndNum+'</nro><xBairro>'+emitBairro+'</xBairro><cMun>'+cMunFG+'</cMun><xMun>'+escXml(em.cidade||'')+'</xMun><UF>'+ufEmit+'</UF><CEP>'+emitCep+'</CEP><cPais>1058</cPais><xPais>BRASIL</xPais><fone>'+emitFone+'</fone></enderEmit><IE>'+soDigitosXml(em.ie||'')+'</IE><CRT>'+crt+'</CRT></emit><dest><'+(isPJ?'CNPJ':'CPF')+'>'+docCli+'</'+(isPJ?'CNPJ':'CPF')+'><xNome>'+escXml(cli?cli.nome:o.clienteNome||'CONSUMIDOR')+'</xNome><enderDest><xLgr>'+escXml((cli&&cli.endereco)||(o.endereco||''))+'</xLgr><nro>'+destEndNum+'</nro><xBairro>'+destBairro+'</xBairro><cMun>'+cMunDest+'</cMun><xMun>'+escXml((cli&&cli.cidade)||(o.clienteCidade)||'')+'</xMun><UF>'+ufDest+'</UF><CEP>'+destCep+'</CEP><cPais>1058</cPais><xPais>BRASIL</xPais><fone>'+destFone+'</fone></enderDest><indIEDest>9</indIEDest></dest>'+detXml+'<total><ICMSTot><vBC>0.00</vBC><vICMS>0.00</vICMS><vICMSDeson>0.00</vICMSDeson><vFCP>0.00</vFCP><vBCST>0.00</vBCST><vST>0.00</vST><vFCPST>0.00</vFCPST><vFCPSTRet>0.00</vFCPSTRet><vProd>'+vProd.toFixed(2)+'</vProd><vFrete>'+frete.toFixed(2)+'</vFrete><vSeg>0.00</vSeg><vDesc>'+vDesc.toFixed(2)+'</vDesc><vII>0.00</vII><vIPI>0.00</vIPI><vIPIDevol>0.00</vIPIDevol><vPIS>0.00</vPIS><vCOFINS>0.00</vCOFINS><vOutro>0.00</vOutro><vNF>'+vNF.toFixed(2)+'</vNF></ICMSTot></total><transp><modFrete>'+modFrete+'</modFrete></transp><pag><detPag><indPag>0</indPag><tPag>01</tPag><vPag>'+vNF.toFixed(2)+'</vPag></detPag></pag><infAdic><infCpl>'+infCpl+'</infCpl></infAdic></infNFe></NFe>'; 
+    baixarXmlArquivo('ORC-'+(o.numero||id)+'-NF-e.xml', xml); 
+    toast('XML NF-e gerado (sem assinatura). Pasta: '+(cfg.pasta||''),'sucesso'); 
+  } catch(e){ 
+    console.error(e); 
+    toast('Erro ao gerar XML NF-e: '+(e.message||e),'erro'); 
+  } 
+}
+
+function baixarXmlArquivo(nome, conteudo){ 
+  try { 
+    const blob = new Blob([conteudo], {type:'text/xml;charset=utf-8;'}); 
+    const url = window.URL.createObjectURL(blob); 
+    const a = document.createElement('a'); 
+    a.href = url; 
+    a.download = nome; 
+    document.body.appendChild(a); 
+    a.click(); 
+    document.body.removeChild(a); 
+    window.URL.revokeObjectURL(url); 
+  } catch(e){ 
+    try { 
+      const data = 'data:text/xml;charset=utf-8,'+encodeURIComponent(conteudo); 
+      const a = document.createElement('a'); 
+      a.href = data; 
+      a.download = nome; 
+      document.body.appendChild(a); 
+      a.click(); 
+      document.body.removeChild(a); 
+    } catch(ex){ console.error(ex); } 
+  } 
+}
+
+
 </script>
 </body>
 </html>
