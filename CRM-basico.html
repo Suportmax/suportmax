@@ -1849,11 +1849,15 @@ function prepararPrimeiroUso(nova){
   }
   return nova;
 }
+function tryParseJson(str, fallback){
+  if(typeof str!=='string') return fallback;
+  try{ const v=JSON.parse(str); return v==null?fallback:v; }catch(e){ return fallback; }
+}
 function carregar(chave=localDataKey){
   let nova = null;
   try{
     const raw = localStorage.getItem(chave);
-    if(raw) nova = normalizar(JSON.parse(raw));
+    if(raw) nova = normalizar(tryParseJson(raw, null));
     else nova = baseVazia();
   }catch(e){
     console.error('Falha ao ler dados locais; uma cópia de recuperação será preservada.', e);
@@ -2184,6 +2188,7 @@ async function iniciarNuvem(){
 /* ---------- Utilidades ---------- */
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+const logDbg = (...args)=>{ try{ if(typeof location!=='undefined' && location.search.includes('debug=1')) console.log('[DBG]', ...args); }catch(e){} };
 function hojeISO(){ const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 function agoraDT(){ return hojeISO()+'T'+String(new Date().getHours()).padStart(2,'0')+':'+String(new Date().getMinutes()).padStart(2,'0'); }
 function dataDeISO(iso){
@@ -7028,7 +7033,7 @@ function htmlCatalogo(){
   </div>`;
 }
 function ligarCatalogo(){
-  const bc = document.getElementById('buscaCat'); if(bc){ bc.oninput = ()=>{ filtroCat.busca = bc.value; if(typeof renderTabelaCat==='function'){ renderTabelaCat(); } else if(typeof render==='function'){ render(); } }; }
+  const bc = document.getElementById('buscaCat'); if(bc){ let t=null; bc.oninput = ()=>{ filtroCat.busca = bc.value; clearTimeout(t); t=setTimeout(()=>{ if(typeof renderTabelaCat==='function'){ renderTabelaCat(); } else if(typeof render==='function'){ render(); } }, 180); }; }
   const fM = document.getElementById('fCatMargem'); if(fM && !fM.dataset.ligado){ fM.dataset.ligado='1'; fM.addEventListener('change', e=>{ filtroCat.margem=e.target.value; renderTabelaCat(); }); }
   const fO = document.getElementById('fCatOrdem'); if(fO && !fO.dataset.ligado){ fO.dataset.ligado='1'; fO.addEventListener('change', e=>{ filtroCat.ordem=e.target.value; renderTabelaCat(); }); }
   const bN = document.getElementById('btnNovoItem'); if(bN && !bN.dataset.ligado){ bN.dataset.ligado='1'; bN.addEventListener('click', ()=>formProduto(null)); }
@@ -12268,9 +12273,19 @@ function gerarXmlNFeOrc(id){
     if(typeof buscarOrc!=='function'){ toast('Função buscarOrc não disponível','erro'); return; } 
     const o = buscarOrc(id); 
     if(!o){ toast('Orçamento não encontrado','erro'); return; } 
+    const st = String(o.status||'').toLowerCase();
+    const ok = ['aprovado','fechado','entregue','venda','concluida','concluída','convertido'];
+    if(!ok.includes(st)){ toast('Gere o XML apenas para orçamentos aprovados/fechados/entregues/concluídos','erro'); return; }
+    const itens = Array.isArray(o.itens)?o.itens:[];
+    for(let i=0;i<itens.length;i++){
+      const it=itens[i];
+      const p = it.produtoId && typeof buscarProd==='function' ? buscarProd(it.produtoId) : null;
+      const ncm = String((p&&p.ncm)||it.ncm||'').replace(/\D/g,'');
+      if(ncm.length < 8){ toast('Preencha o NCM dos itens no catálogo antes de gerar o XML NF-e','erro'); return; }
+    }
     const cfg = cfgNfe(); 
     const em = (typeof db!=='undefined' && db.emissor) ? db.emissor : {}; 
-    const cli = (typeof buscarCli==='function') ? buscarCli(o.clienteId) : null; 
+    const cli = (typeof buscarCli==='function') ? buscarCli(o.clienteId) : null;
     if(!em.nome){ toast('Preencha os dados da empresa em Configurações > Dados','erro'); return; } 
     const cnpjEm = soDigitosXml(em.cnpj||em.doc||em.cpf); 
     if(cnpjEm.length!==14){ toast('CNPJ do emissor inválido ou não informado (use 14 dígitos)','erro'); return; } 
