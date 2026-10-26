@@ -1638,7 +1638,7 @@ function normalizar(d){
   d.seqCT = Math.max(Number(d.seqCT)||0, maiorSeq(d.contratosServico,'numero'));
   return d;
 }
-function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], lancamentos:[], mensagens:mensagemPadrao(), contratos:[], contratosServico:[], tarefas:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, seqCT:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
+function baseVazia(){ return {clientes:[], orcamentos:[], produtos:[], fornecedores:[], ordens:[], lancamentos:[], mensagens:mensagemPadrao(), contratos:[], contratosServico:[], tarefas:[], requisicoesCompra:[], backups:[], auditoria:[], emissor:emissorVazio(), seqOrc:0, seqOS:0, seqCT:0, meta:{comissao:10, valorMensal:0}, role:'admin', ultimoBackup:'', prefs:{tema:'claro', densidade:'normal', cartoes:{stat:true, atencao:true, funil:true, followups:true, recentes:true, orcamentos:true, atividade:true, resumo:true, caixa:true}}}; }
 function prefs(){ if(!db.prefs) db.prefs = baseVazia().prefs; if(!db.prefs.cartoes) db.prefs.cartoes = baseVazia().prefs.cartoes; return db.prefs; }
 
 /* ---------- Financeiro: pagamentos e contas a receber ---------- */
@@ -12276,8 +12276,8 @@ function gerarXmlNFeOrc(id){
     const st = String(o.status||'').toLowerCase();
     const ok = ['aprovado','fechado','entregue','venda','concluida','concluída','convertido'];
     if(!ok.includes(st)){ toast('Gere o XML apenas para orçamentos aprovados/fechados/entregues/concluídos','erro'); return; }
-    const itens = Array.isArray(o.itens)?o.itens:[];
-    for(let i=0;i<itens.length;i++){
+    if(!Array.isArray(itens)) var itensArr = Array.isArray(o.itens)?o.itens:[]; else var itensArr = itens;
+    for(let i=0;i<itensArr.length;i++){
       const it=itens[i];
       const p = it.produtoId && typeof buscarProd==='function' ? buscarProd(it.produtoId) : null;
       const ncm = String((p&&p.ncm)||it.ncm||'').replace(/\D/g,'');
